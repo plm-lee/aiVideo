@@ -10,21 +10,22 @@ class BuyCreditsPage extends StatefulWidget {
 
 class _BuyCreditsPageState extends State<BuyCreditsPage> {
   int? _selectedIndex;
+  static const List<int> _hotDealIndexes = [1, 2];
 
   Widget _buildCreditCard({
     required String credits,
     required String price,
     required String expiration,
-    bool isBestDeal = false,
     required int index,
   }) {
     final isSelected = _selectedIndex == index;
+    final isHot = _hotDealIndexes.contains(index);
 
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
@@ -34,6 +35,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
           ),
         ),
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,26 +81,25 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                 ),
               ],
             ),
-            if (isBestDeal)
+            if (isHot)
               Positioned(
-                right: 0,
-                top: -20,
+                right: -2,
+                top: -22,
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: const BoxDecoration(
-                    color: Colors.orange,
+                    color: Colors.red,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
                     ),
                   ),
                   child: const Text(
-                    'Best Deal',
+                    'HOT',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -146,7 +147,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                   credits: '5000',
                   price: '4.99',
                   expiration: '90',
-                  isBestDeal: true,
                   index: 2,
                 ),
                 _buildCreditCard(
