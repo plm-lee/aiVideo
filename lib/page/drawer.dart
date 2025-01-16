@@ -21,52 +21,57 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _buildCreditsSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppTheme.spacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Credits',
                 style: TextStyle(
-                  color: Colors.white,
+                  color:
+                      isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 8,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.smallBorderRadius),
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pop(context); // 关闭抽屉
+                  Navigator.pop(context);
                   context.push('/buy-credits');
                 },
-                child: const Text(
+                child: Text(
                   'Buy',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark
+                        ? AppTheme.darkTextColor
+                        : AppTheme.lightTextColor,
                     fontSize: 14,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
+          const SizedBox(height: AppTheme.smallSpacing),
+          Text(
             '¢ 0',
             style: TextStyle(
-              color: Colors.white,
+              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -76,30 +81,30 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialSection() {
+  Widget _buildSocialSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppTheme.spacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Follow us',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-            ),
+            style: AppTheme.getSubtitleStyle(isDark),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spacing),
           Row(
             children: [
               IconButton(
                 icon: const Icon(Icons.discord),
-                color: Colors.white,
+                color:
+                    isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
                 onPressed: () {},
               ),
               IconButton(
                 icon: const Icon(Icons.facebook),
-                color: Colors.white,
+                color:
+                    isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
                 onPressed: () {},
               ),
             ],
@@ -167,7 +172,7 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             Divider(color: AppTheme.darkSecondaryTextColor, height: 1),
-            _buildSocialSection(),
+            _buildSocialSection(context),
           ],
         ),
       ),

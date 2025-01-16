@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bigchanllger/page/drawer.dart';
+import 'package:bigchanllger/constants/theme.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -137,25 +138,30 @@ class _AIVideoState extends State<AIVideo> {
   }
 
   Widget _buildAllButton(String category) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
         onTap: () => debugPrint('查看全部 $category'),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.grey[850],
-            borderRadius: BorderRadius.circular(14),
+            color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+            borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'All',
-                style: TextStyle(color: Colors.white, fontSize: 14),
+                style: AppTheme.getTitleStyle(isDark),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+              Icon(Icons.chevron_right,
+                  color: isDark
+                      ? AppTheme.darkSecondaryTextColor
+                      : AppTheme.lightSecondaryTextColor,
+                  size: 20),
             ],
           ),
         ),

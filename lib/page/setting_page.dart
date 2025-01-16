@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bigchanllger/constants/theme.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -20,32 +21,30 @@ class SettingPage extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required String title,
     String? subtitle,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
+        style: AppTheme.getTitleStyle(isDark),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+              style: AppTheme.getSubtitleStyle(isDark),
             )
           : null,
       trailing: trailing ??
-          const Icon(
+          Icon(
             CupertinoIcons.chevron_right,
-            color: Colors.grey,
+            color: isDark
+                ? AppTheme.darkSecondaryTextColor
+                : AppTheme.lightSecondaryTextColor,
             size: 20,
           ),
       onTap: onTap,
@@ -74,11 +73,13 @@ class SettingPage extends StatelessWidget {
           children: [
             _buildSection('Account Info'),
             _buildMenuItem(
+              context: context,
               title: '187****5160',
               subtitle: 'Account Settings',
               onTap: () {},
             ),
             _buildMenuItem(
+              context: context,
               title: 'Free Quota',
               onTap: () {},
             ),
@@ -146,15 +147,18 @@ class SettingPage extends StatelessWidget {
             ),
             _buildSection('Custom'),
             _buildMenuItem(
+              context: context,
               title: 'Theme',
               onTap: () {},
             ),
             _buildMenuItem(
+              context: context,
               title: 'Language',
               onTap: () {},
             ),
             _buildSection('System'),
             _buildMenuItem(
+              context: context,
               title: 'Clear Cache',
               trailing: const Icon(
                 Icons.refresh,
@@ -164,14 +168,17 @@ class SettingPage extends StatelessWidget {
               onTap: () {},
             ),
             _buildMenuItem(
+              context: context,
               title: 'User Terms',
               onTap: () {},
             ),
             _buildMenuItem(
+              context: context,
               title: 'Privacy Policy',
               onTap: () {},
             ),
             _buildMenuItem(
+              context: context,
               title: 'About',
               onTap: () {},
             ),

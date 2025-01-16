@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:bigchanllger/service/purchase_service.dart';
+import 'package:bigchanllger/constants/theme.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -249,19 +250,20 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   }
 
   Widget _buildBulletPoint(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppTheme.smallSpacing),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '• ',
-            style: TextStyle(color: Colors.grey, fontSize: 14),
+            style: AppTheme.getSubtitleStyle(isDark),
           ),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: AppTheme.getSubtitleStyle(isDark),
             ),
           ),
         ],
