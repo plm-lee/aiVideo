@@ -205,17 +205,35 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
           style: AppTheme.getTitleStyle(isDark),
         ),
         actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                '¢ ${creditsService.credits}',
-                style: TextStyle(
-                  color: AppTheme.primaryColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[850] : Colors.grey[200],
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.monetization_on,
+                  color: Colors.amber,
+                  size: 16,
                 ),
-              ),
+                const SizedBox(width: 4),
+                Text(
+                  '${creditsService.credits}',
+                  style: TextStyle(
+                    color: isDark
+                        ? AppTheme.darkTextColor
+                        : AppTheme.lightTextColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
