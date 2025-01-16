@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:bigchanllger/constants/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:bigchanllger/providers/theme_provider.dart';
 
 class ImgToVideoPage extends StatefulWidget {
   const ImgToVideoPage({super.key});
@@ -29,42 +32,33 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildImageSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFFF69B4).withOpacity(0.3),
-        ),
-      ),
+      margin: const EdgeInsets.all(AppTheme.spacing),
+      decoration: AppTheme.getCardDecoration(isDark),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
+            padding: const EdgeInsets.all(AppTheme.spacing),
+            decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.grey,
+                  color: AppTheme.darkSecondaryTextColor,
                   width: 0.2,
                 ),
               ),
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   CupertinoIcons.photo,
-                  color: Color(0xFFFF69B4),
+                  color: AppTheme.primaryColor,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
-                const Text(
+                const SizedBox(width: AppTheme.smallSpacing),
+                Text(
                   'Original Image',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTheme.getTitleStyle(isDark),
                 ),
                 const Spacer(),
                 if (_selectedImage != null)
@@ -133,13 +127,14 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildBottomSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E1E1E),
+      padding: const EdgeInsets.all(AppTheme.spacing),
+      decoration: BoxDecoration(
+        color: AppTheme.darkCardColor,
         border: Border(
           top: BorderSide(
-            color: Colors.grey,
+            color: AppTheme.darkSecondaryTextColor,
             width: 0.2,
           ),
         ),
@@ -213,18 +208,23 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor:
+          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.lightBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios,
+              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Img → Video',
-          style: TextStyle(color: Colors.white),
+          style: AppTheme.getTitleStyle(isDark),
         ),
       ),
       body: Column(
