@@ -133,7 +133,10 @@ class AppDrawer extends StatelessWidget {
                     context: context,
                     icon: CupertinoIcons.time,
                     title: 'More Histories',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // 关闭抽屉
+                      context.push('/histories'); // 导航到历史记录页面
+                    },
                   ),
                   _buildMenuItem(
                     context: context,

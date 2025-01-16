@@ -14,6 +14,7 @@ import 'package:bigchanllger/page/video_history_page.dart';
 import 'package:bigchanllger/service/database_service.dart';
 import 'package:bigchanllger/service/auth_service.dart';
 import 'package:bigchanllger/service/credits_service.dart';
+import 'package:bigchanllger/page/histories_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,6 +91,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/video-history',
       builder: (context, state) => const VideoHistoryPage(),
+    ),
+    GoRoute(
+      path: '/histories',
+      builder: (context, state) => const HistoriesPage(),
     ),
   ],
 );

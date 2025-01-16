@@ -131,4 +131,10 @@ class DatabaseService {
       whereArgs: [id],
     );
   }
+
+  Future<List<GeneratedVideo>> getAllGeneratedVideos() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('generated_videos');
+    return List.generate(maps.length, (i) => GeneratedVideo.fromMap(maps[i]));
+  }
 }
