@@ -8,13 +8,16 @@ import 'package:bigchanllger/providers/theme_provider.dart';
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
 
-  Widget _buildSection(String title) {
+  Widget _buildSection(BuildContext context, String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.grey,
+        style: TextStyle(
+          color: isDark
+              ? AppTheme.darkSecondaryTextColor
+              : AppTheme.lightSecondaryTextColor,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
@@ -121,25 +124,30 @@ class SettingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor:
+          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.lightBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios,
+              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Setting',
-          style: TextStyle(color: Colors.white),
+          style: AppTheme.getTitleStyle(isDark),
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection('Account Info'),
+            _buildSection(context, 'Account Info'),
             _buildMenuItem(
               context: context,
               title: '187****5160',
@@ -155,7 +163,8 @@ class SettingPage extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
+                color:
+                    isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Colors.amber.withOpacity(0.3),
@@ -176,23 +185,16 @@ class SettingPage extends StatelessWidget {
                               height: 24,
                             ),
                             const SizedBox(width: 8),
-                            const Text(
+                            Text(
                               'Invite Now',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTheme.getTitleStyle(isDark),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'You and your friends can get 50 credits each',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
+                          style: AppTheme.getSubtitleStyle(isDark),
                         ),
                       ],
                     ),
@@ -213,7 +215,7 @@ class SettingPage extends StatelessWidget {
                 ],
               ),
             ),
-            _buildSection('Custom'),
+            _buildSection(context, 'Custom'),
             _buildMenuItem(
               context: context,
               title: 'Theme',
@@ -224,7 +226,7 @@ class SettingPage extends StatelessWidget {
               title: 'Language',
               onTap: () {},
             ),
-            _buildSection('System'),
+            _buildSection(context, 'System'),
             _buildMenuItem(
               context: context,
               title: 'Clear Cache',
