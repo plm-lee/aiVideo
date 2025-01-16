@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
+import 'package:bigchanllger/service/database_service.dart';
+import 'package:bigchanllger/models/generated_video.dart';
 
 class TextToVideoPage extends StatefulWidget {
   const TextToVideoPage({super.key});
@@ -248,7 +250,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
         child: ElevatedButton(
           onPressed: _promptController.text.isNotEmpty
               ? () {
-                  // TODO: 实现生成视频逻辑
+                  _generateVideo();
                 }
               : null,
           style: ElevatedButton.styleFrom(
@@ -270,6 +272,20 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _generateVideo() async {
+    // TODO: 实现生成视频逻辑
+    final video = GeneratedVideo(
+      title: 'Generated Video ${DateTime.now()}',
+      filePath: '/path/to/video.mp4', // 替换为实际路径
+      style: _selectedStyle,
+      prompt: _promptController.text,
+      createdAt: DateTime.now(),
+      type: 'text',
+    );
+
+    await DatabaseService().saveGeneratedVideo(video);
   }
 
   @override

@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
+import 'package:bigchanllger/models/generated_video.dart';
+import 'package:bigchanllger/service/database_service.dart';
 
 class ImgToVideoPage extends StatefulWidget {
   const ImgToVideoPage({super.key});
@@ -29,6 +31,22 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
     } catch (e) {
       debugPrint('Error picking image: $e');
     }
+  }
+
+  Future<void> _generateVideo() async {
+    if (_selectedImage == null) return;
+
+    final video = GeneratedVideo(
+      title: 'Generated Video ${DateTime.now()}',
+      filePath: '/path/to/video.mp4', // 替换为实际路径
+      style: 'default',
+      prompt: '',
+      createdAt: DateTime.now(),
+      type: 'image',
+      originalImagePath: _selectedImage!.path,
+    );
+
+    await DatabaseService().saveGeneratedVideo(video);
   }
 
   Widget _buildImageSection() {
@@ -158,7 +176,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
         child: ElevatedButton(
           onPressed: _selectedImage != null
               ? () {
-                  // TODO: 实现生成视频逻辑
+                  _generateVideo();
                 }
               : null,
           style: ElevatedButton.styleFrom(

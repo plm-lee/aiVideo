@@ -10,6 +10,7 @@ import 'package:bigchanllger/page/text_to_video_page.dart';
 import 'package:provider/provider.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
+import 'package:bigchanllger/page/video_history_page.dart';
 
 void main() {
   runApp(
@@ -50,6 +51,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/text-to-video',
       builder: (context, state) => const TextToVideoPage(),
+    ),
+    GoRoute(
+      path: '/video-history',
+      builder: (context, state) => const VideoHistoryPage(),
     ),
   ],
 );
