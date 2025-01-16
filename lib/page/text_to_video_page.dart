@@ -17,6 +17,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
   bool _isProMode = false;
   final TextEditingController _promptController = TextEditingController();
   String _selectedStyle = 'Realistic';
+  bool _canGenerate = false;
 
   final List<String> _styles = [
     'Realistic',
@@ -27,9 +28,25 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _promptController.addListener(_updateGenerateButtonState);
+  }
+
+  @override
   void dispose() {
+    _promptController.removeListener(_updateGenerateButtonState);
     _promptController.dispose();
     super.dispose();
+  }
+
+  void _updateGenerateButtonState() {
+    final canGenerate = _promptController.text.trim().isNotEmpty;
+    if (canGenerate != _canGenerate) {
+      setState(() {
+        _canGenerate = canGenerate;
+      });
+    }
   }
 
   Widget _buildStyleSection() {
@@ -248,14 +265,12 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _promptController.text.isNotEmpty
-              ? () {
-                  _generateVideo();
-                }
-              : null,
+          onPressed: _canGenerate ? _generateVideo : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primaryColor,
-            disabledBackgroundColor: Colors.grey,
+            disabledBackgroundColor: isDark
+                ? AppTheme.darkSecondaryTextColor
+                : AppTheme.lightSecondaryTextColor,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
