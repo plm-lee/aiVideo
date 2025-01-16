@@ -6,6 +6,7 @@ import 'package:bigchanllger/page/register_page.dart';
 import 'package:bigchanllger/page/setting_page.dart';
 import 'package:bigchanllger/page/buy_credits_page.dart';
 import 'package:bigchanllger/page/img_to_video_page.dart';
+import 'package:bigchanllger/page/text_to_video_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,6 +38,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/img-to-video',
       builder: (context, state) => const ImgToVideoPage(),
+    ),
+    GoRoute(
+      path: '/text-to-video',
+      builder: (context, state) => const TextToVideoPage(),
     ),
   ],
 );
