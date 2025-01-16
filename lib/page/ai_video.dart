@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bigchanllger/page/drawer.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -200,40 +201,43 @@ class _AIVideoState extends State<AIVideo> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black,
-        border: null,
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child:
-              const Icon(CupertinoIcons.settings, color: CupertinoColors.white),
-          onPressed: () {
-            // TODO: 处理设置按钮点击
-          },
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E1E1E),
-            borderRadius: BorderRadius.circular(20),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(CupertinoIcons.money_dollar_circle_fill,
-                  color: CupertinoColors.systemYellow, size: 20),
-              SizedBox(width: 4),
-              Text('150 Coins',
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: const [
+                Icon(Icons.monetization_on, color: Colors.amber, size: 20),
+                SizedBox(width: 4),
+                Text(
+                  '150 Coins',
                   style: TextStyle(
                     color: Color(0xFFFF69B4),
                     fontWeight: FontWeight.w600,
-                  )),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
-      child: SafeArea(
+      drawer: const AppDrawer(),
+      body: SafeArea(
         child: ListView(
           children: [
             Padding(

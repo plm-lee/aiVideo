@@ -1,6 +1,5 @@
-import 'package:bigchanllger/page/ai_video.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:bigchanllger/page/ai_video.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,12 +10,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'BigChangllger',
-      theme: const CupertinoThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: CupertinoColors.black,
+      title: 'BigChallenger',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          elevation: 0,
+        ),
       ),
       home: const AIVideo(),
     );
