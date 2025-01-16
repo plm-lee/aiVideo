@@ -1,0 +1,134 @@
+# Flutter 项目的光标规则配置
+
+# 代码风格配置
+style_rules:
+  # 新手友好的代码结构
+  code_structure:
+    # 文件结构顺序
+    file_order:
+      - imports # 导入语句
+      - class_definition # 类定义
+      - variables # 变量声明
+      - constructor # 构造函数
+      - lifecycle # 生命周期方法
+      - public_methods # 公开方法
+      - private_methods # 私有方法
+      - build_method # build方法
+      - widgets # 组件方法
+
+    # 方法顺序规则
+    method_order:
+      - initState
+      - didChangeDependencies
+      - didUpdateWidget
+      - build
+      - dispose
+      - setState callbacks
+      - event handlers
+      - helper methods
+
+  # 代码格式化规则
+  formatting:
+    # 方法长度限制
+    max_method_length: 30
+    # Widget方法长度限制
+    max_widget_method_length: 50
+    # 参数换行阈值
+    parameter_wrapping: 2
+    # 链式调用换行
+    chain_wrapping: true
+
+  # 命名规范
+  naming:
+    widgets: "PascalCase" # 组件名使用大驼峰
+    methods: "camelCase" # 方法名使用小驼峰
+    variables: "camelCase" # 变量名使用小驼峰
+    private: "_camelCase" # 私有成员使用下划线前缀
+    constants: "UPPER_SNAKE" # 常量使用大写蛇形
+
+  # 注释规范
+  comments:
+    require_doc_comments: true # 要求文档注释
+    doc_comment_style: "////" # 使用四斜线文档注释
+    sections:
+      - "Description" # 描述部分
+      - "Parameters" # 参数说明
+      - "Returns" # 返回值说明
+      - "Example" # 使用示例
+
+  # 新手友好提示
+  beginner_hints:
+    show_widget_tips: true # 显示Widget使用提示
+    show_state_management_tips: true # 显示状态管理提示
+    show_lifecycle_tips: true # 显示生命周期提示
+    show_performance_tips: true # 显示性能优化提示
+
+# 忽略的文件和目录
+ignore:
+  - .dart_tool/
+  - .idea/
+  - .vscode/
+  - build/
+  - ios/
+  - android/
+  - windows/
+  - macos/
+  - linux/
+  - test/generated/
+  - "*.g.dart"
+  - "*.freezed.dart"
+  - "*.mocks.dart"
+
+# 优先级较高的文件和目录
+prioritize:
+  - lib/main.dart
+  - lib/app.dart
+  - lib/constants/
+  - lib/models/
+  - lib/providers/
+  - lib/service/
+  - lib/page/
+  - lib/widgets/
+  - lib/utils/
+  - test/
+
+# 相关文件规则
+related_files:
+  - pattern: "lib/models/(.*).dart"
+    related:
+      - "test/models/$1_test.dart"
+      - "lib/providers/$1_provider.dart"
+
+  - pattern: "lib/service/(.*).dart"
+    related:
+      - "test/service/$1_test.dart"
+      - "lib/providers/$1_provider.dart"
+
+  - pattern: "lib/page/(.*).dart"
+    related:
+      - "lib/widgets/$1_widgets.dart"
+      - "test/page/$1_test.dart"
+
+# 上下文包含规则
+context_includes:
+  - pattern: "lib/page/(.*).dart"
+    includes:
+      - "lib/service/*.dart"
+      - "lib/providers/*.dart"
+      - "lib/models/*.dart"
+      - "lib/constants/*.dart"
+
+  - pattern: "lib/service/(.*).dart"
+    includes:
+      - "lib/models/*.dart"
+      - "lib/constants/*.dart"
+
+  - pattern: "test/*_test.dart"
+    includes:
+      - "lib/**/*.dart"
+
+# 代码块大小限制（行数）
+max_block_size: 500
+
+# 默认上下文行数
+default_context_lines: 10
