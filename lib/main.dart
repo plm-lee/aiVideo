@@ -66,8 +66,7 @@ class MyApp extends StatelessWidget {
           title: 'BigChallenger',
           theme: AppTheme.getLightTheme(),
           darkTheme: AppTheme.getDarkTheme(),
-          themeMode:
-              themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          themeMode: themeProvider.themeMode,
           routerConfig: _router,
         );
       },

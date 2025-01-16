@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bigchanllger/constants/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:bigchanllger/providers/theme_provider.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -47,6 +49,72 @@ class SettingPage extends StatelessWidget {
                 : AppTheme.lightSecondaryTextColor,
             size: 20,
           ),
+      onTap: onTap,
+    );
+  }
+
+  void _showThemeOptions(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor:
+          isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppTheme.borderRadius)),
+      ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildThemeOption(
+            context: context,
+            title: '跟随系统',
+            isSelected: themeProvider.themeMode == ThemeMode.system,
+            onTap: () {
+              themeProvider.setThemeMode(ThemeMode.system);
+              Navigator.pop(context);
+            },
+          ),
+          _buildThemeOption(
+            context: context,
+            title: '浅色',
+            isSelected: themeProvider.themeMode == ThemeMode.light,
+            onTap: () {
+              themeProvider.setThemeMode(ThemeMode.light);
+              Navigator.pop(context);
+            },
+          ),
+          _buildThemeOption(
+            context: context,
+            title: '深色',
+            isSelected: themeProvider.themeMode == ThemeMode.dark,
+            onTap: () {
+              themeProvider.setThemeMode(ThemeMode.dark);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption({
+    required BuildContext context,
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ListTile(
+      title: Text(title, style: AppTheme.getTitleStyle(isDark)),
+      trailing: isSelected
+          ? Icon(
+              Icons.check,
+              color: AppTheme.primaryColor,
+            )
+          : null,
       onTap: onTap,
     );
   }
@@ -149,7 +217,7 @@ class SettingPage extends StatelessWidget {
             _buildMenuItem(
               context: context,
               title: 'Theme',
-              onTap: () {},
+              onTap: () => _showThemeOptions(context),
             ),
             _buildMenuItem(
               context: context,
