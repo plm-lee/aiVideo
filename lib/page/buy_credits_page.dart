@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:bigchanllger/service/purchase_service.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -11,6 +12,19 @@ class BuyCreditsPage extends StatefulWidget {
 class _BuyCreditsPageState extends State<BuyCreditsPage> {
   int? _selectedIndex;
   static const List<int> _hotDealIndexes = [1, 2];
+  final _purchaseService = PurchaseService();
+
+  @override
+  void initState() {
+    super.initState();
+    _purchaseService.initialize();
+  }
+
+  @override
+  void dispose() {
+    _purchaseService.dispose();
+    super.dispose();
+  }
 
   Widget _buildCreditCard({
     required String credits,
@@ -110,6 +124,27 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     );
   }
 
+  void _handlePurchase() async {
+    if (_selectedIndex == null) return;
+
+    final credits = ['600', '1200', '5000', '10000', '38000'][_selectedIndex!];
+
+    try {
+      final success = await _purchaseService.buyProduct(credits);
+      if (!success) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('购买失败，请稍后重试')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('发生错误: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,11 +220,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _selectedIndex != null
-                        ? () {
-                            // TODO: 处理购买逻辑
-                          }
-                        : null,
+                    onPressed: _selectedIndex != null ? _handlePurchase : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 16),
