@@ -43,7 +43,9 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: AppTheme.darkSecondaryTextColor,
+                  color: isDark
+                      ? AppTheme.darkSecondaryTextColor
+                      : AppTheme.lightSecondaryTextColor,
                   width: 0.2,
                 ),
               ),
@@ -70,16 +72,15 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
               ],
             ),
           ),
-          AspectRatio(
-            aspectRatio: 1,
+          GestureDetector(
+            onTap: _pickImage,
             child: Container(
-              margin: const EdgeInsets.all(16),
+              height: 200,
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.grey.withOpacity(0.3),
-                ),
+                color:
+                    isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+                borderRadius: BorderRadius.circular(AppTheme.borderRadius),
               ),
               child: _selectedImage != null
                   ? ClipRRect(
