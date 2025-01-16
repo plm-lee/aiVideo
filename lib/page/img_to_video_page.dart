@@ -65,8 +65,13 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                 const Spacer(),
                 if (_selectedImage != null)
                   IconButton(
-                    icon:
-                        const Icon(Icons.refresh, color: Colors.grey, size: 20),
+                    icon: Icon(
+                      Icons.refresh,
+                      color: isDark
+                          ? AppTheme.darkSecondaryTextColor
+                          : AppTheme.lightSecondaryTextColor,
+                      size: 20,
+                    ),
                     onPressed: _pickImage,
                   ),
               ],
@@ -99,13 +104,17 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                           Icon(
                             CupertinoIcons.cloud_upload,
                             size: 48,
-                            color: Colors.grey[600],
+                            color: isDark
+                                ? AppTheme.darkSecondaryTextColor
+                                : AppTheme.lightSecondaryTextColor,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Click to upload',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: isDark
+                                  ? AppTheme.darkSecondaryTextColor
+                                  : AppTheme.lightSecondaryTextColor,
                               fontSize: 16,
                             ),
                           ),
@@ -113,7 +122,9 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                           Text(
                             'Support JPG, PNG, etc.',
                             style: TextStyle(
-                              color: Colors.grey[800],
+                              color: isDark
+                                  ? AppTheme.darkSecondaryTextColor
+                                  : AppTheme.lightSecondaryTextColor,
                               fontSize: 14,
                             ),
                           ),
