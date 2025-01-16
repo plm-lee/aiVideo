@@ -48,11 +48,12 @@ class _AIVideoState extends State<AIVideo> {
     required String title,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
         height: _cardHeight,
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
           borderRadius: BorderRadius.circular(_borderRadius),
         ),
         child: Material(
@@ -69,22 +70,18 @@ class _AIVideoState extends State<AIVideo> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey[850],
+                      color: isDark ? Colors.grey[850] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFFF69B4).withOpacity(0.3),
+                        color: AppTheme.primaryColor.withOpacity(0.3),
                       ),
                     ),
-                    child: Icon(icon, color: const Color(0xFFFF69B4), size: 20),
+                    child: Icon(icon, color: AppTheme.primaryColor, size: 20),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTheme.getTitleStyle(isDark),
                   ),
                 ],
               ),
@@ -96,6 +93,7 @@ class _AIVideoState extends State<AIVideo> {
   }
 
   Widget _buildCategorySection(Map<String, dynamic> category) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,10 +108,11 @@ class _AIVideoState extends State<AIVideo> {
               const SizedBox(width: 8),
               Text(
                 category['title'],
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color:
+                      isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
                 ),
               ),
               const Spacer(),
@@ -170,14 +169,15 @@ class _AIVideoState extends State<AIVideo> {
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: _spacing),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_borderRadius),
-        color: const Color(0xFF1E1E1E),
+        color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
         border: Border.all(
-          color: const Color(0xFFFF69B4).withOpacity(0.3),
+          color: AppTheme.primaryColor.withOpacity(0.3),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -191,8 +191,9 @@ class _AIVideoState extends State<AIVideo> {
               bottom: 12,
               child: Text(
                 item['title'],
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color:
+                      isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -205,14 +206,22 @@ class _AIVideoState extends State<AIVideo> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor:
+          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
+      drawer: const AppDrawer(),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.lightBackgroundColor,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.settings),
+            icon: Icon(
+              Icons.settings,
+              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
+            ),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -229,21 +238,23 @@ class _AIVideoState extends State<AIVideo> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[850],
+                      color: isDark ? Colors.grey[850] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.monetization_on,
                           color: Colors.amber,
                           size: 16,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           '0',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark
+                                ? AppTheme.darkTextColor
+                                : AppTheme.lightTextColor,
                             fontSize: 14,
                           ),
                         ),
@@ -256,7 +267,6 @@ class _AIVideoState extends State<AIVideo> {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
       body: SafeArea(
         child: ListView(
           children: [
