@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bigchanllger/service/credits_service.dart';
 import 'package:bigchanllger/service/database_service.dart';
 import 'package:bigchanllger/models/user_config.dart';
+import 'package:bigchanllger/models/user.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
@@ -47,13 +48,11 @@ void main() {
     });
 
     test('useCredits should decrease credits if sufficient balance', () async {
-      // 准备测试数据
       when(mockDatabaseService.saveConfig(any)).thenAnswer((_) async => 1);
 
-      // 直接设置初始金币数量，而不是通过 addCredits
-      creditsService._credits = 1000;
+      // 使用公开的 setter
+      creditsService.credits = 1000;
 
-      // 执行测试
       final result = await creditsService.useCredits(500);
 
       // 验证结果
@@ -63,16 +62,45 @@ void main() {
     });
 
     test('useCredits should fail if insufficient balance', () async {
-      // 直接设置初始金币数量
-      creditsService._credits = 100;
+      // 使用公开的 setter
+      creditsService.credits = 100;
 
-      // 执行测试
       final result = await creditsService.useCredits(500);
 
       // 验证结果
       expect(result, false);
       expect(creditsService.credits, 100);
       verifyNever(mockDatabaseService.saveConfig(any));
+    });
+
+    test('addCreditsToUser should add credits to specific user', () async {
+      // 准备测试数据
+      final testUser = User(
+        id: 1,
+        email: 'test@example.com',
+        token: 'test_token',
+        loginTime: DateTime.now(),
+      );
+      when(mockDatabaseService.saveConfig(any)).thenAnswer((_) async => 1);
+      when(mockDatabaseService.getConfig('user_credits_${testUser.id}'))
+          .thenAnswer((_) async => UserConfig(
+                key: 'user_credits_${testUser.id}',
+                value: '100',
+              ));
+
+      // 执行测试
+      await creditsService.addCreditsToUser(testUser.id!, 500);
+
+      // 验证结果
+      verify(mockDatabaseService.getConfig('user_credits_${testUser.id}'))
+          .called(1);
+      verify(mockDatabaseService.saveConfig(any)).called(1);
+
+      // 验证保存的金币数量是否正确
+      final captured =
+          verify(mockDatabaseService.saveConfig(captureAny)).captured;
+      final savedConfig = captured.first as UserConfig;
+      expect(savedConfig.value, '600'); // 原有100 + 新增500
     });
   });
 }

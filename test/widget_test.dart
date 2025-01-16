@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:bigchanllger/main.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
@@ -15,6 +16,12 @@ import 'package:bigchanllger/service/credits_service.dart';
 import 'package:bigchanllger/service/auth_service.dart';
 
 void main() {
+  // 初始化 sqflite
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(

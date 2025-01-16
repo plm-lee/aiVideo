@@ -57,4 +57,31 @@ class CreditsService extends ChangeNotifier {
     notifyListeners();
     return true;
   }
+
+  Future<void> addCreditsToUser(int userId, int amount) async {
+    final config = await _databaseService.getConfig('user_credits_$userId');
+    final currentCredits = config != null ? int.parse(config.value) : 0;
+    final newCredits = currentCredits + amount;
+
+    await _databaseService.saveConfig(
+      UserConfig(
+        key: 'user_credits_$userId',
+        value: newCredits.toString(),
+      ),
+    );
+
+    // 如果是当前用户，更新内存中的金币数量
+    if (_currentUserId == userId) {
+      _credits = newCredits;
+      notifyListeners();
+    }
+  }
+
+  // 添加一个字段来跟踪当前用户ID
+  int? _currentUserId;
+
+  // 设置当前用户ID的方法
+  void setCurrentUserId(int? userId) {
+    _currentUserId = userId;
+  }
 }
