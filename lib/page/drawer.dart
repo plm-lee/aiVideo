@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -22,7 +23,7 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildCreditsSection() {
+  Widget _buildCreditsSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -39,15 +40,28 @@ class AppDrawer extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              CupertinoButton(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(20),
-                child: const Text('Buy'),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context); // 关闭抽屉
+                  context.push('/buy-credits');
+                },
+                child: const Text(
+                  'Buy',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ],
           ),
@@ -105,7 +119,7 @@ class AppDrawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            _buildCreditsSection(),
+            _buildCreditsSection(context),
             const Divider(color: Colors.grey, height: 1),
             Expanded(
               child: ListView(
@@ -139,7 +153,10 @@ class AppDrawer extends StatelessWidget {
                   _buildMenuItem(
                     icon: CupertinoIcons.settings,
                     title: 'Setting',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // 先关闭抽屉
+                      context.push('/settings'); // 跳转到设置页面
+                    },
                   ),
                 ],
               ),

@@ -215,23 +215,39 @@ class _AIVideoState extends State<AIVideo> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: const [
-                Icon(Icons.monetization_on, color: Colors.amber, size: 20),
-                SizedBox(width: 4),
-                Text(
-                  '150 Coins',
-                  style: TextStyle(
-                    color: Color(0xFFFF69B4),
-                    fontWeight: FontWeight.w600,
+            child: GestureDetector(
+              onTap: () => context.push('/buy-credits'),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.monetization_on,
+                          color: Colors.amber,
+                          size: 16,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          '0',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
