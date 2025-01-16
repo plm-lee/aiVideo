@@ -7,9 +7,17 @@ import 'package:bigchanllger/page/setting_page.dart';
 import 'package:bigchanllger/page/buy_credits_page.dart';
 import 'package:bigchanllger/page/img_to_video_page.dart';
 import 'package:bigchanllger/page/text_to_video_page.dart';
+import 'package:provider/provider.dart';
+import 'package:bigchanllger/constants/theme.dart';
+import 'package:bigchanllger/providers/theme_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 final _router = GoRouter(
@@ -51,17 +59,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'BigChallenger',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Colors.black,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.black,
-          elevation: 0,
-        ),
-      ),
-      routerConfig: _router,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'BigChallenger',
+          theme: AppTheme.getLightTheme(),
+          darkTheme: AppTheme.getDarkTheme(),
+          themeMode:
+              themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          routerConfig: _router,
+        );
+      },
     );
   }
 }
