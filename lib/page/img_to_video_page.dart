@@ -132,77 +132,41 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacing),
       decoration: BoxDecoration(
-        color: AppTheme.darkCardColor,
+        color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
         border: Border(
           top: BorderSide(
-            color: AppTheme.darkSecondaryTextColor,
+            color: isDark
+                ? AppTheme.darkSecondaryTextColor
+                : AppTheme.lightSecondaryTextColor,
             width: 0.2,
           ),
         ),
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.grey.withOpacity(0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.workspace_premium,
-                    color: Colors.amber, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Pro Mode',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-                const Spacer(),
-                Switch(
-                  value: _isProMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _isProMode = value;
-                    });
-                  },
-                  activeColor: const Color(0xFFFF69B4),
-                ),
-              ],
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _selectedImage != null
+              ? () {
+                  // TODO: 实现生成视频逻辑
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            disabledBackgroundColor: Colors.grey,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _selectedImage != null
-                  ? () {
-                      // TODO: 实现生成视频逻辑
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF69B4),
-                disabledBackgroundColor: Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                'Generate',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          child: Text(
+            'Generate',
+            style: TextStyle(
+              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -224,7 +188,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Img → Video',
+          'Img To Video',
           style: AppTheme.getTitleStyle(isDark),
         ),
       ),
