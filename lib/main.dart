@@ -5,6 +5,7 @@ import 'package:bigchanllger/page/login_page.dart';
 import 'package:bigchanllger/page/register_page.dart';
 import 'package:bigchanllger/page/setting_page.dart';
 import 'package:bigchanllger/page/buy_credits_page.dart';
+import 'package:bigchanllger/page/img_to_video_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +33,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/buy-credits',
       builder: (context, state) => const BuyCreditsPage(),
+    ),
+    GoRoute(
+      path: '/img-to-video',
+      builder: (context, state) => const ImgToVideoPage(),
     ),
   ],
 );

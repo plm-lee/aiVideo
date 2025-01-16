@@ -38,9 +38,7 @@ class _AIVideoState extends State<AIVideo> {
 
   void _handleVideoConversion(String type) {
     debugPrint('处理$type转视频');
-    final uri = Uri.parse(type == 'text'
-        ? '/creative-draw/create?mode=text-to-image'
-        : '/creative-draw/create-video');
+    final uri = Uri.parse(type == 'text' ? '/text-to-video' : '/img-to-video');
     context.push(uri.toString());
   }
 
