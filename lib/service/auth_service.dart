@@ -14,6 +14,9 @@ class AuthService extends ChangeNotifier {
 
   Future<void> checkAuth() async {
     _currentUser = await _databaseService.getLastLoggedInUser();
+    if (_currentUser != null) {
+      debugPrint('加载用户: ${_currentUser!.email}');
+    }
     notifyListeners();
   }
 

@@ -29,8 +29,12 @@ class CreditsService extends ChangeNotifier {
     final config = await _databaseService.getConfig('user_credits');
     if (config != null) {
       _credits = int.parse(config.value);
-      notifyListeners();
+    } else {
+      _credits = 0;
     }
+
+    debugPrint('加载金币: ${_credits}');
+    notifyListeners();
   }
 
   Future<void> addCredits(int amount) async {

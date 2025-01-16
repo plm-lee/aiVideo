@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bigchanllger/page/drawer.dart';
 import 'package:bigchanllger/constants/theme.dart';
+import 'package:bigchanllger/service/credits_service.dart';
+import 'package:provider/provider.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -230,9 +232,9 @@ class _AIVideoState extends State<AIVideo> {
             margin: const EdgeInsets.only(right: 16),
             child: GestureDetector(
               onTap: () => context.push('/buy-credits'),
-              child: Row(
-                children: [
-                  Container(
+              child: Consumer<CreditsService>(
+                builder: (context, creditsService, child) {
+                  return Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 4,
@@ -250,7 +252,7 @@ class _AIVideoState extends State<AIVideo> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '0',
+                          '${creditsService.credits}',
                           style: TextStyle(
                             color: isDark
                                 ? AppTheme.darkTextColor
@@ -260,8 +262,8 @@ class _AIVideoState extends State<AIVideo> {
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
