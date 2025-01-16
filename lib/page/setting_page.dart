@@ -72,28 +72,31 @@ class SettingPage extends StatelessWidget {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildThemeOption(
-            context: context,
-            title: '跟随系统',
-            isSelected: themeProvider.themeMode == ThemeMode.system,
+          ListTile(
+            title: Text('System', style: AppTheme.getTitleStyle(isDark)),
+            trailing: themeProvider.themeMode == ThemeMode.system
+                ? Icon(Icons.check, color: AppTheme.primaryColor)
+                : null,
             onTap: () {
               themeProvider.setThemeMode(ThemeMode.system);
               Navigator.pop(context);
             },
           ),
-          _buildThemeOption(
-            context: context,
-            title: '浅色',
-            isSelected: themeProvider.themeMode == ThemeMode.light,
+          ListTile(
+            title: Text('Light', style: AppTheme.getTitleStyle(isDark)),
+            trailing: themeProvider.themeMode == ThemeMode.light
+                ? Icon(Icons.check, color: AppTheme.primaryColor)
+                : null,
             onTap: () {
               themeProvider.setThemeMode(ThemeMode.light);
               Navigator.pop(context);
             },
           ),
-          _buildThemeOption(
-            context: context,
-            title: '深色',
-            isSelected: themeProvider.themeMode == ThemeMode.dark,
+          ListTile(
+            title: Text('Dark', style: AppTheme.getTitleStyle(isDark)),
+            trailing: themeProvider.themeMode == ThemeMode.dark
+                ? Icon(Icons.check, color: AppTheme.primaryColor)
+                : null,
             onTap: () {
               themeProvider.setThemeMode(ThemeMode.dark);
               Navigator.pop(context);
@@ -101,25 +104,6 @@ class SettingPage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildThemeOption({
-    required BuildContext context,
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ListTile(
-      title: Text(title, style: AppTheme.getTitleStyle(isDark)),
-      trailing: isSelected
-          ? Icon(
-              Icons.check,
-              color: AppTheme.primaryColor,
-            )
-          : null,
-      onTap: onTap,
     );
   }
 
