@@ -1,5 +1,36 @@
 # Flutter 项目的光标规则配置
 
+# 代码安全配置
+safety_rules:
+  # 代码生成前的检查
+  pre_generation_checks:
+    # 功能完整性检查
+    functionality_checks:
+      - verify_existing_methods # 验证现有方法是否保持
+      - verify_public_apis # 验证公开API是否兼容
+      - verify_state_management # 验证状态管理逻辑
+      - verify_dependencies # 验证依赖关系
+      - verify_widget_tree # 验证组件树结构
+
+    # 最小改动原则
+    minimal_changes:
+      preserve_structure: true # 保持原有结构
+      preserve_naming: true # 保持原有命名
+      preserve_comments: true # 保持原有注释
+      smart_refactor: true # 智能重构
+
+    # 兼容性检查
+    compatibility:
+      backward_compatible: true # 向后兼容
+      check_dependencies: true # 检查依赖关系
+      check_interfaces: true # 检查接口兼容性
+
+    # 测试验证
+    test_verification:
+      run_existing_tests: true # 运行现有测试
+      verify_coverage: true # 验证测试覆盖率
+      check_regression: true # 检查回归问题
+
 # 代码风格配置
 style_rules:
   # 新手友好的代码结构
