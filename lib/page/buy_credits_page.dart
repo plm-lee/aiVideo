@@ -20,6 +20,9 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   @override
   void initState() {
     super.initState();
+    if (_hotDealIndexes.isNotEmpty) {
+      _selectedIndex = _hotDealIndexes[0];
+    }
     _purchaseService.initialize();
   }
 
