@@ -33,6 +33,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     required String expiration,
     required int index,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _selectedIndex == index;
     final isHot = _hotDealIndexes.contains(index);
 
@@ -42,10 +43,10 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.green : Colors.transparent,
+            color: isSelected ? AppTheme.primaryColor : Colors.transparent,
             width: 2,
           ),
         ),
@@ -60,8 +61,10 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                   children: [
                     Text(
                       '¢ $credits',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: isDark
+                            ? AppTheme.darkTextColor
+                            : AppTheme.lightTextColor,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -88,8 +91,8 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                 ),
                 Text(
                   '\$$price',
-                  style: const TextStyle(
-                    color: Colors.green,
+                  style: TextStyle(
+                    color: AppTheme.primaryColor,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -125,10 +128,33 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     );
   }
 
+  Widget _buildBulletPoint(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTheme.smallSpacing),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '• ',
+            style: AppTheme.getSubtitleStyle(isDark),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTheme.getSubtitleStyle(isDark),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _handlePurchase() async {
     if (_selectedIndex == null) return;
 
     final credits = ['600', '1200', '5000', '10000', '38000'][_selectedIndex!];
+    final price = ['0.99', '1.99', '4.99', '9.99', '29.99'][_selectedIndex!];
 
     try {
       final success = await _purchaseService.buyProduct(credits);
@@ -148,18 +174,26 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor:
+          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.lightBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Buy Credits',
-          style: TextStyle(color: Colors.white),
+          style: AppTheme.getTitleStyle(isDark),
         ),
       ),
       body: Column(
@@ -205,12 +239,9 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '购买说明：',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: AppTheme.getSubtitleStyle(isDark),
                 ),
                 const SizedBox(height: 8),
                 _buildBulletPoint('您购买的金币需在有效期内使用，逾期未使用即失效；'),
@@ -223,47 +254,37 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                   child: ElevatedButton(
                     onPressed: _selectedIndex != null ? _handlePurchase : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: AppTheme.primaryColor,
+                      disabledBackgroundColor: isDark
+                          ? AppTheme.darkSecondaryTextColor
+                          : AppTheme.lightSecondaryTextColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.smallBorderRadius),
                       ),
                     ),
                     child: Text(
                       _selectedIndex != null
-                          ? 'Create Order \$4.99'
+                          ? 'Create Order \$${[
+                              '0.99',
+                              '1.99',
+                              '4.99',
+                              '9.99',
+                              '29.99'
+                            ][_selectedIndex!]}'
                           : 'Please select a plan',
-                      style: const TextStyle(
+                      style: TextStyle(
+                        color: isDark
+                            ? AppTheme.darkTextColor
+                            : AppTheme.lightTextColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBulletPoint(String text) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.smallSpacing),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '• ',
-            style: AppTheme.getSubtitleStyle(isDark),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTheme.getSubtitleStyle(isDark),
             ),
           ),
         ],
