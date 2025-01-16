@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-class BuyCreditsPage extends StatelessWidget {
+class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
+
+  @override
+  State<BuyCreditsPage> createState() => _BuyCreditsPageState();
+}
+
+class _BuyCreditsPageState extends State<BuyCreditsPage> {
+  int? _selectedIndex;
 
   Widget _buildCreditCard({
     required String credits,
     required String price,
     required String expiration,
     bool isBestDeal = false,
-    VoidCallback? onTap,
+    required int index,
   }) {
+    final isSelected = _selectedIndex == index;
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => setState(() => _selectedIndex = index),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
-          border: isBestDeal ? Border.all(color: Colors.green, width: 1) : null,
+          border: Border.all(
+            color: isSelected ? Colors.green : Colors.transparent,
+            width: 2,
+          ),
         ),
         child: Stack(
           children: [
@@ -47,7 +59,7 @@ class BuyCreditsPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$expiration天 expiration',
+                          '$expiration天有效期',
                           style: const TextStyle(
                             color: Colors.amber,
                             fontSize: 14,
@@ -112,40 +124,114 @@ class BuyCreditsPage extends StatelessWidget {
           'Buy Credits',
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history, color: Colors.white),
-            onPressed: () {},
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: [
+                _buildCreditCard(
+                  credits: '600',
+                  price: '0.99',
+                  expiration: '30',
+                  index: 0,
+                ),
+                _buildCreditCard(
+                  credits: '1200',
+                  price: '1.99',
+                  expiration: '90',
+                  index: 1,
+                ),
+                _buildCreditCard(
+                  credits: '5000',
+                  price: '4.99',
+                  expiration: '90',
+                  isBestDeal: true,
+                  index: 2,
+                ),
+                _buildCreditCard(
+                  credits: '10000',
+                  price: '9.99',
+                  expiration: '180',
+                  index: 3,
+                ),
+                _buildCreditCard(
+                  credits: '38000',
+                  price: '29.99',
+                  expiration: '365',
+                  index: 4,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '购买说明：',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildBulletPoint('您购买的金币需在有效期内使用，逾期未使用即失效；'),
+                _buildBulletPoint('金币不支持退款、提现或转赠他人；'),
+                _buildBulletPoint(
+                    '支付如遇到问题，可发邮件至 BigChallenger1986@gmail.com，我们会为您解决。'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _selectedIndex != null
+                        ? () {
+                            // TODO: 处理购买逻辑
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      _selectedIndex != null
+                          ? 'Create Order \$4.99'
+                          : 'Please select a plan',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ],
       ),
-      body: ListView(
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCreditCard(
-            credits: '600',
-            price: '0.99',
-            expiration: '30',
+          const Text(
+            '• ',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
           ),
-          _buildCreditCard(
-            credits: '1200',
-            price: '1.99',
-            expiration: '90',
-          ),
-          _buildCreditCard(
-            credits: '5000',
-            price: '4.99',
-            expiration: '90',
-            isBestDeal: true,
-          ),
-          _buildCreditCard(
-            credits: '10000',
-            price: '9.99',
-            expiration: '180',
-          ),
-          _buildCreditCard(
-            credits: '38000',
-            price: '29.99',
-            expiration: '365',
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
           ),
         ],
       ),
