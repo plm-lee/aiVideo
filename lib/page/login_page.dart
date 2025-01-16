@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bigchanllger/service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,10 +22,19 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    // TODO: 实现登录逻辑
-    debugPrint('Login with: ${_emailController.text}');
-    context.go('/home');
+  void _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      return;
+    }
+
+    final success = await AuthService().login(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (success && mounted) {
+      context.go('/home');
+    }
   }
 
   @override

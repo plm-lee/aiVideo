@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:bigchanllger/models/user_config.dart';
 import 'package:bigchanllger/models/generated_video.dart';
+import 'package:bigchanllger/models/user.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -46,6 +47,15 @@ class DatabaseService {
         originalImagePath TEXT
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        loginTime TEXT NOT NULL
+      )
+    ''');
   }
 
   // User Config Methods
@@ -86,6 +96,37 @@ class DatabaseService {
     final db = await database;
     await db.delete(
       'generated_videos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // User Methods
+  Future<void> saveUser(User user) async {
+    final db = await database;
+    await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<User?> getLastLoggedInUser() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      orderBy: 'loginTime DESC',
+      limit: 1,
+    );
+
+    if (maps.isEmpty) return null;
+    return User.fromMap(maps.first);
+  }
+
+  Future<void> deleteUser(int id) async {
+    final db = await database;
+    await db.delete(
+      'users',
       where: 'id = ?',
       whereArgs: [id],
     );

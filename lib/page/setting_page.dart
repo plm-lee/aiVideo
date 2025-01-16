@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
+import 'package:bigchanllger/service/auth_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -120,6 +121,13 @@ class SettingPage extends StatelessWidget {
           : null,
       onTap: onTap,
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    await AuthService().logout();
+    if (context.mounted) {
+      context.go('/login');
+    }
   }
 
   @override
@@ -258,9 +266,7 @@ class SettingPage extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    context.go('/login');
-                  },
+                  onPressed: () => _handleLogout(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E1E1E),
                     padding: const EdgeInsets.symmetric(vertical: 16),

@@ -11,11 +11,24 @@ import 'package:provider/provider.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
 import 'package:bigchanllger/page/video_history_page.dart';
+import 'package:bigchanllger/service/database_service.dart';
+import 'package:bigchanllger/service/auth_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化数据库
+  await DatabaseService().database;
+
+  // 检查认证状态
+  await AuthService().checkAuth();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthService()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -23,6 +36,23 @@ void main() {
 
 final _router = GoRouter(
   initialLocation: '/login',
+  redirect: (context, state) {
+    final auth = context.read<AuthService>();
+    final isLoggedIn = auth.currentUser != null;
+
+    if (!isLoggedIn &&
+        state.uri.path != '/login' &&
+        state.uri.path != '/register') {
+      return '/login';
+    }
+
+    if (isLoggedIn &&
+        (state.uri.path == '/login' || state.uri.path == '/register')) {
+      return '/home';
+    }
+
+    return null;
+  },
   routes: [
     GoRoute(
       path: '/login',
