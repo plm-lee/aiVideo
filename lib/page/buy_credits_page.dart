@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:bigchanllger/service/purchase_service.dart';
 import 'package:bigchanllger/constants/theme.dart';
+import 'package:bigchanllger/service/credits_service.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -158,7 +160,13 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
 
     try {
       final success = await _purchaseService.buyProduct(credits);
-      if (!success) {
+      if (success) {
+        await context.read<CreditsService>().addCredits(int.parse(credits));
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('成功购买 $credits 金币')),
+        );
+      } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('购买失败，请稍后重试')),
@@ -175,6 +183,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final creditsService = context.watch<CreditsService>();
 
     return Scaffold(
       backgroundColor:
@@ -195,6 +204,21 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
           'Buy Credits',
           style: AppTheme.getTitleStyle(isDark),
         ),
+        actions: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Text(
+                '¢ ${creditsService.credits}',
+                style: TextStyle(
+                  color: AppTheme.primaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

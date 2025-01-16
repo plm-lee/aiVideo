@@ -13,6 +13,7 @@ import 'package:bigchanllger/providers/theme_provider.dart';
 import 'package:bigchanllger/page/video_history_page.dart';
 import 'package:bigchanllger/service/database_service.dart';
 import 'package:bigchanllger/service/auth_service.dart';
+import 'package:bigchanllger/service/credits_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +24,15 @@ void main() async {
   // 检查认证状态
   await AuthService().checkAuth();
 
+  // 加载用户金币
+  await CreditsService().loadCredits();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => CreditsService()),
       ],
       child: const MyApp(),
     ),
