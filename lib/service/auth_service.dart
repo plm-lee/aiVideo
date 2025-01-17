@@ -42,7 +42,8 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logout() async {
     if (_currentUser?.id != null) {
-      await _databaseService.deleteUser(_currentUser!.id!);
+      await _databaseService.clearUserData(_currentUser!.id!);
+      await _databaseService.clearUserConfigs();
     }
     _currentUser = null;
     notifyListeners();

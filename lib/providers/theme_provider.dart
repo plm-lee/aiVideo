@@ -16,6 +16,9 @@ class ThemeProvider extends ChangeNotifier {
     final config = await _databaseService.getConfig('theme_mode');
     if (config != null) {
       _themeMode = _parseThemeMode(config.value);
+
+      // 日志
+      debugPrint('初始化主题: ${_themeMode}');
       notifyListeners();
     }
   }
@@ -29,6 +32,7 @@ class ThemeProvider extends ChangeNotifier {
           value: _themeModeToString(mode),
         ),
       );
+      debugPrint('设置主题: ${_themeMode}');
       notifyListeners();
     }
   }

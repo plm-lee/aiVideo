@@ -137,4 +137,37 @@ class DatabaseService {
     final List<Map<String, dynamic>> maps = await db.query('generated_videos');
     return List.generate(maps.length, (i) => GeneratedVideo.fromMap(maps[i]));
   }
+
+  // 清理指定用户的所有数据
+  Future<void> clearUserData(int userId) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // 删除用户记录
+      await txn.delete(
+        'users',
+        where: 'id = ?',
+        whereArgs: [userId],
+      );
+
+      // 删除用户的视频记录
+      await txn.delete(
+        'generated_videos',
+        where: 'userId = ?',
+        whereArgs: [userId],
+      );
+
+      // 删除用户的金币记录
+      await txn.delete(
+        'user_configs',
+        where: 'key = ?',
+        whereArgs: ['user_credits_$userId'],
+      );
+    });
+  }
+
+  // 清理所有用户配置
+  Future<void> clearUserConfigs() async {
+    final db = await database;
+    await db.delete('user_configs');
+  }
 }
