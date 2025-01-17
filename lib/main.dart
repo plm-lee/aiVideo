@@ -17,6 +17,7 @@ import 'package:bigchanllger/service/credits_service.dart';
 import 'package:bigchanllger/page/histories_page.dart';
 import 'package:bigchanllger/models/user_config.dart';
 import 'package:bigchanllger/page/purchase_history_page.dart';
+import 'package:bigchanllger/service/locale_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,12 +34,16 @@ void main() async {
   // 加载用户金币
   await CreditsService().loadCredits();
 
+  // 加载语言设置
+  await LocaleService().loadLocale();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => CreditsService()),
+        ChangeNotifierProvider(create: (_) => LocaleService()),
       ],
       child: const MyApp(),
     ),

@@ -5,6 +5,7 @@ import 'package:bigchanllger/constants/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:bigchanllger/providers/theme_provider.dart';
 import 'package:bigchanllger/service/auth_service.dart';
+import 'package:bigchanllger/service/locale_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -109,6 +110,7 @@ class SettingPage extends StatelessWidget {
 
   void _showLanguageOptions(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = Provider.of<LocaleService>(context, listen: false);
 
     showModalBottomSheet(
       context: context,
@@ -123,12 +125,23 @@ class SettingPage extends StatelessWidget {
         children: [
           ListTile(
             title: Text('中文', style: AppTheme.getTitleStyle(isDark)),
-            trailing: Icon(Icons.check, color: AppTheme.primaryColor),
-            onTap: () => Navigator.pop(context),
+            trailing: localeService.locale.languageCode == 'zh'
+                ? Icon(Icons.check, color: AppTheme.primaryColor)
+                : null,
+            onTap: () {
+              localeService.setLocale(const Locale('zh', 'CN'));
+              Navigator.pop(context);
+            },
           ),
           ListTile(
             title: Text('English', style: AppTheme.getTitleStyle(isDark)),
-            onTap: () => Navigator.pop(context),
+            trailing: localeService.locale.languageCode == 'en'
+                ? Icon(Icons.check, color: AppTheme.primaryColor)
+                : null,
+            onTap: () {
+              localeService.setLocale(const Locale('en', 'US'));
+              Navigator.pop(context);
+            },
           ),
         ],
       ),
