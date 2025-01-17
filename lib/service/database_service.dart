@@ -16,6 +16,7 @@ class DatabaseService {
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
+    _printAllUserData();
     return _database!;
   }
 
@@ -27,6 +28,41 @@ class DatabaseService {
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+  }
+
+  // 初始化数据库的时候，把所有用户数据打印出来
+  Future<void> _printAllUserData() async {
+    final db = await database;
+
+    // 打印用户表数据
+    final List<Map<String, dynamic>> users = await db.query('users');
+    print('用户表数据:');
+    for (var user in users) {
+      print(user);
+    }
+
+    // 打印用户配置表数据
+    final List<Map<String, dynamic>> configs = await db.query('user_configs');
+    print('用户配置表数据:');
+    for (var config in configs) {
+      print(config);
+    }
+
+    // 打印生成视频表数据
+    final List<Map<String, dynamic>> videos =
+        await db.query('generated_videos');
+    print('生成视频表数据:');
+    for (var video in videos) {
+      print(video);
+    }
+
+    // 打印购买记录表数据
+    final List<Map<String, dynamic>> purchases =
+        await db.query('purchase_records');
+    print('购买记录表数据:');
+    for (var purchase in purchases) {
+      print(purchase);
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -133,11 +169,30 @@ class DatabaseService {
   // User Config Methods
   Future<void> saveConfig(UserConfig config) async {
     final db = await database;
-    await db.insert(
-      'user_configs',
-      config.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final existingConfig = await getConfig(config.key, userId: config.userId);
+
+    if (existingConfig != null) {
+      final Map<String, dynamic> updateData = {
+        'key': config.key,
+        'value': config.value,
+        'userId': config.userId,
+      };
+
+      await db.update(
+        'user_configs',
+        updateData,
+        where:
+            'key = ? AND userId ${config.userId == null ? 'IS NULL' : '= ?'}',
+        whereArgs:
+            config.userId == null ? [config.key] : [config.key, config.userId],
+      );
+    } else {
+      await db.insert(
+        'user_configs',
+        config.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   Future<UserConfig?> getConfig(String key, {int? userId}) async {
