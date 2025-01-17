@@ -5,6 +5,7 @@ import 'package:bigchanllger/models/generated_video.dart';
 import 'package:bigchanllger/models/user.dart';
 
 class DatabaseService {
+  static final int _dbVersion = 3;
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -21,7 +22,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'bigchallenger.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: _dbVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -29,11 +30,21 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
+      CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        loginTime TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE user_configs(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         key TEXT NOT NULL,
         value TEXT NOT NULL,
-        userId INTEGER
+        userId INTEGER,
+        FOREIGN KEY (userId) REFERENCES users(id)
       )
     ''');
 
@@ -47,16 +58,8 @@ class DatabaseService {
         createdAt TEXT NOT NULL,
         type TEXT NOT NULL,
         originalImagePath TEXT,
-        userId INTEGER
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
-        token TEXT NOT NULL,
-        loginTime TEXT NOT NULL
+        userId INTEGER,
+        FOREIGN KEY (userId) REFERENCES users(id)
       )
     ''');
   }
@@ -66,6 +69,51 @@ class DatabaseService {
       await db
           .execute('ALTER TABLE generated_videos ADD COLUMN userId INTEGER');
       await db.execute('ALTER TABLE user_configs ADD COLUMN userId INTEGER');
+    }
+
+    if (oldVersion < 3) {
+      await db.execute(
+          'ALTER TABLE generated_videos RENAME TO generated_videos_backup');
+      await db
+          .execute('ALTER TABLE user_configs RENAME TO user_configs_backup');
+
+      await db.execute('''
+        CREATE TABLE generated_videos(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          filePath TEXT NOT NULL,
+          style TEXT NOT NULL,
+          prompt TEXT NOT NULL,
+          createdAt TEXT NOT NULL,
+          type TEXT NOT NULL,
+          originalImagePath TEXT,
+          userId INTEGER,
+          FOREIGN KEY (userId) REFERENCES users(id)
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE user_configs(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          key TEXT NOT NULL,
+          value TEXT NOT NULL,
+          userId INTEGER,
+          FOREIGN KEY (userId) REFERENCES users(id)
+        )
+      ''');
+
+      await db.execute('''
+        INSERT INTO generated_videos 
+        SELECT * FROM generated_videos_backup
+      ''');
+
+      await db.execute('''
+        INSERT INTO user_configs 
+        SELECT * FROM user_configs_backup
+      ''');
+
+      await db.execute('DROP TABLE generated_videos_backup');
+      await db.execute('DROP TABLE user_configs_backup');
     }
   }
 
