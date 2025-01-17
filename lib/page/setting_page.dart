@@ -108,8 +108,43 @@ class SettingPage extends StatelessWidget {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
-    await AuthService().logout();
-    if (context.mounted) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // 显示确认对话框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor:
+            isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+        title: Text(
+          '确认退出',
+          style: AppTheme.getTitleStyle(isDark),
+        ),
+        content: Text(
+          '退出登录将清空本地所有数据，包括主题设置、历史记录等。\n是否确认退出？',
+          style: AppTheme.getSubtitleStyle(isDark),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              '取消',
+              style: TextStyle(color: AppTheme.darkSecondaryTextColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              '确认退出',
+              style: TextStyle(color: AppTheme.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await AuthService().logout();
       context.go('/login');
     }
   }
