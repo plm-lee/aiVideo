@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:bigchanllger/models/user_config.dart';
 import 'package:bigchanllger/models/generated_video.dart';
 import 'package:bigchanllger/models/user.dart';
+import 'package:bigchanllger/models/purchase_record.dart';
 
 class DatabaseService {
   static final int _dbVersion = 3;
@@ -58,6 +59,18 @@ class DatabaseService {
         createdAt TEXT NOT NULL,
         type TEXT NOT NULL,
         originalImagePath TEXT,
+        userId INTEGER,
+        FOREIGN KEY (userId) REFERENCES users(id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE purchase_records(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        createdAt TEXT NOT NULL,
+        expireAt TEXT,
         userId INTEGER,
         FOREIGN KEY (userId) REFERENCES users(id)
       )
@@ -234,5 +247,23 @@ class DatabaseService {
     final path = join(await getDatabasesPath(), 'bigchallenger.db');
     await databaseFactory.deleteDatabase(path);
     _database = null;
+  }
+
+  Future<List<PurchaseRecord>> getPurchaseRecords() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'purchase_records',
+      orderBy: 'createdAt DESC',
+    );
+    return List.generate(maps.length, (i) => PurchaseRecord.fromMap(maps[i]));
+  }
+
+  Future<void> savePurchaseRecord(PurchaseRecord record) async {
+    final db = await database;
+    await db.insert(
+      'purchase_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

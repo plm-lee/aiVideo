@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:bigchanllger/service/purchase_service.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:bigchanllger/service/credits_service.dart';
+import 'package:go_router/go_router.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -192,51 +193,31 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
       backgroundColor:
           isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
       appBar: AppBar(
-        backgroundColor: isDark
-            ? AppTheme.darkBackgroundColor
-            : AppTheme.lightBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back_ios,
-            color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
+            Icons.arrow_back,
+            color: isDark ? Colors.white : Colors.black,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Buy Credits',
+          '购买金币',
           style: AppTheme.getTitleStyle(isDark),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 4,
+          TextButton.icon(
+            onPressed: () => context.push('/purchase-history'),
+            icon: Icon(
+              Icons.history,
+              color: isDark ? Colors.white : Colors.black,
             ),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[850] : Colors.grey[200],
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.monetization_on,
-                  color: Colors.amber,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${creditsService.credits}',
-                  style: TextStyle(
-                    color: isDark
-                        ? AppTheme.darkTextColor
-                        : AppTheme.lightTextColor,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            label: Text(
+              '购买历史',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
           ),
         ],

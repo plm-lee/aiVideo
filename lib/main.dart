@@ -16,6 +16,7 @@ import 'package:bigchanllger/service/auth_service.dart';
 import 'package:bigchanllger/service/credits_service.dart';
 import 'package:bigchanllger/page/histories_page.dart';
 import 'package:bigchanllger/models/user_config.dart';
+import 'package:bigchanllger/page/purchase_history_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,6 +100,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/histories',
       builder: (context, state) => const HistoriesPage(),
+    ),
+    GoRoute(
+      path: '/purchase-history',
+      builder: (context, state) => const PurchaseHistoryPage(),
     ),
   ],
 );
