@@ -107,6 +107,34 @@ class SettingPage extends StatelessWidget {
     );
   }
 
+  void _showLanguageOptions(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor:
+          isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppTheme.borderRadius)),
+      ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text('中文', style: AppTheme.getTitleStyle(isDark)),
+            trailing: Icon(Icons.check, color: AppTheme.primaryColor),
+            onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            title: Text('English', style: AppTheme.getTitleStyle(isDark)),
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleLogout(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -251,7 +279,7 @@ class SettingPage extends StatelessWidget {
             _buildMenuItem(
               context: context,
               title: 'Language',
-              onTap: () {},
+              onTap: () => _showLanguageOptions(context),
             ),
             _buildSection(context, 'System'),
             _buildMenuItem(
