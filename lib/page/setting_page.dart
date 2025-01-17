@@ -12,10 +12,12 @@ class SettingPage extends StatelessWidget {
 
   Widget _buildSection(BuildContext context, String title) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = context.watch<LocaleService>();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
-        title,
+        localeService.translate(title.toLowerCase()),
         style: TextStyle(
           color: isDark
               ? AppTheme.darkSecondaryTextColor
@@ -30,30 +32,18 @@ class SettingPage extends StatelessWidget {
   Widget _buildMenuItem({
     required BuildContext context,
     required String title,
-    String? subtitle,
     Widget? trailing,
-    VoidCallback? onTap,
+    required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = context.watch<LocaleService>();
+
     return ListTile(
       title: Text(
-        title,
+        localeService.translate(title.toLowerCase()),
         style: AppTheme.getTitleStyle(isDark),
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: AppTheme.getSubtitleStyle(isDark),
-            )
-          : null,
-      trailing: trailing ??
-          Icon(
-            CupertinoIcons.chevron_right,
-            color: isDark
-                ? AppTheme.darkSecondaryTextColor
-                : AppTheme.lightSecondaryTextColor,
-            size: 20,
-          ),
+      trailing: trailing,
       onTap: onTap,
     );
   }
@@ -150,33 +140,33 @@ class SettingPage extends StatelessWidget {
 
   Future<void> _handleLogout(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = context.watch<LocaleService>();
 
-    // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor:
             isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
         title: Text(
-          '确认退出',
+          localeService.translate('confirm_logout'),
           style: AppTheme.getTitleStyle(isDark),
         ),
         content: Text(
-          '退出登录将清空本地所有数据，包括主题设置、历史记录等。\n是否确认退出？',
+          localeService.translate('logout_message'),
           style: AppTheme.getSubtitleStyle(isDark),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              '取消',
+              localeService.translate('cancel'),
               style: TextStyle(color: AppTheme.darkSecondaryTextColor),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              '确认退出',
+              localeService.translate('confirm'),
               style: TextStyle(color: AppTheme.primaryColor),
             ),
           ),
@@ -219,7 +209,6 @@ class SettingPage extends StatelessWidget {
             _buildMenuItem(
               context: context,
               title: '187****5160',
-              subtitle: 'Account Settings',
               onTap: () {},
             ),
             _buildMenuItem(

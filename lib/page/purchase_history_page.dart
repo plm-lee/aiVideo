@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:bigchanllger/constants/theme.dart';
 import 'package:bigchanllger/models/purchase_record.dart';
 import 'package:bigchanllger/service/database_service.dart';
+import 'package:bigchanllger/l10n/app_en.dart';
+import 'package:bigchanllger/l10n/app_zh.dart';
+import 'package:provider/provider.dart';
+import 'package:bigchanllger/service/locale_service.dart';
 
 class PurchaseHistoryPage extends StatelessWidget {
   const PurchaseHistoryPage({super.key});
@@ -9,12 +13,14 @@ class PurchaseHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = context.watch<LocaleService>();
 
     return Scaffold(
       backgroundColor:
           isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
       appBar: AppBar(
-        title: Text('购买历史', style: AppTheme.getTitleStyle(isDark)),
+        title: Text(localeService.translate('purchase_history'),
+            style: AppTheme.getTitleStyle(isDark)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(

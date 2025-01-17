@@ -1,0 +1,23 @@
+const Map<String, String> enUS = {
+  'settings': 'Settings',
+  'theme': 'Theme',
+  'language': 'Language',
+  'system': 'System',
+  'clear_cache': 'Clear Cache',
+  'user_terms': 'User Terms',
+  'privacy_policy': 'Privacy Policy',
+  'about': 'About',
+  'logout': 'Logout',
+  'confirm_logout': 'Confirm Logout',
+  'logout_message':
+      'Logging out will clear all local data, including theme settings and history.\nAre you sure?',
+  'cancel': 'Cancel',
+  'confirm': 'Confirm',
+  'dark': 'Dark',
+  'light': 'Light',
+  'system_default': 'System Default',
+  'purchase_history': 'Purchase History',
+  'video_history': 'Video History',
+  'credits': 'Credits',
+  'buy_credits': 'Buy Credits',
+};
