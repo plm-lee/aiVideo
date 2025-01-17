@@ -21,8 +21,9 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'bigchallenger.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -31,7 +32,8 @@ class DatabaseService {
       CREATE TABLE user_configs(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         key TEXT NOT NULL,
-        value TEXT NOT NULL
+        value TEXT NOT NULL,
+        userId INTEGER
       )
     ''');
 
@@ -44,7 +46,8 @@ class DatabaseService {
         prompt TEXT NOT NULL,
         createdAt TEXT NOT NULL,
         type TEXT NOT NULL,
-        originalImagePath TEXT
+        originalImagePath TEXT,
+        userId INTEGER
       )
     ''');
 
@@ -56,6 +59,14 @@ class DatabaseService {
         loginTime TEXT NOT NULL
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db
+          .execute('ALTER TABLE generated_videos ADD COLUMN userId INTEGER');
+      await db.execute('ALTER TABLE user_configs ADD COLUMN userId INTEGER');
+    }
   }
 
   // User Config Methods
@@ -152,15 +163,15 @@ class DatabaseService {
       // 删除用户的视频记录
       await txn.delete(
         'generated_videos',
-        where: 'userId = ?',
+        where: 'userId IS NULL OR userId = ?',
         whereArgs: [userId],
       );
 
-      // 删除用户的金币记录
+      // 删除用户的配置
       await txn.delete(
         'user_configs',
-        where: 'key = ?',
-        whereArgs: ['user_credits_$userId'],
+        where: 'userId IS NULL OR userId = ?',
+        whereArgs: [userId],
       );
     });
   }
@@ -169,5 +180,11 @@ class DatabaseService {
   Future<void> clearUserConfigs() async {
     final db = await database;
     await db.delete('user_configs');
+  }
+
+  Future<void> deleteDatabase() async {
+    final path = join(await getDatabasesPath(), 'bigchallenger.db');
+    await databaseFactory.deleteDatabase(path);
+    _database = null;
   }
 }
