@@ -51,6 +51,7 @@ class SettingPage extends StatelessWidget {
   void _showThemeOptions(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final localeService = Provider.of<LocaleService>(context, listen: false);
 
     showModalBottomSheet(
       context: context,
@@ -64,7 +65,8 @@ class SettingPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            title: Text('System', style: AppTheme.getTitleStyle(isDark)),
+            title: Text(localeService.translate('system_default'),
+                style: AppTheme.getTitleStyle(isDark)),
             trailing: themeProvider.themeMode == ThemeMode.system
                 ? Icon(Icons.check, color: AppTheme.primaryColor)
                 : null,
@@ -74,7 +76,8 @@ class SettingPage extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Light', style: AppTheme.getTitleStyle(isDark)),
+            title: Text(localeService.translate('light'),
+                style: AppTheme.getTitleStyle(isDark)),
             trailing: themeProvider.themeMode == ThemeMode.light
                 ? Icon(Icons.check, color: AppTheme.primaryColor)
                 : null,
@@ -84,7 +87,8 @@ class SettingPage extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Dark', style: AppTheme.getTitleStyle(isDark)),
+            title: Text(localeService.translate('dark'),
+                style: AppTheme.getTitleStyle(isDark)),
             trailing: themeProvider.themeMode == ThemeMode.dark
                 ? Icon(Icons.check, color: AppTheme.primaryColor)
                 : null,
@@ -140,7 +144,7 @@ class SettingPage extends StatelessWidget {
 
   Future<void> _handleLogout(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final localeService = context.watch<LocaleService>();
+    final localeService = Provider.of<LocaleService>(context, listen: false);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -183,6 +187,7 @@ class SettingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeService = context.watch<LocaleService>();
     return Scaffold(
       backgroundColor:
           isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
@@ -197,7 +202,7 @@ class SettingPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Setting',
+          localeService.translate('settings'),
           style: AppTheme.getTitleStyle(isDark),
         ),
       ),
@@ -205,15 +210,10 @@ class SettingPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection(context, 'Account Info'),
+            _buildSection(context, 'account_info'),
             _buildMenuItem(
               context: context,
-              title: '187****5160',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              context: context,
-              title: 'Free Quota',
+              title: 'phone',
               onTap: () {},
             ),
             Container(
@@ -243,14 +243,14 @@ class SettingPage extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Invite Now',
+                              localeService.translate('invite_now'),
                               style: AppTheme.getTitleStyle(isDark),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'You and your friends can get 50 credits each',
+                          localeService.translate('invite_description'),
                           style: AppTheme.getSubtitleStyle(isDark),
                         ),
                       ],
@@ -264,29 +264,29 @@ class SettingPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Invite',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      localeService.translate('invite'),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
               ),
             ),
-            _buildSection(context, 'Custom'),
+            _buildSection(context, 'custom'),
             _buildMenuItem(
               context: context,
-              title: 'Theme',
+              title: 'theme',
               onTap: () => _showThemeOptions(context),
             ),
             _buildMenuItem(
               context: context,
-              title: 'Language',
+              title: 'language',
               onTap: () => _showLanguageOptions(context),
             ),
-            _buildSection(context, 'System'),
+            _buildSection(context, 'system'),
             _buildMenuItem(
               context: context,
-              title: 'Clear Cache',
+              title: 'clear_cache',
               trailing: const Icon(
                 Icons.refresh,
                 color: Colors.grey,
@@ -296,17 +296,17 @@ class SettingPage extends StatelessWidget {
             ),
             _buildMenuItem(
               context: context,
-              title: 'User Terms',
+              title: 'user_terms',
               onTap: () {},
             ),
             _buildMenuItem(
               context: context,
-              title: 'Privacy Policy',
+              title: 'privacy_policy',
               onTap: () {},
             ),
             _buildMenuItem(
               context: context,
-              title: 'About',
+              title: 'about',
               onTap: () {},
             ),
             const SizedBox(height: 32),
@@ -323,9 +323,9 @@ class SettingPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Log Out',
-                    style: TextStyle(
+                  child: Text(
+                    localeService.translate('logout'),
+                    style: const TextStyle(
                       color: Color(0xFFFF69B4),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

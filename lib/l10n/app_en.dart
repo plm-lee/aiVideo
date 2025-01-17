@@ -56,4 +56,10 @@ const Map<String, String> enUS = {
   'passwords_not_match': 'Passwords do not match',
   'register_success': 'Registration successful',
   'register_failed': 'Registration failed',
+  'invite_now': 'Invite Now',
+  'invite_description': 'You and your friends can get 50 credits each',
+  'invite': 'Invite',
+  'account_info': 'Account Info',
+  'custom': 'Custom',
+  'phone': '187****5160',
 };

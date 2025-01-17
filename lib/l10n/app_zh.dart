@@ -55,4 +55,10 @@ const Map<String, String> zhCN = {
   'passwords_not_match': '两次输入的密码不一致',
   'register_success': '注册成功',
   'register_failed': '注册失败',
+  'invite_now': '立即邀请',
+  'invite_description': '你和你的朋友各可获得50金币',
+  'invite': '邀请',
+  'account_info': '账户信息',
+  'custom': '自定义',
+  'phone': '187****5160',
 };
