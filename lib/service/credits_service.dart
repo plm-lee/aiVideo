@@ -34,6 +34,12 @@ class CreditsService extends ChangeNotifier {
     }
 
     debugPrint('加载金币: ${_credits}');
+
+    // 金币为0，给用户增加100金币
+    if (_credits == 0) {
+      await addCredits(100);
+    }
+
     notifyListeners();
   }
 

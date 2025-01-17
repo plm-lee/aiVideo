@@ -2,11 +2,13 @@ class UserConfig {
   final int? id;
   final String key;
   final String value;
+  final int? userId;
 
   UserConfig({
     this.id,
     required this.key,
     required this.value,
+    this.userId,
   });
 
   Map<String, dynamic> toMap() {
@@ -14,6 +16,7 @@ class UserConfig {
       'id': id,
       'key': key,
       'value': value,
+      'userId': userId,
     };
   }
 
@@ -22,6 +25,7 @@ class UserConfig {
       id: map['id'],
       key: map['key'],
       value: map['value'],
+      userId: map['userId'],
     );
   }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:bigchanllger/service/database_service.dart';
 import 'package:bigchanllger/models/user_config.dart';
+import 'package:bigchanllger/service/auth_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system; // 默认跟随系统
+  ThemeMode _themeMode = ThemeMode.system;
   final DatabaseService _databaseService = DatabaseService();
+  final AuthService _authService = AuthService();
 
   ThemeMode get themeMode => _themeMode;
 
@@ -13,12 +15,15 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> _loadThemeMode() async {
-    final config = await _databaseService.getConfig('theme_mode');
+    final user = _authService.currentUser;
+    final config = await _databaseService.getConfig(
+      'theme_mode',
+      userId: user?.id,
+    );
+
     if (config != null) {
       _themeMode = _parseThemeMode(config.value);
-
-      // 日志
-      debugPrint('初始化主题: ${_themeMode}');
+      debugPrint('加载用户主题: ${_themeMode}');
       notifyListeners();
     }
   }
@@ -26,13 +31,17 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> setThemeMode(ThemeMode mode) async {
     if (_themeMode != mode) {
       _themeMode = mode;
+      final user = _authService.currentUser;
+
       await _databaseService.saveConfig(
         UserConfig(
           key: 'theme_mode',
           value: _themeModeToString(mode),
+          userId: user?.id,
         ),
       );
-      debugPrint('设置主题: ${_themeMode}');
+
+      debugPrint('保存用户主题: ${_themeMode}');
       notifyListeners();
     }
   }

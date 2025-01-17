@@ -58,9 +58,9 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
           as _i4.Future<void>);
 
   @override
-  _i4.Future<_i5.UserConfig?> getConfig(String? key) =>
+  _i4.Future<_i5.UserConfig?> getConfig(String? key, {int? userId}) =>
       (super.noSuchMethod(
-            Invocation.method(#getConfig, [key]),
+            Invocation.method(#getConfig, [key], {#userId: userId}),
             returnValue: _i4.Future<_i5.UserConfig?>.value(),
             returnValueForMissingStub: _i4.Future<_i5.UserConfig?>.value(),
           )
@@ -120,6 +120,47 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
   _i4.Future<void> deleteUser(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteUser, [id]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<List<_i6.GeneratedVideo>> getAllGeneratedVideos() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAllGeneratedVideos, []),
+            returnValue: _i4.Future<List<_i6.GeneratedVideo>>.value(
+              <_i6.GeneratedVideo>[],
+            ),
+            returnValueForMissingStub:
+                _i4.Future<List<_i6.GeneratedVideo>>.value(
+                  <_i6.GeneratedVideo>[],
+                ),
+          )
+          as _i4.Future<List<_i6.GeneratedVideo>>);
+
+  @override
+  _i4.Future<void> clearUserData(int? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#clearUserData, [userId]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> clearUserConfigs() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearUserConfigs, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> deleteDatabase() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteDatabase, []),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )

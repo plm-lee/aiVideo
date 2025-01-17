@@ -15,9 +15,13 @@ import 'package:bigchanllger/service/database_service.dart';
 import 'package:bigchanllger/service/auth_service.dart';
 import 'package:bigchanllger/service/credits_service.dart';
 import 'package:bigchanllger/page/histories_page.dart';
+import 'package:bigchanllger/models/user_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 删除数据库 测试用
+  // await DatabaseService().deleteDatabase();
 
   // 初始化数据库
   await DatabaseService().database;

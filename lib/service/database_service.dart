@@ -127,12 +127,12 @@ class DatabaseService {
     );
   }
 
-  Future<UserConfig?> getConfig(String key) async {
+  Future<UserConfig?> getConfig(String key, {int? userId}) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'user_configs',
-      where: 'key = ?',
-      whereArgs: [key],
+      where: userId == null ? 'key = ?' : 'key = ? AND userId = ?',
+      whereArgs: userId == null ? [key] : [key, userId],
     );
 
     if (maps.isEmpty) return null;
