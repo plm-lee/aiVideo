@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:bigchanllger/service/database_service.dart';
-import 'package:bigchanllger/models/user_config.dart';
+import 'package:bigchallenger/service/database_service.dart';
+import 'package:bigchallenger/models/user_config.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;

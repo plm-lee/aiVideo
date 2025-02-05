@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchanllger/service/purchase_service.dart';
-import 'package:bigchanllger/constants/theme.dart';
-import 'package:bigchanllger/service/credits_service.dart';
+import 'package:bigchallenger/service/purchase_service.dart';
+import 'package:bigchallenger/constants/theme.dart';
+import 'package:bigchallenger/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
 
 class BuyCreditsPage extends StatefulWidget {

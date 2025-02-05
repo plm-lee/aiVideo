@@ -61,4 +61,9 @@ const Map<String, String> zhCN = {
   'account_info': '账户信息',
   'custom': '自定义',
   'phone': '187****5160',
+  'user_avatar': '用户头像',
+  'navigation': '导航',
+  'menu': '菜单',
+  'drawer_header': '个人信息',
+  'credits_balance': '金币余额: {}',
 };

@@ -1,4 +1,4 @@
-package com.example.bigchanllger_app
+package com.example.bigchallenger_app
 
 import io.flutter.embedding.android.FlutterActivity
 

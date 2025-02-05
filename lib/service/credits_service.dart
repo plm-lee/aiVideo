@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:bigchanllger/service/database_service.dart';
-import 'package:bigchanllger/models/user_config.dart';
-import 'package:bigchanllger/models/purchase_record.dart';
+import 'package:bigchallenger/service/database_service.dart';
+import 'package:bigchallenger/models/user_config.dart';
+import 'package:bigchallenger/models/purchase_record.dart';
 
 class CreditsService extends ChangeNotifier {
   static final CreditsService _instance = CreditsService._internal();

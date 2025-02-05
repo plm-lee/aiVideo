@@ -62,4 +62,9 @@ const Map<String, String> enUS = {
   'account_info': 'Account Info',
   'custom': 'Custom',
   'phone': '187****5160',
+  'user_avatar': 'User Avatar',
+  'navigation': 'Navigation',
+  'menu': 'Menu',
+  'drawer_header': 'Profile',
+  'credits_balance': 'Credits Balance: {}',
 };

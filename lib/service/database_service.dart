@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:bigchanllger/models/user_config.dart';
-import 'package:bigchanllger/models/generated_video.dart';
-import 'package:bigchanllger/models/user.dart';
-import 'package:bigchanllger/models/purchase_record.dart';
+import 'package:bigchallenger/models/user_config.dart';
+import 'package:bigchallenger/models/generated_video.dart';
+import 'package:bigchallenger/models/user.dart';
+import 'package:bigchallenger/models/purchase_record.dart';
 
 class DatabaseService {
   static final int _dbVersion = 3;

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:bigchanllger/models/user.dart';
-import 'package:bigchanllger/service/database_service.dart';
+import 'package:bigchallenger/models/user.dart';
+import 'package:bigchallenger/service/database_service.dart';
 
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();

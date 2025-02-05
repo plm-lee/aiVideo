@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:bigchanllger/constants/theme.dart';
+import 'package:bigchallenger/constants/theme.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
