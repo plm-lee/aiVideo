@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchallenger/service/purchase_service.dart';
-import 'package:bigchallenger/constants/theme.dart';
-import 'package:bigchallenger/service/credits_service.dart';
+import 'package:ai_video/service/purchase_service.dart';
+import 'package:ai_video/constants/theme.dart';
+import 'package:ai_video/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
 
 class BuyCreditsPage extends StatefulWidget {
@@ -273,7 +273,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                 _buildBulletPoint('您购买的金币需在有效期内使用，逾期未使用即失效；'),
                 _buildBulletPoint('金币不支持退款、提现或转赠他人；'),
                 _buildBulletPoint(
-                    '支付如遇到问题，可发邮件至 BigChallenger1986@gmail.com，我们会为您解决。'),
+                    '支付如遇到问题，可发邮件至 ai_video1986@gmail.com，我们会为您解决。'),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

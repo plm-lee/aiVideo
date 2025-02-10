@@ -1,4 +1,4 @@
-package com.example.bigchallenger_app
+package com.bigchallenger.ai_video_app
 
 import io.flutter.embedding.android.FlutterActivity
 

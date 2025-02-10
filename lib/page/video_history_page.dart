@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bigchallenger/models/generated_video.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/constants/theme.dart';
+import 'package:ai_video/models/generated_video.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/constants/theme.dart';
 
 class VideoHistoryPage extends StatelessWidget {
   const VideoHistoryPage({super.key});

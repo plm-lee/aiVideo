@@ -1,4 +1,4 @@
-# bigchallenger_app
+# ai_video_app
 
 A new Flutter project.
 

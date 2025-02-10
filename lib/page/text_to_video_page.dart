@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:bigchallenger/constants/theme.dart';
+import 'package:ai_video/constants/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchallenger/providers/theme_provider.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/models/generated_video.dart';
+import 'package:ai_video/providers/theme_provider.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/models/generated_video.dart';
 
 class TextToVideoPage extends StatefulWidget {
   const TextToVideoPage({super.key});

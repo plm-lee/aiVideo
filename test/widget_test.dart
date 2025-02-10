@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'package:bigchallenger/main.dart';
-import 'package:bigchallenger/providers/theme_provider.dart';
-import 'package:bigchallenger/service/credits_service.dart';
-import 'package:bigchallenger/service/auth_service.dart';
+import 'package:ai_video/main.dart';
+import 'package:ai_video/providers/theme_provider.dart';
+import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/auth_service.dart';
 
 void main() {
   // 初始化 sqflite

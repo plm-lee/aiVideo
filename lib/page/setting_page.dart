@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:bigchallenger/constants/theme.dart';
+import 'package:ai_video/constants/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchallenger/providers/theme_provider.dart';
-import 'package:bigchallenger/service/auth_service.dart';
-import 'package:bigchallenger/service/locale_service.dart';
+import 'package:ai_video/providers/theme_provider.dart';
+import 'package:ai_video/service/auth_service.dart';
+import 'package:ai_video/service/locale_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});

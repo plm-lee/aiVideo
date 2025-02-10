@@ -1,6 +1,6 @@
 {
-  "name": "bigchallenger_app",
-  "short_name": "bigchallenger_app",
+  "name": "ai_video_app",
+  "short_name": "ai_video_app",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0175C2",

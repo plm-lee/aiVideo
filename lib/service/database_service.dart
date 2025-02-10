@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:bigchallenger/models/user_config.dart';
-import 'package:bigchallenger/models/generated_video.dart';
-import 'package:bigchallenger/models/user.dart';
-import 'package:bigchallenger/models/purchase_record.dart';
+import 'package:ai_video/models/user_config.dart';
+import 'package:ai_video/models/generated_video.dart';
+import 'package:ai_video/models/user.dart';
+import 'package:ai_video/models/purchase_record.dart';
 
 class DatabaseService {
   static final int _dbVersion = 3;
@@ -21,7 +21,7 @@ class DatabaseService {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'bigchallenger.db');
+    String path = join(await getDatabasesPath(), 'ai_video.db');
     return await openDatabase(
       path,
       version: _dbVersion,
@@ -299,7 +299,7 @@ class DatabaseService {
   }
 
   Future<void> deleteDatabase() async {
-    final path = join(await getDatabasesPath(), 'bigchallenger.db');
+    final path = join(await getDatabasesPath(), 'ai_video.db');
     await databaseFactory.deleteDatabase(path);
     _database = null;
   }

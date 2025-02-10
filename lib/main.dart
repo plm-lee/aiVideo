@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:bigchallenger/page/ai_video.dart';
-import 'package:bigchallenger/page/login_page.dart';
-import 'package:bigchallenger/page/register_page.dart';
-import 'package:bigchallenger/page/setting_page.dart';
-import 'package:bigchallenger/page/buy_credits_page.dart';
-import 'package:bigchallenger/page/img_to_video_page.dart';
-import 'package:bigchallenger/page/text_to_video_page.dart';
+import 'package:ai_video/page/ai_video.dart';
+import 'package:ai_video/page/login_page.dart';
+import 'package:ai_video/page/register_page.dart';
+import 'package:ai_video/page/setting_page.dart';
+import 'package:ai_video/page/buy_credits_page.dart';
+import 'package:ai_video/page/img_to_video_page.dart';
+import 'package:ai_video/page/text_to_video_page.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchallenger/constants/theme.dart';
-import 'package:bigchallenger/providers/theme_provider.dart';
-import 'package:bigchallenger/page/video_history_page.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/service/auth_service.dart';
-import 'package:bigchallenger/service/credits_service.dart';
-import 'package:bigchallenger/page/histories_page.dart';
-import 'package:bigchallenger/models/user_config.dart';
-import 'package:bigchallenger/page/purchase_history_page.dart';
-import 'package:bigchallenger/service/locale_service.dart';
+import 'package:ai_video/constants/theme.dart';
+import 'package:ai_video/providers/theme_provider.dart';
+import 'package:ai_video/page/video_history_page.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/service/auth_service.dart';
+import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/page/histories_page.dart';
+import 'package:ai_video/models/user_config.dart';
+import 'package:ai_video/page/purchase_history_page.dart';
+import 'package:ai_video/service/locale_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,7 +122,7 @@ class MyApp extends StatelessWidget {
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'BigChallenger',
+          title: 'ai_video',
           theme: AppTheme.getLightTheme(),
           darkTheme: AppTheme.getDarkTheme(),
           themeMode: themeProvider.themeMode,

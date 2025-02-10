@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:bigchallenger/constants/theme.dart';
-import 'package:bigchallenger/models/purchase_record.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/l10n/app_en.dart';
-import 'package:bigchallenger/l10n/app_zh.dart';
+import 'package:ai_video/constants/theme.dart';
+import 'package:ai_video/models/purchase_record.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/l10n/app_en.dart';
+import 'package:ai_video/l10n/app_zh.dart';
 import 'package:provider/provider.dart';
-import 'package:bigchallenger/service/locale_service.dart';
+import 'package:ai_video/service/locale_service.dart';
 
 class PurchaseHistoryPage extends StatelessWidget {
   const PurchaseHistoryPage({super.key});

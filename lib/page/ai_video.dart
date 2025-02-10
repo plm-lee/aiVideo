@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:bigchallenger/page/drawer.dart';
-import 'package:bigchallenger/constants/theme.dart';
-import 'package:bigchallenger/service/credits_service.dart';
+import 'package:ai_video/page/drawer.dart';
+import 'package:ai_video/constants/theme.dart';
+import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
 
 class AIVideo extends StatefulWidget {

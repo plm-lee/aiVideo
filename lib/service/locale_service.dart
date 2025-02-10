@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/models/user_config.dart';
-import 'package:bigchallenger/l10n/app_en.dart';
-import 'package:bigchallenger/l10n/app_zh.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/models/user_config.dart';
+import 'package:ai_video/l10n/app_en.dart';
+import 'package:ai_video/l10n/app_zh.dart';
 
 class LocaleService extends ChangeNotifier {
   static final LocaleService _instance = LocaleService._internal();

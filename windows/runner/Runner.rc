@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "bigchallenger_app" "\0"
+            VALUE "CompanyName", "com.bigchallenger" "\0"
+            VALUE "FileDescription", "ai_video_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bigchallenger_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "bigchallenger_app.exe" "\0"
-            VALUE "ProductName", "bigchallenger_app" "\0"
+            VALUE "InternalName", "ai_video_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.bigchallenger. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ai_video_app.exe" "\0"
+            VALUE "ProductName", "ai_video_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bigchallenger/service/credits_service.dart';
-import 'package:bigchallenger/service/database_service.dart';
-import 'package:bigchallenger/models/user_config.dart';
-import 'package:bigchallenger/models/user.dart';
+import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/models/user_config.dart';
+import 'package:ai_video/models/user.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
