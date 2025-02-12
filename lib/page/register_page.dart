@@ -19,6 +19,29 @@ class _RegisterPageState extends State<RegisterPage> {
   int _countDown = 60;
   bool _isCountingDown = false;
 
+  // 添加输入监听
+  bool _isFormValid = false;
+  String? _emailError;
+  String? _verificationCodeError;
+  String? _passwordError;
+  String? _confirmPasswordError;
+
+  // 添加邮箱验证正则表达式
+  final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+  // 添加邮箱有效性状态
+  bool get _isEmailValid => _emailRegex.hasMatch(_emailController.text);
+
+  @override
+  void initState() {
+    super.initState();
+    // 添加输入监听
+    _emailController.addListener(_validateForm);
+    _verificationCodeController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+    _confirmPasswordController.addListener(_validateForm);
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -26,6 +49,55 @@ class _RegisterPageState extends State<RegisterPage> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // 表单验证
+  void _validateForm() {
+    setState(() {
+      // 验证邮箱
+      if (_emailController.text.isEmpty) {
+        _emailError = 'Email is required';
+      } else if (!_emailRegex.hasMatch(_emailController.text)) {
+        _emailError = 'Please enter a valid email';
+      } else {
+        _emailError = null;
+      }
+
+      // 验证验证码
+      if (_verificationCodeController.text.isEmpty) {
+        _verificationCodeError = 'Verification code is required';
+      } else if (_verificationCodeController.text.length != 6) {
+        _verificationCodeError = 'Code must be 6 digits';
+      } else {
+        _verificationCodeError = null;
+      }
+
+      // 验证密码
+      if (_passwordController.text.isEmpty) {
+        _passwordError = 'Password is required';
+      } else {
+        _passwordError = null;
+      }
+
+      // 验证确认密码
+      if (_confirmPasswordController.text.isEmpty) {
+        _confirmPasswordError = 'Please confirm your password';
+      } else if (_confirmPasswordController.text != _passwordController.text) {
+        _confirmPasswordError = 'Passwords do not match';
+      } else {
+        _confirmPasswordError = null;
+      }
+
+      // 检查所有字段是否有效
+      _isFormValid = _emailError == null &&
+          _verificationCodeError == null &&
+          _passwordError == null &&
+          _confirmPasswordError == null &&
+          _emailController.text.isNotEmpty &&
+          _verificationCodeController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty &&
+          _confirmPasswordController.text.isNotEmpty;
+    });
   }
 
   void _handleRegister() {
@@ -60,6 +132,20 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _sendVerificationCode() {
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _emailError = 'Email is required';
+      });
+      return;
+    }
+
+    if (!_emailRegex.hasMatch(_emailController.text)) {
+      setState(() {
+        _emailError = 'Please enter a valid email';
+      });
+      return;
+    }
+
     // TODO: 实现发送验证码逻辑
     debugPrint('Send verification code to: ${_emailController.text}');
     _startCountDown();
@@ -112,8 +198,24 @@ class _RegisterPageState extends State<RegisterPage> {
                   fillColor: const Color(0xFF1E1E1E),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: _emailError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _emailError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _emailError != null
+                        ? const BorderSide(color: Colors.red, width: 2)
+                        : const BorderSide(color: Color(0xFFFF69B4), width: 2),
+                  ),
+                  errorText: _emailError,
+                  errorStyle: const TextStyle(color: Colors.red),
                 ),
               ),
               const SizedBox(height: 16),
@@ -139,6 +241,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderSide: BorderSide.none,
                         ),
                         counterText: '',
+                        errorText: _verificationCodeError,
+                        errorStyle: const TextStyle(color: Colors.red),
                       ),
                     ),
                   ),
@@ -147,7 +251,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: 100,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _isCountingDown ? null : _sendVerificationCode,
+                      onPressed: (_isCountingDown || !_isEmailValid)
+                          ? null
+                          : _sendVerificationCode,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF69B4),
                         padding: EdgeInsets.zero,
@@ -198,6 +304,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
+                  errorText: _passwordError,
+                  errorStyle: const TextStyle(color: Colors.red),
                 ),
               ),
               const SizedBox(height: 16),
@@ -229,6 +337,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
+                  errorText: _confirmPasswordError,
+                  errorStyle: const TextStyle(color: Colors.red),
                 ),
               ),
               const SizedBox(height: 32),
@@ -237,12 +347,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _handleRegister,
+                  onPressed: _isFormValid ? _handleRegister : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF69B4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    disabledBackgroundColor: Colors.grey,
                   ),
                   child: const Text(
                     'Sign Up',
