@@ -3,6 +3,14 @@ import 'package:ai_video/models/user.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/api/auth_api.dart';
 
+// 添加一个注册结果类
+class RegisterResult {
+  final bool success;
+  final String? message;
+
+  RegisterResult(this.success, this.message);
+}
+
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -67,6 +75,40 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       debugPrint('发送验证码错误: $e');
       return false;
+    }
+  }
+
+  Future<RegisterResult> register({
+    required String email,
+    required String verificationCode,
+    required String password,
+  }) async {
+    try {
+      final response = await _authApi.register(
+        email: email,
+        verificationCode: verificationCode,
+        password: password,
+      );
+
+      if (response['response']['success'] == '1') {
+        // 注册成功后自动登录
+        final user = User(
+          email: email,
+          token: response['response']['token'] ?? 'dummy_token',
+          loginTime: DateTime.now(),
+        );
+
+        await _databaseService.saveUser(user);
+        _currentUser = user;
+        notifyListeners();
+
+        return RegisterResult(true, null);
+      } else {
+        return RegisterResult(false, response['response']['description']);
+      }
+    } catch (e) {
+      debugPrint('注册错误: $e');
+      return RegisterResult(false, '注册失败，请稍后重试');
     }
   }
 }

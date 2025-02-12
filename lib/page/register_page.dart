@@ -67,8 +67,6 @@ class _RegisterPageState extends State<RegisterPage> {
       // 验证验证码
       if (_verificationCodeController.text.isEmpty) {
         _verificationCodeError = 'Verification code is required';
-      } else if (_verificationCodeController.text.length != 6) {
-        _verificationCodeError = 'Code must be 6 digits';
       } else {
         _verificationCodeError = null;
       }
@@ -101,10 +99,35 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  void _handleRegister() {
-    // TODO: 实现注册逻辑
-    debugPrint('Register with: ${_emailController.text}');
-    context.go('/home');
+  void _handleRegister() async {
+    try {
+      final result = await AuthService().register(
+        email: _emailController.text,
+        verificationCode: _verificationCodeController.text,
+        password: _passwordController.text,
+      );
+
+      if (result.success) {
+        // 注册成功，跳转到首页
+        if (mounted) {
+          context.go('/home');
+        }
+      } else {
+        // 注册失败，显示错误信息
+        if (mounted) {
+          setState(() {
+            _emailError = result.message ?? 'Registration failed';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _emailError = 'Error during registration';
+        });
+      }
+      debugPrint('Register error: $e');
+    }
   }
 
   void _startCountDown() {
@@ -245,7 +268,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _verificationCodeController,
                       style: const TextStyle(color: Colors.white),
                       keyboardType: TextInputType.number,
-                      maxLength: 6,
+                      maxLength: 9,
                       decoration: InputDecoration(
                         hintText: 'Verification Code',
                         hintStyle: const TextStyle(color: Colors.grey),

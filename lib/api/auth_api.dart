@@ -20,9 +20,9 @@ class AuthApi {
     required String verificationCode,
     required String password,
   }) async {
-    return await _apiClient.post('/auth/register', {
+    return await _apiClient.post('/customer/register', {
       'email': email,
-      'verificationCode': verificationCode,
+      'code': verificationCode,
       'password': password,
     });
   }
