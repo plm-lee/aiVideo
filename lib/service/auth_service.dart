@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:ai_video/models/user.dart';
 import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/api/auth_api.dart';
 
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
@@ -9,6 +10,7 @@ class AuthService extends ChangeNotifier {
 
   User? _currentUser;
   final DatabaseService _databaseService = DatabaseService();
+  final AuthApi _authApi = AuthApi();
 
   User? get currentUser => _currentUser;
 
@@ -47,5 +49,24 @@ class AuthService extends ChangeNotifier {
     }
     _currentUser = null;
     notifyListeners();
+  }
+
+  Future<bool> sendVerificationCode(String email) async {
+    try {
+      final response = await _authApi.sendVerificationCode(email);
+
+      // {"response":{"success":"1","description":"success","errorcode":"0000"}}
+      // 检查响应状态
+      if (response['response']['success'] == '1') {
+        debugPrint('验证码发送成功: ${response['response']['description']}');
+        return true;
+      } else {
+        debugPrint('验证码发送失败: ${response['response']['description']}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('发送验证码错误: $e');
+      return false;
+    }
   }
 }

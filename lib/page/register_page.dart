@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_video/service/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -131,7 +132,7 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  void _sendVerificationCode() {
+  void _sendVerificationCode() async {
     if (_emailController.text.isEmpty) {
       setState(() {
         _emailError = 'Email is required';
@@ -146,9 +147,25 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // TODO: 实现发送验证码逻辑
-    debugPrint('Send verification code to: ${_emailController.text}');
-    _startCountDown();
+    try {
+      final result =
+          await AuthService().sendVerificationCode(_emailController.text);
+
+      if (result) {
+        // 发送成功，开始倒计时
+        _startCountDown();
+      } else {
+        // 发送失败，显示错误
+        setState(() {
+          _emailError = 'Failed to send verification code';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _emailError = 'Error sending verification code';
+      });
+      debugPrint('Send verification code error: $e');
+    }
   }
 
   @override
