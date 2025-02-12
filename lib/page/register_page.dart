@@ -238,7 +238,22 @@ class _RegisterPageState extends State<RegisterPage> {
                         fillColor: const Color(0xFF1E1E1E),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+                          borderSide: _verificationCodeError != null
+                              ? const BorderSide(color: Colors.red, width: 1)
+                              : BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: _verificationCodeError != null
+                              ? const BorderSide(color: Colors.red, width: 1)
+                              : BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: _verificationCodeError != null
+                              ? const BorderSide(color: Colors.red, width: 2)
+                              : const BorderSide(
+                                  color: Color(0xFFFF69B4), width: 2),
                         ),
                         counterText: '',
                         errorText: _verificationCodeError,
@@ -302,7 +317,21 @@ class _RegisterPageState extends State<RegisterPage> {
                   fillColor: const Color(0xFF1E1E1E),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: _passwordError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _passwordError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _passwordError != null
+                        ? const BorderSide(color: Colors.red, width: 2)
+                        : const BorderSide(color: Color(0xFFFF69B4), width: 2),
                   ),
                   errorText: _passwordError,
                   errorStyle: const TextStyle(color: Colors.red),
@@ -335,7 +364,21 @@ class _RegisterPageState extends State<RegisterPage> {
                   fillColor: const Color(0xFF1E1E1E),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: _confirmPasswordError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _confirmPasswordError != null
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: _confirmPasswordError != null
+                        ? const BorderSide(color: Colors.red, width: 2)
+                        : const BorderSide(color: Color(0xFFFF69B4), width: 2),
                   ),
                   errorText: _confirmPasswordError,
                   errorStyle: const TextStyle(color: Colors.red),
