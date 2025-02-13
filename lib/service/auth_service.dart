@@ -120,4 +120,21 @@ class AuthService extends ChangeNotifier {
       return (false, '登录失败，请稍后重试');
     }
   }
+
+  // 获取当前用户信息
+  Future<(bool success, String? message, User? user)> getCurrentUser() async {
+    try {
+      _currentUser ??= await _databaseService.getLastLoggedInUser();
+
+      if (_currentUser == null) {
+        return (false, '用户未登录', null);
+      }
+
+      debugPrint('当前用户: ${_currentUser!.email}');
+      return (true, null, _currentUser);
+    } catch (e) {
+      debugPrint('获取用户信息错误: $e');
+      return (false, '获取用户信息失败，请重新登录', null);
+    }
+  }
 }

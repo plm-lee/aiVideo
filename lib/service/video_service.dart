@@ -2,31 +2,21 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:ai_video/api/video_api.dart';
-import 'package:ai_video/models/generated_video.dart';
-import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/auth_service.dart';
 
 class VideoService extends ChangeNotifier {
-  final VideoApi _videoApi;
-  final DatabaseService _databaseService;
-  final AuthService _authService;
-
-  VideoService({
-    required VideoApi videoApi,
-    required DatabaseService databaseService,
-    required AuthService authService,
-  })  : _videoApi = videoApi,
-        _databaseService = databaseService,
-        _authService = authService;
+  final VideoApi _videoApi = VideoApi();
+  final AuthService _authService = AuthService();
 
   Future<(bool, String)> imageToVideo({
     required File imageFile,
     required String prompt,
   }) async {
     try {
-      final currentUser = _authService.currentUser;
-      if (currentUser == null || currentUser.uuid == null) {
-        return (false, '用户未登录或uuid为空');
+      // 获取当前用户信息
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        return (false, message ?? '用户未登录');
       }
 
       final List<int> imageBytes = await imageFile.readAsBytes();
@@ -36,7 +26,7 @@ class VideoService extends ChangeNotifier {
         image: base64Image,
         prompt: prompt,
         model: 'video_model',
-        uuid: currentUser.uuid,
+        uuid: user.uuid,
       );
 
       if (response != null) {
