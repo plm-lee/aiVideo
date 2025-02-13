@@ -14,6 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -24,6 +25,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = '邮箱和密码不能为空';
+      });
       return;
     }
 
@@ -34,6 +38,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (isSuccess && mounted) {
       context.go('/home');
+    } else {
+      setState(() {
+        _errorMessage = errorMessage ?? '登录失败，请稍后重试';
+      });
     }
   }
 
@@ -117,6 +125,17 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
