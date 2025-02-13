@@ -6,7 +6,7 @@ import 'package:ai_video/models/user.dart';
 import 'package:ai_video/models/purchase_record.dart';
 
 class DatabaseService {
-  static final int _dbVersion = 3;
+  static final int _dbVersion = 5;
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -71,6 +71,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL,
         token TEXT NOT NULL,
+        uuid TEXT,
         loginTime TEXT NOT NULL
       )
     ''');
@@ -163,6 +164,10 @@ class DatabaseService {
 
       await db.execute('DROP TABLE generated_videos_backup');
       await db.execute('DROP TABLE user_configs_backup');
+    }
+
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE users ADD COLUMN uuid TEXT');
     }
   }
 

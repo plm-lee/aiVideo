@@ -1,7 +1,7 @@
 import 'package:ai_video/api/api_client.dart';
 
 class AuthApi {
-  static const String baseUrl = 'https://chat.bigchallenger.com/api';
+  static const String baseUrl = 'https://chat.bigchallenger.com';
   final ApiClient _apiClient;
 
   AuthApi({ApiClient? apiClient})
@@ -9,7 +9,7 @@ class AuthApi {
 
   // 发送验证码
   Future<Map<String, dynamic>> sendVerificationCode(String email) async {
-    return await _apiClient.post('/customer/rigister_code', {
+    return await _apiClient.post('/api/customer/rigister_code', {
       'email': email,
     });
   }
@@ -20,7 +20,7 @@ class AuthApi {
     required String verificationCode,
     required String password,
   }) async {
-    return await _apiClient.post('/customer/register', {
+    return await _apiClient.post('/api/customer/register', {
       'email': email,
       'code': verificationCode,
       'password': password,
@@ -32,7 +32,7 @@ class AuthApi {
     required String email,
     required String password,
   }) async {
-    return await _apiClient.post('/auth/login', {
+    return await _apiClient.post('/sessions/app_login', {
       'email': email,
       'password': password,
     });

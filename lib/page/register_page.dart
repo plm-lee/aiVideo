@@ -108,9 +108,9 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (result.success) {
-        // 注册成功，跳转到首页
+        // 注册成功，跳转登录页面
         if (mounted) {
-          context.go('/home');
+          context.go('/login');
         }
       } else {
         // 注册失败，显示错误信息

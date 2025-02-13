@@ -27,12 +27,12 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final success = await AuthService().login(
+    final (isSuccess, errorMessage) = await AuthService().login(
       _emailController.text,
       _passwordController.text,
     );
 
-    if (success && mounted) {
+    if (isSuccess && mounted) {
       context.go('/home');
     }
   }

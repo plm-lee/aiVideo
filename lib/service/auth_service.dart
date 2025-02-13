@@ -8,7 +8,7 @@ class RegisterResult {
   final bool success;
   final String? message;
 
-  RegisterResult(this.success, this.message);
+  const RegisterResult(this.success, this.message);
 }
 
 class AuthService extends ChangeNotifier {
@@ -23,53 +23,40 @@ class AuthService extends ChangeNotifier {
   User? get currentUser => _currentUser;
 
   Future<void> checkAuth() async {
-    _currentUser = await _databaseService.getLastLoggedInUser();
-    if (_currentUser != null) {
-      debugPrint('加载用户: ${_currentUser!.email}');
-    }
-    notifyListeners();
-  }
-
-  Future<bool> login(String email, String password) async {
     try {
-      // TODO: 实现实际的登录API调用
-      // 模拟登录成功
-      final user = User(
-        email: email,
-        token: 'dummy_token_${DateTime.now().millisecondsSinceEpoch}',
-        loginTime: DateTime.now(),
-      );
-
-      await _databaseService.saveUser(user);
-      _currentUser = user;
+      _currentUser = await _databaseService.getLastLoggedInUser();
+      if (_currentUser != null) {
+        debugPrint('加载用户: ${_currentUser!.email}');
+      }
       notifyListeners();
-      return true;
     } catch (e) {
-      debugPrint('Login error: $e');
-      return false;
+      debugPrint('检查认证状态错误: $e');
     }
   }
 
   Future<void> logout() async {
-    if (_currentUser?.id != null) {
-      await _databaseService.clearUserData(_currentUser!.id!);
-      await _databaseService.clearUserConfigs();
+    try {
+      if (_currentUser?.id != null) {
+        await _databaseService.clearUserData(_currentUser!.id!);
+        await _databaseService.clearUserConfigs();
+      }
+      _currentUser = null;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('登出错误: $e');
     }
-    _currentUser = null;
-    notifyListeners();
   }
 
   Future<bool> sendVerificationCode(String email) async {
     try {
       final response = await _authApi.sendVerificationCode(email);
+      final responseData = response['response'];
 
-      // {"response":{"success":"1","description":"success","errorcode":"0000"}}
-      // 检查响应状态
-      if (response['response']['success'] == '1') {
-        debugPrint('验证码发送成功: ${response['response']['description']}');
+      if (responseData['success'] == '1') {
+        debugPrint('验证码发送成功: ${responseData['description']}');
         return true;
       } else {
-        debugPrint('验证码发送失败: ${response['response']['description']}');
+        debugPrint('验证码发送失败: ${responseData['description']}');
         return false;
       }
     } catch (e) {
@@ -89,26 +76,48 @@ class AuthService extends ChangeNotifier {
         verificationCode: verificationCode,
         password: password,
       );
+      final responseData = response['response'];
 
-      if (response['response']['success'] == '1') {
-        // 注册成功后自动登录
+      if (responseData['success'] == '1') {
+        return const RegisterResult(true, null);
+      } else {
+        return RegisterResult(false, responseData['description']);
+      }
+    } catch (e) {
+      debugPrint('注册错误: $e');
+      return const RegisterResult(false, '注册失败，请稍后重试');
+    }
+  }
+
+  Future<(bool success, String? message)> login(
+      String email, String password) async {
+    try {
+      final response = await _authApi.login(
+        email: email,
+        password: password,
+      );
+      final responseData = response['response'];
+
+      if (responseData['success'] == '1') {
+        final uuid = responseData['uuid'];
         final user = User(
           email: email,
-          token: response['response']['token'] ?? 'dummy_token',
+          token: responseData['token'] ?? '',
+          uuid: uuid ?? '',
           loginTime: DateTime.now(),
         );
 
         await _databaseService.saveUser(user);
         _currentUser = user;
         notifyListeners();
-
-        return RegisterResult(true, null);
+        return (true, null);
       } else {
-        return RegisterResult(false, response['response']['description']);
+        debugPrint('登录失败: ${responseData['description']}');
+        return (false, responseData['description']?.toString());
       }
     } catch (e) {
-      debugPrint('注册错误: $e');
-      return RegisterResult(false, '注册失败，请稍后重试');
+      debugPrint('登录错误: $e');
+      return (false, '登录失败，请稍后重试');
     }
   }
 }
