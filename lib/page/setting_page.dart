@@ -78,47 +78,53 @@ class SettingPage extends StatelessWidget {
 
             // 推荐好友部分
             _buildSection('Refer friends'),
-            _buildMenuItem(
-              icon: Icons.card_giftcard,
-              title: 'Get Coins for Free',
-              onTap: () {},
-            ),
+            _buildSectionContainer([
+              _buildMenuItem(
+                icon: Icons.card_giftcard,
+                title: 'Get Coins for Free',
+                onTap: () {},
+              ),
+            ]),
 
             // 权限部分
             _buildSection('Permissions'),
-            _buildMenuItem(
-              icon: Icons.photo_library,
-              title: 'Photo Permissions',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              icon: Icons.notifications,
-              title: 'Notification Permissions',
-              onTap: () {},
-            ),
+            _buildSectionContainer([
+              _buildMenuItem(
+                icon: Icons.photo_library,
+                title: 'Photo Permissions',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.notifications,
+                title: 'Notification Permissions',
+                onTap: () {},
+              ),
+            ]),
 
             // 帮助部分
             _buildSection('Help'),
-            _buildMenuItem(
-              icon: Icons.monetization_on,
-              title: 'Coins Details',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              icon: Icons.restore,
-              title: 'Restore Purchase',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              icon: Icons.star_border,
-              title: 'Rate Us',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              icon: Icons.share,
-              title: 'Share VideoMax',
-              onTap: () {},
-            ),
+            _buildSectionContainer([
+              _buildMenuItem(
+                icon: Icons.monetization_on,
+                title: 'Coins Details',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.restore,
+                title: 'Restore Purchase',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.star_border,
+                title: 'Rate Us',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.share,
+                title: 'Share VideoMax',
+                onTap: () {},
+              ),
+            ]),
 
             const SizedBox(height: 32),
           ],
@@ -138,6 +144,17 @@ class SettingPage extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionContainer(List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(children: children),
     );
   }
 
