@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/service/video_service.dart';
 
 class ImgToVideoPage extends StatefulWidget {
   const ImgToVideoPage({super.key});
@@ -194,6 +195,8 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildBottomButton() {
+    final bool canGenerate = _selectedImage != null;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -224,21 +227,46 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
               ),
             ],
           ),
-          TextButton(
-            onPressed: _selectedImage != null ? _generateVideo : null,
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: canGenerate
+                  ? const LinearGradient(
+                      colors: [Colors.white, Color(0xFFF0F0F0)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: canGenerate ? null : Colors.grey[400],
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: canGenerate
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
-            child: const Text(
-              'Generate',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: canGenerate ? _generateVideo : null,
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  child: Text(
+                    'Generate',
+                    style: TextStyle(
+                      color: canGenerate ? Colors.black : Colors.black38,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -261,18 +289,57 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Future<void> _generateVideo() async {
-    if (_selectedImage == null) return;
+    try {
+      // 显示加载对话框
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ),
+      );
 
-    final video = GeneratedVideo(
-      title: 'Generated Video ${DateTime.now()}',
-      filePath: '/path/to/video.mp4', // 替换为实际路径
-      style: 'default',
-      prompt: _promptController.text,
-      createdAt: DateTime.now(),
-      type: 'image',
-      originalImagePath: _selectedImage!.path,
+      final videoService = VideoService();
+      final (success, message) = await videoService.imageToVideo(
+        imageFile: _selectedImage!,
+        prompt: _promptController.text.trim(),
+      );
+
+      // 关闭加载对话框
+      if (mounted) Navigator.of(context).pop();
+
+      if (success) {
+        _showSuccessMessage(message);
+      } else {
+        _showErrorMessage(message);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showErrorMessage('生成视频时发生错误：$e');
+      }
+    }
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
+  }
 
-    await DatabaseService().saveGeneratedVideo(video);
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }
