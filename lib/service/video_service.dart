@@ -40,4 +40,34 @@ class VideoService extends ChangeNotifier {
       return (false, '视频生成失败：$e');
     }
   }
+
+  Future<(bool, String)> textToVideo({
+    required String prompt,
+    required int duration,
+  }) async {
+    try {
+      // 获取当前用户信息
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        return (false, message ?? '用户未登录');
+      }
+
+      final response = await _videoApi.addVideoTask(
+        image: '', // 文本转视频不需要图片
+        prompt: prompt,
+        model: 'TextMax-A', // 使用文本转视频模型
+        uuid: user.uuid,
+      );
+
+      if (response != null) {
+        return (true, '视频任务创建成功');
+      }
+
+      // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
+
+      return (false, '视频任务创建失败：服务器响应为空');
+    } catch (e) {
+      return (false, '视频生成失败：$e');
+    }
+  }
 }

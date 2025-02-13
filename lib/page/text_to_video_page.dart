@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/generated_video.dart';
+import 'package:ai_video/service/video_service.dart';
 
 class TextToVideoPage extends StatefulWidget {
   const TextToVideoPage({super.key});
@@ -14,330 +15,259 @@ class TextToVideoPage extends StatefulWidget {
 }
 
 class _TextToVideoPageState extends State<TextToVideoPage> {
-  bool _isProMode = false;
-  final TextEditingController _promptController = TextEditingController();
-  String _selectedStyle = 'Realistic';
-  bool _canGenerate = false;
-
-  final List<String> _styles = [
-    'Realistic',
-    'Anime',
-    'Cartoon',
-    '3D Animation',
-    'Cinematic',
-  ];
+  final _promptController = TextEditingController();
+  int _selectedLength = 5; // 默认5秒
 
   @override
-  void initState() {
-    super.initState();
-    _promptController.addListener(_updateGenerateButtonState);
-  }
-
-  @override
-  void dispose() {
-    _promptController.removeListener(_updateGenerateButtonState);
-    _promptController.dispose();
-    super.dispose();
-  }
-
-  void _updateGenerateButtonState() {
-    final canGenerate = _promptController.text.trim().isNotEmpty;
-    if (canGenerate != _canGenerate) {
-      setState(() {
-        _canGenerate = canGenerate;
-      });
-    }
-  }
-
-  Widget _buildStyleSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.all(AppTheme.spacing),
-      decoration: AppTheme.getCardDecoration(isDark),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppTheme.spacing),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? AppTheme.darkSecondaryTextColor
-                      : AppTheme.lightSecondaryTextColor,
-                  width: 0.2,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.wand_stars,
-                  color: AppTheme.primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: AppTheme.smallSpacing),
-                Text(
-                  'Style',
-                  style: AppTheme.getTitleStyle(isDark),
-                ),
-                const Spacer(),
-                Text(
-                  _selectedStyle,
-                  style: AppTheme.getSubtitleStyle(isDark),
-                ),
-                Icon(
-                  CupertinoIcons.chevron_right,
-                  color: isDark
-                      ? AppTheme.darkSecondaryTextColor
-                      : AppTheme.lightSecondaryTextColor,
-                  size: 16,
-                ),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
-          Container(
-            height: 100,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _styles.length,
-              itemBuilder: (context, index) {
-                final style = _styles[index];
-                final isSelected = style == _selectedStyle;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedStyle = style),
-                  child: Container(
-                    width: 80,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppTheme.primaryColor
-                          : (isDark ? Colors.black : Colors.white),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppTheme.primaryColor
-                            : isDark
-                                ? AppTheme.darkSecondaryTextColor
-                                    .withOpacity(0.3)
-                                : AppTheme.lightSecondaryTextColor
-                                    .withOpacity(0.3),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        style,
+          title: const Text(
+            'Text to Video',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Describe the video',
                         style: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : (isDark
-                                  ? AppTheme.darkTextColor
-                                  : AppTheme.lightTextColor),
-                          fontSize: 12,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPromptSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.all(AppTheme.spacing),
-      decoration: AppTheme.getCardDecoration(isDark),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppTheme.spacing),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? AppTheme.darkSecondaryTextColor
-                      : AppTheme.lightSecondaryTextColor,
-                  width: 0.2,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.lightbulb,
-                  color: AppTheme.primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Your Ideas',
-                  style: AppTheme.getTitleStyle(isDark),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    _promptController.text =
-                        'A romantic couple walking on beach';
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.arrow_2_circlepath,
-                        color: isDark
-                            ? AppTheme.darkSecondaryTextColor
-                            : AppTheme.lightSecondaryTextColor,
-                        size: 14,
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E1E1E),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextField(
+                          controller: _promptController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          maxLines: 4,
+                          maxLength: 1000,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Eg. A white little fox in the forest',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                            prefixIcon: Padding(
+                              padding: EdgeInsets.only(bottom: 60),
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Random',
-                        style: AppTheme.getSubtitleStyle(isDark),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Video Length',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          _buildLengthOption(5),
+                          const SizedBox(width: 16),
+                          _buildLengthOption(10),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
+            _buildBottomButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLengthOption(int seconds) {
+    final isSelected = _selectedLength == seconds;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedLength = seconds),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          '${seconds}s',
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomButton() {
+    final bool canGenerate = _promptController.text.trim().isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFFF6B6B), Color(0xFFFF8E8E)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
+              SizedBox(width: 8),
+              Text(
+                '150 Coins',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           Container(
-            padding: const EdgeInsets.all(AppTheme.spacing),
-            child: TextField(
-              controller: _promptController,
-              maxLines: 4,
-              style: AppTheme.getTitleStyle(isDark),
-              decoration: InputDecoration(
-                hintText:
-                    'Keywords of the scene you imagine, separated by commas',
-                hintStyle: AppTheme.getSubtitleStyle(isDark),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? AppTheme.darkSecondaryTextColor.withOpacity(0.3)
-                        : AppTheme.lightSecondaryTextColor.withOpacity(0.3),
+            decoration: BoxDecoration(
+              gradient: canGenerate
+                  ? const LinearGradient(
+                      colors: [Colors.white, Color(0xFFF0F0F0)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: canGenerate ? null : Colors.grey[400],
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: canGenerate
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: canGenerate ? _generateVideo : null,
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
                   ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? AppTheme.darkSecondaryTextColor.withOpacity(0.3)
-                        : AppTheme.lightSecondaryTextColor.withOpacity(0.3),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: AppTheme.primaryColor,
+                  child: Text(
+                    'Generate',
+                    style: TextStyle(
+                      color: canGenerate ? Colors.black : Colors.black38,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.spacing),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? AppTheme.darkSecondaryTextColor
-                : AppTheme.lightSecondaryTextColor,
-            width: 0.2,
-          ),
-        ),
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _canGenerate ? _generateVideo : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryColor,
-            disabledBackgroundColor: isDark
-                ? AppTheme.darkSecondaryTextColor
-                : AppTheme.lightSecondaryTextColor,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
-            ),
-          ),
-          child: Text(
-            'Generate',
-            style: TextStyle(
-              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
       ),
     );
   }
 
   Future<void> _generateVideo() async {
-    // TODO: 实现生成视频逻辑
-    final video = GeneratedVideo(
-      title: 'Generated Video ${DateTime.now()}',
-      filePath: '/path/to/video.mp4', // 替换为实际路径
-      style: _selectedStyle,
-      prompt: _promptController.text,
-      createdAt: DateTime.now(),
-      type: 'text',
-    );
+    try {
+      // 显示加载对话框
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ),
+      );
 
-    await DatabaseService().saveGeneratedVideo(video);
+      final videoService = VideoService();
+      final (success, message) = await videoService.textToVideo(
+        prompt: _promptController.text.trim(),
+        duration: _selectedLength,
+      );
+
+      // 关闭加载对话框
+      if (mounted) Navigator.of(context).pop();
+
+      if (success) {
+        _showSuccessMessage(message);
+      } else {
+        _showErrorMessage(message);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showErrorMessage('生成视频时发生错误：$e');
+      }
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: isDark
-            ? AppTheme.darkBackgroundColor
-            : AppTheme.lightBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios,
-              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Text → Video',
-          style: AppTheme.getTitleStyle(isDark),
-        ),
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildStyleSection(),
-                  _buildPromptSection(),
-                ],
-              ),
-            ),
-          ),
-          _buildBottomSection(),
-        ],
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
