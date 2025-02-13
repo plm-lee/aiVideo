@@ -218,14 +218,12 @@ class _AIVideoState extends State<AIVideo> {
             ? AppTheme.darkBackgroundColor
             : AppTheme.lightBackgroundColor,
         elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
-            ),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+        leading: IconButton(
+          icon: Icon(
+            Icons.settings,
+            color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
           ),
+          onPressed: () => context.push('/settings'),
         ),
         actions: [
           Container(
