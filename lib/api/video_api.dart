@@ -32,11 +32,11 @@ class VideoApi {
     int pageSize = 10,
   }) async {
     return await _apiClient.post(
-      '/api/ai_video/user_tasks',
+      '/api/ai_video/all_tasks',
       {
         'uuid': uuid,
-        'page': page,
-        'page_size': pageSize,
+        // 'page': page,
+        // 'page_size': pageSize,
       },
     );
   }

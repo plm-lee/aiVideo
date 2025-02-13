@@ -4,6 +4,7 @@ import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/models/user.dart';
 import 'package:ai_video/models/purchase_record.dart';
+import 'package:ai_video/models/video_task.dart';
 
 class DatabaseService {
   static final int _dbVersion = 5;
@@ -325,5 +326,24 @@ class DatabaseService {
       record.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<void> saveVideoTasks(List<VideoTask> tasks) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (var task in tasks) {
+        await txn.insert(
+          'video_tasks',
+          {
+            'business_id': task.businessId,
+            'created_at': task.createdAt.toIso8601String(),
+            'state': task.state,
+            'prompt': task.prompt,
+            'origin_img': task.originImg,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
   }
 }
