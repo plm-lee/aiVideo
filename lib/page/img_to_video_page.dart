@@ -202,6 +202,10 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
