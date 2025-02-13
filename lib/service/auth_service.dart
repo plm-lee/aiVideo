@@ -97,9 +97,9 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
       final responseData = response['response'];
+      final uuid = response['uuid'];
 
       if (responseData['success'] == '1') {
-        final uuid = responseData['uuid'];
         final user = User(
           email: email,
           token: responseData['token'] ?? '',
@@ -110,6 +110,8 @@ class AuthService extends ChangeNotifier {
         await _databaseService.saveUser(user);
         _currentUser = user;
         notifyListeners();
+        // log 登录用户uuid
+        debugPrint('登录用户uuid: ${user.uuid}');
         return (true, null);
       } else {
         debugPrint('登录失败: ${responseData['description']}');
