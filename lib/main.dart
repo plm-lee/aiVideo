@@ -18,6 +18,7 @@ import 'package:ai_video/page/histories_page.dart';
 import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/page/purchase_history_page.dart';
 import 'package:ai_video/service/locale_service.dart';
+import 'package:ai_video/page/mine_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,7 +81,9 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const AIVideo(),
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: const AIVideo(),
+      ),
     ),
     GoRoute(
       path: '/settings',
@@ -109,6 +112,12 @@ final _router = GoRouter(
     GoRoute(
       path: '/purchase-history',
       builder: (context, state) => const PurchaseHistoryPage(),
+    ),
+    GoRoute(
+      path: '/mine',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: const MinePage(),
+      ),
     ),
   ],
 );

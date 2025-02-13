@@ -5,6 +5,7 @@ import 'package:ai_video/page/drawer.dart';
 import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
+import 'package:ai_video/widgets/bottom_nav_bar.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -210,8 +211,7 @@ class _AIVideoState extends State<AIVideo> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
+      backgroundColor: Colors.black,
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: isDark
@@ -292,6 +292,7 @@ class _AIVideoState extends State<AIVideo> {
           ],
         ),
       ),
+      bottomNavigationBar: const BottomNavBar(currentPath: '/home'),
     );
   }
 }
