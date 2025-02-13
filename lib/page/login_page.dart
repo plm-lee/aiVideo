@@ -32,16 +32,22 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final (isSuccess, errorMessage) = await AuthService().login(
-      _emailController.text,
-      _passwordController.text,
-    );
+    try {
+      final (isSuccess, errorMessage) = await AuthService().login(
+        _emailController.text,
+        _passwordController.text,
+      );
 
-    if (isSuccess && mounted) {
-      context.go('/home');
-    } else {
+      if (isSuccess && mounted) {
+        context.go('/home');
+      } else {
+        setState(() {
+          _errorMessage = errorMessage ?? '登录失败，请稍后重试';
+        });
+      }
+    } catch (e) {
       setState(() {
-        _errorMessage = errorMessage ?? '登录失败，请稍后重试';
+        _errorMessage = '登录失败: $e';
       });
     }
   }
@@ -143,6 +149,18 @@ class _LoginPageState extends State<LoginPage> {
                       isPassword: true,
                     ),
                     const SizedBox(height: 16),
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Color(0xFFFF4444),
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
                     TextButton(
                       onPressed: () {
                         // TODO: 实现忘记密码功能
