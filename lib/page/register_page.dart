@@ -21,12 +21,10 @@ class _RegisterPageState extends State<RegisterPage> {
   int _countDown = 60;
   bool _isCountingDown = false;
 
-  // 添加输入监听
-  bool _isFormValid = false;
+  // 移除实时验证相关变量
   String? _emailError;
   String? _verificationCodeError;
   String? _passwordError;
-  String? _confirmPasswordError;
 
   // 添加邮箱验证正则表达式
   final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
@@ -37,11 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    // 添加输入监听
-    _emailController.addListener(_validateForm);
-    _verificationCodeController.addListener(_validateForm);
-    _passwordController.addListener(_validateForm);
-    _confirmPasswordController.addListener(_validateForm);
+    // 移除输入监听
   }
 
   @override
@@ -53,43 +47,12 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // 表单验证
-  void _validateForm() {
-    setState(() {
-      // 验证邮箱
-      if (_emailController.text.isEmpty) {
-        _emailError = 'Email is required';
-      } else if (!_emailRegex.hasMatch(_emailController.text)) {
-        _emailError = 'Please enter a valid email';
-      } else {
-        _emailError = null;
-      }
-
-      // 验证验证码
-      if (_verificationCodeController.text.isEmpty) {
-        _verificationCodeError = 'Verification code is required';
-      } else {
-        _verificationCodeError = null;
-      }
-
-      // 验证密码
-      if (_passwordController.text.isEmpty) {
-        _passwordError = 'Password is required';
-      } else {
-        _passwordError = null;
-      }
-
-      // 检查所有字段是否有效
-      _isFormValid = _emailError == null &&
-          _verificationCodeError == null &&
-          _passwordError == null &&
-          _emailController.text.isNotEmpty &&
-          _verificationCodeController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty;
-    });
-  }
-
   void _handleRegister() async {
+    // 点击时进行验证
+    if (!_validateForm()) {
+      return;
+    }
+
     try {
       final result = await AuthService().register(
         email: _emailController.text,
@@ -98,12 +61,10 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (result.success) {
-        // 注册成功，跳转登录页面
         if (mounted) {
           context.go('/login');
         }
       } else {
-        // 注册失败，显示错误信息
         if (mounted) {
           setState(() {
             _emailError = result.message ?? 'Registration failed';
@@ -118,6 +79,39 @@ class _RegisterPageState extends State<RegisterPage> {
       }
       debugPrint('Register error: $e');
     }
+  }
+
+  bool _validateForm() {
+    bool isValid = true;
+    setState(() {
+      // 验证邮箱
+      if (_emailController.text.isEmpty) {
+        _emailError = 'Email is required';
+        isValid = false;
+      } else if (!_emailRegex.hasMatch(_emailController.text)) {
+        _emailError = 'Please enter a valid email';
+        isValid = false;
+      } else {
+        _emailError = null;
+      }
+
+      // 验证验证码
+      if (_verificationCodeController.text.isEmpty) {
+        _verificationCodeError = 'Verification code is required';
+        isValid = false;
+      } else {
+        _verificationCodeError = null;
+      }
+
+      // 验证密码
+      if (_passwordController.text.isEmpty) {
+        _passwordError = 'Password is required';
+        isValid = false;
+      } else {
+        _passwordError = null;
+      }
+    });
+    return isValid;
   }
 
   void _startCountDown() {
@@ -360,9 +354,18 @@ class _RegisterPageState extends State<RegisterPage> {
                             width: 100,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: (_isCountingDown || !_isEmailValid)
+                              onPressed: _isCountingDown
                                   ? null
-                                  : _sendVerificationCode,
+                                  : () {
+                                      if (_isEmailValid) {
+                                        _sendVerificationCode();
+                                      } else {
+                                        setState(() {
+                                          _emailError =
+                                              'Please enter a valid email';
+                                        });
+                                      }
+                                    },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFF69B4),
                                 padding: EdgeInsets.zero,
@@ -435,21 +438,31 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 32),
                       // 注册按钮
-                      SizedBox(
+                      Container(
                         width: double.infinity,
                         height: 48,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFFFF8C8C),
+                              Color(0xFFFF69B4),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
                         child: ElevatedButton(
-                          onPressed: _isFormValid ? _handleRegister : null,
+                          onPressed: _handleRegister,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF69B4),
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            disabledBackgroundColor: Colors.grey,
                           ),
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(
+                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
