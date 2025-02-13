@@ -25,13 +25,15 @@ class VideoService extends ChangeNotifier {
       final response = await _videoApi.addVideoTask(
         image: base64Image,
         prompt: prompt,
-        model: 'video_model',
+        model: 'VideoMax-A',
         uuid: user.uuid,
       );
 
       if (response != null) {
         return (true, '视频任务创建成功');
       }
+
+      // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
 
       return (false, '视频任务创建失败：服务器响应为空');
     } catch (e) {
