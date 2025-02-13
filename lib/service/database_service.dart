@@ -113,6 +113,19 @@ class DatabaseService {
         FOREIGN KEY (userId) REFERENCES users(id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE video_tasks(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        state INTEGER NOT NULL,
+        prompt TEXT NOT NULL,
+        origin_img TEXT,
+        userId INTEGER,
+        FOREIGN KEY (userId) REFERENCES users(id)
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -332,17 +345,26 @@ class DatabaseService {
     final db = await database;
     await db.transaction((txn) async {
       for (var task in tasks) {
-        await txn.insert(
+        // 检查是否已存在相同的 business_id
+        final existing = await txn.query(
           'video_tasks',
-          {
-            'business_id': task.businessId,
-            'created_at': task.createdAt.toIso8601String(),
-            'state': task.state,
-            'prompt': task.prompt,
-            'origin_img': task.originImg,
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
+          where: 'business_id = ?',
+          whereArgs: [task.businessId],
         );
+
+        if (existing.isEmpty) {
+          await txn.insert(
+            'video_tasks',
+            {
+              'business_id': task.businessId,
+              'created_at': task.createdAt.toIso8601String(),
+              'state': task.state,
+              'prompt': task.prompt,
+              'origin_img': task.originImg,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
       }
     });
   }

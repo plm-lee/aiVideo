@@ -87,8 +87,8 @@ class VideoService extends ChangeNotifier {
         return (false, '获取任务失败：${response['response']['description']}');
       }
 
-      final List<VideoTask> videoTasks = response['video_tasks']
-          .map((task) => VideoTask.fromJson(task))
+      final List<VideoTask> videoTasks = (response['video_tasks'] as List)
+          .map((task) => VideoTask.fromJson(task as Map<String, dynamic>))
           .toList();
 
       // 保存到db

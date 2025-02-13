@@ -12,13 +12,18 @@ class ApiClient {
   }) : _client = client ?? http.Client();
 
   // 通用的 GET 请求方法
-  Future<Map<String, dynamic>> get(String endpoint) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {'Content-Type': 'application/json'},
+  Future<Map<String, dynamic>> get(
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final uri = Uri.parse('$baseUrl$endpoint').replace(
+      queryParameters: queryParameters?.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
     );
+    final response = await _client.get(uri);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load data: ${response.statusCode}');

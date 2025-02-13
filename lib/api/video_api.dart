@@ -28,15 +28,11 @@ class VideoApi {
   // 获取用户所有任务
   Future<Map<String, dynamic>> getUserTasks({
     required String uuid,
-    int page = 1,
-    int pageSize = 10,
   }) async {
-    return await _apiClient.post(
+    return await _apiClient.get(
       '/api/ai_video/all_tasks',
-      {
+      queryParameters: {
         'uuid': uuid,
-        // 'page': page,
-        // 'page_size': pageSize,
       },
     );
   }
