@@ -112,6 +112,9 @@ class _MinePageState extends State<MinePage> {
       }
     }
 
+    final bool isImageTask =
+        task.originImg != null && task.originImg!.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -121,7 +124,7 @@ class _MinePageState extends State<MinePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (task.originImg != null)
+          if (isImageTask)
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
@@ -148,6 +151,24 @@ class _MinePageState extends State<MinePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Icon(
+                      isImageTask ? Icons.image : Icons.text_fields,
+                      color: Colors.grey,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isImageTask ? 'Image to Video' : 'Text to Video',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Text(
                   getDecodedPrompt(task.prompt),
                   style: const TextStyle(
