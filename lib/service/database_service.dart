@@ -7,7 +7,7 @@ import 'package:ai_video/models/purchase_record.dart';
 import 'package:ai_video/models/video_task.dart';
 
 class DatabaseService {
-  static final int _dbVersion = 5;
+  static final int _dbVersion = 6;
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -182,6 +182,21 @@ class DatabaseService {
 
     if (oldVersion < 5) {
       await db.execute('ALTER TABLE users ADD COLUMN uuid TEXT');
+    }
+
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE video_tasks(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          business_id TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          state INTEGER NOT NULL,
+          prompt TEXT NOT NULL,
+          origin_img TEXT,
+          userId INTEGER,
+          FOREIGN KEY (userId) REFERENCES users(id)
+        )
+      ''');
     }
   }
 

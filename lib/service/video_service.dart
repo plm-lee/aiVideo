@@ -82,18 +82,21 @@ class VideoService extends ChangeNotifier {
       }
 
       final response = await _videoApi.getUserTasks(uuid: user.uuid);
-      // {"response":{"success":"1","description":"success","errorcode":"0000"},"video_tasks":[{"business_id":"dba7feb1e2cc41d3842e4cc4c37dba28","created_at":"2025-02-11 07:40","state":1,"prompt":"让图片中的狗奔跑起来","origin_img":"https://magaai.s3.us-west-1.amazonaws.com/2025/02/11/aduio_img/8839693ce1e04f9498fe253cc7a1295e?X-Amz-Algorithm=AWS4-HMAC-SHA256\u0026X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250213%2Fus-west-1%2Fs3%2Faws4_request\u0026X-Amz-Date=20250213T014543Z\u0026X-Amz-Expires=3600\u0026X-Amz-SignedHeaders=host\u0026X-Amz-Signature=b03b49643f70ee5d773d0d9887c473b400094a33a29032661696d6d0b9fc0c95"}]}
       if (response['response']['success'] != '1') {
         return (false, '获取任务失败：${response['response']['description']}');
       }
 
-      final List<VideoTask> videoTasks = (response['video_tasks'] as List)
-          .map((task) => VideoTask.fromJson(task as Map<String, dynamic>))
-          .toList();
+      final List<VideoTask> videoTasks =
+          (response['video_tasks'] as List).map((task) {
+        // 处理中文编码
+        final decodedPrompt = utf8.decode(
+          utf8.encode(task['prompt'] as String),
+        );
+        task['prompt'] = decodedPrompt;
+        return VideoTask.fromJson(task as Map<String, dynamic>);
+      }).toList();
 
-      // 保存到db
       await _databaseService.saveVideoTasks(videoTasks);
-
       return (true, '获取任务成功');
     } catch (e) {
       return (false, '获取任务失败：$e');
