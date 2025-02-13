@@ -4,6 +4,8 @@ import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:ai_video/service/video_service.dart';
+import 'package:ai_video/service/database_service.dart';
+import 'package:ai_video/models/video_task.dart';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -14,19 +16,145 @@ class MinePage extends StatefulWidget {
 
 class _MinePageState extends State<MinePage> {
   final _videoService = VideoService();
-  bool _isLoading = true;
+  final _databaseService = DatabaseService();
+  bool _isLoading = false;
+  List<VideoTask> _tasks = [];
 
   @override
   void initState() {
     super.initState();
-    _loadTasks();
   }
 
-  Future<void> _loadTasks() async {
+  Widget _buildContent() {
+    if (_tasks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.folder_outlined,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No Results',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 32),
+            _buildButton(
+              'Explore more AI effects',
+              onTap: () => context.go('/home'),
+            ),
+            const SizedBox(height: 16),
+            _buildButton(
+              'Restore',
+              onTap: _handleRestore,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _tasks.length,
+          itemBuilder: (context, index) {
+            final task = _tasks[index];
+            return _buildTaskCard(task);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(VideoTask task) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (task.originImg != null)
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.network(
+                  task.originImg!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: const Color(0xFF2E2E2E),
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.prompt,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  task.createdAt.toString().split('.')[0],
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleRestore() async {
+    setState(() => _isLoading = true);
     try {
       final (success, message) = await _videoService.getUserTasks();
       if (!success) {
         debugPrint('获取任务失败: $message');
+      }
+      // 获取最新任务列表
+      final tasks = await _databaseService.getVideoTasks();
+      if (mounted) {
+        setState(() => _tasks = tasks);
       }
     } catch (e) {
       debugPrint('加载任务出错: $e');
@@ -77,47 +205,7 @@ class _MinePageState extends State<MinePage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.folder_outlined,
-                      size: 50,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No Results',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  _buildButton(
-                    'Explore more AI effects',
-                    onTap: () => context.go('/home'),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildButton(
-                    'Restore',
-                    onTap: () {
-                      // TODO: 实现恢复功能
-                    },
-                  ),
-                ],
-              ),
-            ),
+          : _buildContent(),
       bottomNavigationBar: const BottomNavBar(currentPath: '/mine'),
     );
   }

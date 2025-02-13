@@ -22,4 +22,24 @@ class VideoTask {
       originImg: json['origin_img'],
     );
   }
+
+  factory VideoTask.fromMap(Map<String, dynamic> map) {
+    return VideoTask(
+      businessId: map['business_id'],
+      createdAt: DateTime.parse(map['created_at']),
+      state: map['state'],
+      prompt: map['prompt'],
+      originImg: map['origin_img'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'business_id': businessId,
+      'created_at': createdAt.toIso8601String(),
+      'state': state,
+      'prompt': prompt,
+      'origin_img': originImg,
+    };
+  }
 }
