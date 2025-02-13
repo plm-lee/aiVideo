@@ -6,6 +6,7 @@ import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/video_task.dart';
+import 'dart:convert';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -17,12 +18,30 @@ class MinePage extends StatefulWidget {
 class _MinePageState extends State<MinePage> {
   final _videoService = VideoService();
   final _databaseService = DatabaseService();
-  bool _isLoading = false;
+  bool _isLoading = true;
   List<VideoTask> _tasks = [];
 
   @override
   void initState() {
     super.initState();
+    _loadLocalTasks();
+  }
+
+  Future<void> _loadLocalTasks() async {
+    try {
+      final tasks = await _databaseService.getVideoTasks();
+      if (mounted) {
+        setState(() {
+          _tasks = tasks;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('加载本地任务失败: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Widget _buildContent() {
@@ -84,6 +103,15 @@ class _MinePageState extends State<MinePage> {
   }
 
   Widget _buildTaskCard(VideoTask task) {
+    String getDecodedPrompt(String prompt) {
+      try {
+        return utf8.decode(prompt.runes.toList());
+      } catch (e) {
+        debugPrint('解码提示词失败: $e');
+        return prompt;
+      }
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -121,7 +149,7 @@ class _MinePageState extends State<MinePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  task.prompt,
+                  getDecodedPrompt(task.prompt),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -151,17 +179,10 @@ class _MinePageState extends State<MinePage> {
       if (!success) {
         debugPrint('获取任务失败: $message');
       }
-      // 获取最新任务列表
-      final tasks = await _databaseService.getVideoTasks();
-      if (mounted) {
-        setState(() => _tasks = tasks);
-      }
+      await _loadLocalTasks();
     } catch (e) {
       debugPrint('加载任务出错: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      setState(() => _isLoading = false);
     }
   }
 
