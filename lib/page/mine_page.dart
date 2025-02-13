@@ -7,6 +7,7 @@ import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/video_task.dart';
 import 'dart:convert';
+import 'package:ai_video/page/task_detail_page.dart';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -115,80 +116,90 @@ class _MinePageState extends State<MinePage> {
     final bool isImageTask =
         task.originImg != null && task.originImg!.isNotEmpty;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isImageTask)
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.network(
-                  task.originImg!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFF2E2E2E),
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    );
-                  },
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskDetailPage(task: task),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isImageTask)
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.network(
+                    task.originImg!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: const Color(0xFF2E2E2E),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      isImageTask ? Icons.image : Icons.text_fields,
-                      color: Colors.grey,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isImageTask ? 'Image to Video' : 'Text to Video',
-                      style: const TextStyle(
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isImageTask ? Icons.image : Icons.text_fields,
                         color: Colors.grey,
-                        fontSize: 14,
+                        size: 16,
                       ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isImageTask ? 'Image to Video' : 'Text to Video',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    getDecodedPrompt(task.prompt),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  getDecodedPrompt(task.prompt),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  task.createdAt.toString().split('.')[0],
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+                  const SizedBox(height: 8),
+                  Text(
+                    task.createdAt.toString().split('.')[0],
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
