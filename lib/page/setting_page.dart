@@ -51,28 +51,59 @@ class SettingPage extends StatelessWidget {
             // Pro 升级卡片
             Container(
               margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF4A0040), Color(0xFF800080)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF2D0A31), // 深紫色
+                    Color(0xFF3D1440), // 中紫色
+                    Color(0xFF4A1C4D), // 浅紫色
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Image.asset('assets/images/diamond.png', width: 40),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Get VideoMax Pro',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.withOpacity(0.2),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset('assets/images/diamond.png', width: 40),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Get VideoMax Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
