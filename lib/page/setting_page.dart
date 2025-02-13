@@ -7,9 +7,14 @@ import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/locale_service.dart';
 
-class SettingPage extends StatelessWidget {
+class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
 
+  @override
+  State<SettingPage> createState() => _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -154,6 +159,16 @@ class SettingPage extends StatelessWidget {
                 icon: Icons.share,
                 title: 'Share VideoMax',
                 onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.logout,
+                title: 'Logout',
+                onTap: () {
+                  AuthService().logout();
+                  if (context.mounted) {
+                    context.go('/login');
+                  }
+                },
               ),
             ]),
 
