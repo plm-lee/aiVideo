@@ -17,6 +17,32 @@ class TextToVideoPage extends StatefulWidget {
 class _TextToVideoPageState extends State<TextToVideoPage> {
   final _promptController = TextEditingController();
   int _selectedLength = 5; // 默认5秒
+  bool _canGenerate = false; // 添加状态变量
+
+  @override
+  void initState() {
+    super.initState();
+    // 添加输入监听
+    _promptController.addListener(_updateGenerateButtonState);
+  }
+
+  @override
+  void dispose() {
+    // 移除监听
+    _promptController.removeListener(_updateGenerateButtonState);
+    _promptController.dispose();
+    super.dispose();
+  }
+
+  // 更新按钮状态
+  void _updateGenerateButtonState() {
+    final canGenerate = _promptController.text.trim().isNotEmpty;
+    if (canGenerate != _canGenerate) {
+      setState(() {
+        _canGenerate = canGenerate;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,8 +163,6 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
   }
 
   Widget _buildBottomButton() {
-    final bool canGenerate = _promptController.text.trim().isNotEmpty;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -171,16 +195,16 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
           ),
           Container(
             decoration: BoxDecoration(
-              gradient: canGenerate
+              gradient: _canGenerate
                   ? const LinearGradient(
                       colors: [Colors.white, Color(0xFFF0F0F0)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     )
                   : null,
-              color: canGenerate ? null : Colors.grey[400],
+              color: _canGenerate ? null : Colors.grey[400],
               borderRadius: BorderRadius.circular(24),
-              boxShadow: canGenerate
+              boxShadow: _canGenerate
                   ? [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -193,7 +217,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: canGenerate ? _generateVideo : null,
+                onTap: _canGenerate ? _generateVideo : null,
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -203,7 +227,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
                   child: Text(
                     'Generate',
                     style: TextStyle(
-                      color: canGenerate ? Colors.black : Colors.black38,
+                      color: _canGenerate ? Colors.black : Colors.black38,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
