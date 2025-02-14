@@ -21,10 +21,12 @@ class _MinePageState extends State<MinePage> {
   final _databaseService = DatabaseService();
   bool _isLoading = true;
   List<VideoTask> _tasks = [];
+  late Future<List<VideoTask>> _videoTasksFuture;
 
   @override
   void initState() {
     super.initState();
+    _videoTasksFuture = _databaseService.getVideoTasks();
     _loadLocalTasks();
     _fetchRemoteTasks();
   }
@@ -209,12 +211,32 @@ class _MinePageState extends State<MinePage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    task.createdAt.toString().split('.')[0],
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        task.createdAt.toString().split('.')[0],
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(task.state),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getStatusText(task.state),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -309,5 +331,31 @@ class _MinePageState extends State<MinePage> {
         ),
       ),
     );
+  }
+
+  String _getStatusText(int state) {
+    switch (state) {
+      case 0:
+        return 'Processing';
+      case 1:
+        return 'Completed';
+      case 2:
+        return 'Failed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color _getStatusColor(int state) {
+    switch (state) {
+      case 0:
+        return Colors.blue;
+      case 1:
+        return Colors.green;
+      case 2:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

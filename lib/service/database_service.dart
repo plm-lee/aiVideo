@@ -401,7 +401,10 @@ class DatabaseService {
 
   Future<List<VideoTask>> getVideoTasks() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('video_tasks');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'video_tasks',
+      orderBy: 'created_at DESC',
+    );
     return List.generate(maps.length, (i) => VideoTask.fromMap(maps[i]));
   }
 }
