@@ -61,7 +61,7 @@ class VideoService extends ChangeNotifier {
       final response = await _videoApi.addVideoTask(
         image: '', // 文本转视频不需要图片
         prompt: prompt,
-        model: 'TextMax-A', // 使用文本转视频模型
+        model: 'VideoMax-A', // 使用文本转视频模型
         uuid: user.uuid,
       );
 

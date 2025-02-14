@@ -382,6 +382,18 @@ class DatabaseService {
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
+        } else {
+          // 如果存在，更新状态、图片和视频地址
+          await txn.update(
+            'video_tasks',
+            {
+              'state': task.state,
+              'video_url': task.videoUrl,
+              'origin_img': task.originImg,
+            },
+            where: 'business_id = ?',
+            whereArgs: [task.businessId],
+          );
         }
       }
     });
