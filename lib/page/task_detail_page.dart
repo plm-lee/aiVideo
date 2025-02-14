@@ -1,14 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:ai_video/models/video_task.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import 'dart:convert';
 
-class TaskDetailPage extends StatelessWidget {
+class TaskDetailPage extends StatefulWidget {
   final VideoTask task;
 
   const TaskDetailPage({
     super.key,
     required this.task,
   });
+
+  @override
+  State<TaskDetailPage> createState() => _TaskDetailPageState();
+}
+
+class _TaskDetailPageState extends State<TaskDetailPage> {
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    if (widget.task.videoUrl != null) {
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.task.videoUrl!),
+      );
+
+      await _videoController!.initialize();
+
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController!,
+        autoPlay: true,
+        looping: true,
+        aspectRatio: _videoController!.value.aspectRatio,
+        placeholder: const Center(child: CircularProgressIndicator()),
+        autoInitialize: true,
+      );
+
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
 
   String _getDecodedPrompt(String prompt) {
     try {
@@ -47,9 +91,7 @@ class TaskDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isImageTask =
-        task.originImg != null && task.originImg!.isNotEmpty;
-    final String decodedPrompt = _getDecodedPrompt(task.prompt);
+    final decodedPrompt = _getDecodedPrompt(widget.task.prompt);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -57,7 +99,7 @@ class TaskDetailPage extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -69,27 +111,30 @@ class TaskDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isImageTask)
-              Container(
-                width: double.infinity,
-                height: 250,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
+            // 视频播放器
+            if (widget.task.videoUrl != null && _chewieController != null)
+              AspectRatio(
+                aspectRatio: _chewieController!.aspectRatio ?? 16 / 9,
+                child: Chewie(controller: _chewieController!),
+              )
+            else if (widget.task.state == 0)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
                 ),
-                child: Image.network(
-                  task.originImg!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(
-                        Icons.image_not_supported,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    );
-                  },
+              )
+            else
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    '视频未就绪',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -97,33 +142,19 @@ class TaskDetailPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        isImageTask ? Icons.image : Icons.text_fields,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        isImageTask ? 'Image to Video' : 'Text to Video',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(task.state).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
+                          color: _getStatusColor(widget.task.state),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          _getStatusText(task.state),
-                          style: TextStyle(
-                            color: _getStatusColor(task.state),
+                          _getStatusText(widget.task.state),
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 14,
                           ),
                         ),
@@ -164,7 +195,7 @@ class TaskDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    task.createdAt.toString().split('.')[0],
+                    widget.task.createdAt.toString().split('.')[0],
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
