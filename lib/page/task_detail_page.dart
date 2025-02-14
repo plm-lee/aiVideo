@@ -317,7 +317,24 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       return const AspectRatio(
         aspectRatio: 16 / 9,
         child: Center(
-          child: CircularProgressIndicator(color: Colors.white),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.hourglass_empty,
+                color: Colors.white,
+                size: 36,
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Processing...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -325,9 +342,23 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     return const AspectRatio(
       aspectRatio: 16 / 9,
       child: Center(
-        child: Text(
-          '视频未就绪',
-          style: TextStyle(color: Colors.white),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.white,
+              size: 36,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Video not ready',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );
