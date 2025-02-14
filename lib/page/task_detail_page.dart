@@ -5,6 +5,7 @@ import 'package:chewie/chewie.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:ai_video/service/video_service.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final VideoTask task;
@@ -72,6 +73,50 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       if (mounted) setState(() {});
     } catch (e) {
       debugPrint('Video initialization failed: $e');
+    }
+  }
+
+  Future<void> _saveVideoToGallery() async {
+    if (widget.task.videoUrl == null) return;
+
+    final PermissionState permission =
+        await PhotoManager.requestPermissionExtend();
+    if (!permission.isAuth) {
+      debugPrint('Photo library permission not granted');
+      return;
+    }
+
+    try {
+      String? localPath = await _videoService.getLocalVideoPath(
+        widget.task.businessId,
+      );
+
+      if (localPath == null) {
+        localPath = await _videoService.downloadVideo(
+          widget.task.videoUrl!,
+          widget.task.businessId,
+        );
+      }
+
+      if (localPath != null) {
+        final result = await PhotoManager.editor.saveVideo(
+          File(localPath),
+          title: 'video_${widget.task.businessId}',
+        );
+        if (result != null) {
+          debugPrint('Video saved to gallery');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Video saved to gallery')),
+          );
+        } else {
+          throw Exception('Failed to save video');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error saving video: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to save video')),
+      );
     }
   }
 
@@ -179,6 +224,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           'Task Details',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save_alt),
+            onPressed: _saveVideoToGallery,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
