@@ -7,7 +7,7 @@ import 'package:ai_video/models/purchase_record.dart';
 import 'package:ai_video/models/video_task.dart';
 
 class DatabaseService {
-  static final int _dbVersion = 6;
+  static final int _dbVersion = 7;
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -115,15 +115,13 @@ class DatabaseService {
     ''');
 
     await db.execute('''
-      CREATE TABLE video_tasks(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        business_id TEXT NOT NULL,
+      CREATE TABLE video_tasks (
+        business_id TEXT PRIMARY KEY,
         created_at TEXT NOT NULL,
         state INTEGER NOT NULL,
         prompt TEXT NOT NULL,
         origin_img TEXT,
-        userId INTEGER,
-        FOREIGN KEY (userId) REFERENCES users(id)
+        video_url TEXT
       )
     ''');
   }
@@ -197,6 +195,10 @@ class DatabaseService {
           FOREIGN KEY (userId) REFERENCES users(id)
         )
       ''');
+    }
+
+    if (oldVersion < 7) {
+      await db.execute('ALTER TABLE video_tasks ADD COLUMN video_url TEXT');
     }
   }
 
@@ -376,6 +378,7 @@ class DatabaseService {
               'state': task.state,
               'prompt': task.prompt,
               'origin_img': task.originImg,
+              'video_url': task.videoUrl,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );

@@ -93,6 +93,12 @@ class VideoService extends ChangeNotifier {
           utf8.encode(task['prompt'] as String),
         );
         task['prompt'] = decodedPrompt;
+
+        // 如果任务完成且有 object_key，将其作为视频地址
+        if (task['state'] == 1 && task['object_key'] != null) {
+          task['video_url'] = task['object_key'];
+        }
+
         return VideoTask.fromJson(task as Map<String, dynamic>);
       }).toList();
 

@@ -4,6 +4,7 @@ class VideoTask {
   final int state;
   final String prompt;
   final String? originImg;
+  final String? videoUrl;
 
   VideoTask({
     required this.businessId,
@@ -11,6 +12,7 @@ class VideoTask {
     required this.state,
     required this.prompt,
     this.originImg,
+    this.videoUrl,
   });
 
   factory VideoTask.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class VideoTask {
       state: json['state'],
       prompt: json['prompt'],
       originImg: json['origin_img'],
+      videoUrl: json['video_url'],
     );
   }
 
@@ -30,6 +33,7 @@ class VideoTask {
       state: map['state'],
       prompt: map['prompt'],
       originImg: map['origin_img'],
+      videoUrl: map['video_url'],
     );
   }
 
@@ -40,6 +44,7 @@ class VideoTask {
       'state': state,
       'prompt': prompt,
       'origin_img': originImg,
+      'video_url': videoUrl,
     };
   }
 }

@@ -26,6 +26,7 @@ class _MinePageState extends State<MinePage> {
   void initState() {
     super.initState();
     _loadLocalTasks();
+    _fetchRemoteTasks();
   }
 
   Future<void> _loadLocalTasks() async {
@@ -43,6 +44,26 @@ class _MinePageState extends State<MinePage> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _fetchRemoteTasks() async {
+    try {
+      final (success, message) = await _videoService.getUserTasks();
+      if (!success) {
+        debugPrint('获取远程任务失败: $message');
+        return;
+      }
+
+      if (mounted) {
+        await _loadLocalTasks();
+      }
+    } catch (e) {
+      debugPrint('获取远程任务出错: $e');
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    await _fetchRemoteTasks();
   }
 
   Widget _buildContent() {
@@ -258,7 +279,10 @@ class _MinePageState extends State<MinePage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : _buildContent(),
+          : RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: _buildContent(),
+            ),
       bottomNavigationBar: const BottomNavBar(currentPath: '/mine'),
     );
   }
