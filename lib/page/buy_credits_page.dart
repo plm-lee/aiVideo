@@ -186,38 +186,33 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final creditsService = context.watch<CreditsService>();
-
     return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
+          icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          '购买金币',
-          style: AppTheme.getTitleStyle(isDark),
-        ),
         actions: [
-          TextButton.icon(
-            onPressed: () => context.push('/purchase-history'),
-            icon: Icon(
-              Icons.history,
-              color: isDark ? Colors.white : Colors.black,
+          Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A4A4A),
+              borderRadius: BorderRadius.circular(20),
             ),
-            label: Text(
-              '购买历史',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-              ),
+            child: Row(
+              children: [
+                const Icon(Icons.monetization_on,
+                    color: Colors.amber, size: 20),
+                const SizedBox(width: 4),
+                const Text(
+                  'Buy Coins',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
             ),
           ),
         ],
@@ -225,95 +220,172 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              children: [
-                _buildCreditCard(
-                  credits: '600',
-                  price: '0.99',
-                  expiration: '30',
-                  index: 0,
-                ),
-                _buildCreditCard(
-                  credits: '1200',
-                  price: '1.99',
-                  expiration: '90',
-                  index: 1,
-                ),
-                _buildCreditCard(
-                  credits: '5000',
-                  price: '4.99',
-                  expiration: '90',
-                  index: 2,
-                ),
-                _buildCreditCard(
-                  credits: '10000',
-                  price: '9.99',
-                  expiration: '180',
-                  index: 3,
-                ),
-                _buildCreditCard(
-                  credits: '38000',
-                  price: '29.99',
-                  expiration: '365',
-                  index: 4,
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '购买说明：',
-                  style: AppTheme.getSubtitleStyle(isDark),
-                ),
-                const SizedBox(height: 8),
-                _buildBulletPoint('您购买的金币需在有效期内使用，逾期未使用即失效；'),
-                _buildBulletPoint('金币不支持退款、提现或转赠他人；'),
-                _buildBulletPoint(
-                    '支付如遇到问题，可发邮件至 ai_video1986@gmail.com，我们会为您解决。'),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _selectedIndex != null ? _handlePurchase : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      disabledBackgroundColor: isDark
-                          ? AppTheme.darkSecondaryTextColor
-                          : AppTheme.lightSecondaryTextColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.smallBorderRadius),
-                      ),
-                    ),
-                    child: Text(
-                      _selectedIndex != null
-                          ? 'Create Order \$${[
-                              '0.99',
-                              '1.99',
-                              '4.99',
-                              '9.99',
-                              '29.99'
-                            ][_selectedIndex!]}'
-                          : 'Please select a plan',
-                      style: TextStyle(
-                        color: isDark
-                            ? AppTheme.darkTextColor
-                            : AppTheme.lightTextColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    'Get VideoMax Pro',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  _buildFeatureItem('1200 Coins Refresh Weekly'),
+                  _buildFeatureItem('Up to 5 tasks in queue'),
+                  _buildFeatureItem('Pro Quality Videos'),
+                  _buildFeatureItem('Fast-track Generation'),
+                ],
+              ),
+            ),
+          ),
+          _buildBottomSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.pink.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check,
+              color: Colors.pink,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBottomSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'Weekly Renewal',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '\$8.99',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  '\$8.99 / week',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Renews automatically, cancel anytime.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orange.shade200, Colors.pink],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                // 处理订阅
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              child: const Text(
+                'Continue',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildTextButton('Terms'),
+              const Text(' • ', style: TextStyle(color: Colors.grey)),
+              _buildTextButton('Privacy'),
+              const Text(' • ', style: TextStyle(color: Colors.grey)),
+              _buildTextButton('Restore Purchase'),
+              const Text(' • ', style: TextStyle(color: Colors.grey)),
+              _buildTextButton('What are Coins?'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextButton(String text) {
+    return TextButton(
+      onPressed: () {},
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+          decoration: TextDecoration.underline,
+        ),
       ),
     );
   }
