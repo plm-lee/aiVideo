@@ -5,6 +5,9 @@ import 'package:ai_video/api/video_api.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/models/video_task.dart';
 import 'package:ai_video/service/database_service.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 class VideoService extends ChangeNotifier {
   final VideoApi _videoApi = VideoApi();
@@ -106,6 +109,48 @@ class VideoService extends ChangeNotifier {
       return (true, '获取任务成功');
     } catch (e) {
       return (false, '获取任务失败：$e');
+    }
+  }
+
+  // 获取视频本地缓存路径
+  Future<String?> getLocalVideoPath(String businessId) async {
+    try {
+      final directory = await path_provider.getApplicationDocumentsDirectory();
+      final videoPath = '${directory.path}/videos/$businessId.mp4';
+      final file = File(videoPath);
+
+      if (await file.exists()) {
+        return videoPath;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('获取本地视频路径失败: $e');
+      return null;
+    }
+  }
+
+  // 下载并缓存视频
+  Future<String?> downloadVideo(String url, String businessId) async {
+    try {
+      final directory = await path_provider.getApplicationDocumentsDirectory();
+      final videoDir = Directory('${directory.path}/videos');
+      if (!await videoDir.exists()) {
+        await videoDir.create(recursive: true);
+      }
+
+      final videoPath = '${videoDir.path}/$businessId.mp4';
+      final file = File(videoPath);
+
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) {
+        throw Exception('下载视频失败');
+      }
+
+      await file.writeAsBytes(response.bodyBytes);
+      return videoPath;
+    } catch (e) {
+      debugPrint('下载视频失败: $e');
+      return null;
     }
   }
 }

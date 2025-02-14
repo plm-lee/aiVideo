@@ -3,6 +3,8 @@ import 'package:ai_video/models/video_task.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:ai_video/service/video_service.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final VideoTask task;
@@ -17,10 +19,12 @@ class TaskDetailPage extends StatefulWidget {
 }
 
 class _TaskDetailPageState extends State<TaskDetailPage> {
+  final _videoService = VideoService();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   bool _isPlaying = false;
   bool _isFullScreen = false;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -29,11 +33,31 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   Future<void> _initializeVideo() async {
-    if (widget.task.videoUrl != null) {
-      _videoController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.task.videoUrl!),
+    if (widget.task.videoUrl == null) return;
+
+    try {
+      // 先检查本地缓存
+      String? localPath = await _videoService.getLocalVideoPath(
+        widget.task.businessId,
       );
 
+      // 如果本地没有，下载并缓存
+      if (localPath == null) {
+        setState(() => _isDownloading = true);
+        localPath = await _videoService.downloadVideo(
+          widget.task.videoUrl!,
+          widget.task.businessId,
+        );
+        setState(() => _isDownloading = false);
+      }
+
+      if (localPath == null) {
+        debugPrint('获取视频失败');
+        return;
+      }
+
+      // 使用本地文件初始化播放器
+      _videoController = VideoPlayerController.file(File(localPath));
       await _videoController!.initialize();
 
       _chewieController = ChewieController(
@@ -46,6 +70,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       );
 
       if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('视频初始化失败: $e');
     }
   }
 
@@ -247,6 +273,25 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   Widget _buildVideoPreview() {
+    if (_isDownloading) {
+      return const AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 8),
+              Text(
+                '正在下载视频...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (widget.task.videoUrl != null &&
         _videoController?.value.isInitialized == true) {
       return GestureDetector(
