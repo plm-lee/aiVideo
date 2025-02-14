@@ -132,9 +132,9 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'ai_video',
-          theme: AppTheme.getLightTheme(),
+          theme: AppTheme.getDarkTheme(),
           darkTheme: AppTheme.getDarkTheme(),
-          themeMode: themeProvider.themeMode,
+          themeMode: ThemeMode.dark,
           routerConfig: _router,
         );
       },
