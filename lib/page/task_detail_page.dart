@@ -52,7 +52,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       }
 
       if (localPath == null) {
-        debugPrint('获取视频失败');
+        debugPrint('Failed to get video');
         return;
       }
 
@@ -71,7 +71,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
       if (mounted) setState(() {});
     } catch (e) {
-      debugPrint('视频初始化失败: $e');
+      debugPrint('Video initialization failed: $e');
     }
   }
 
@@ -113,13 +113,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   String _getStatusText(int state) {
     switch (state) {
       case 0:
-        return '处理中';
+        return 'Processing';
       case 1:
-        return '已完成';
+        return 'Completed';
       case 2:
-        return '失败';
+        return 'Failed';
       default:
-        return '未知状态';
+        return 'Unknown';
     }
   }
 
@@ -176,7 +176,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '任务详情',
+          'Task Details',
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -241,7 +241,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    '提示词',
+                    'Prompt',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
@@ -283,7 +283,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
               CircularProgressIndicator(color: Colors.white),
               SizedBox(height: 8),
               Text(
-                '正在下载视频...',
+                'Downloading video...',
                 style: TextStyle(color: Colors.white),
               ),
             ],

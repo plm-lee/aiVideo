@@ -22,7 +22,7 @@ class VideoService extends ChangeNotifier {
       // 获取当前用户信息
       final (success, message, user) = await _authService.getCurrentUser();
       if (!success || user == null) {
-        return (false, message ?? '用户未登录');
+        return (false, message ?? 'User not logged in');
       }
 
       final List<int> imageBytes = await imageFile.readAsBytes();
@@ -36,14 +36,14 @@ class VideoService extends ChangeNotifier {
       );
 
       if (response != null) {
-        return (true, '视频任务创建成功');
+        return (true, 'Video task created successfully');
       }
 
       // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
 
-      return (false, '视频任务创建失败：服务器响应为空');
+      return (false, 'Failed to create video task: Empty server response');
     } catch (e) {
-      return (false, '视频生成失败：$e');
+      return (false, 'Video generation failed: $e');
     }
   }
 
@@ -55,7 +55,7 @@ class VideoService extends ChangeNotifier {
       // 获取当前用户信息
       final (success, message, user) = await _authService.getCurrentUser();
       if (!success || user == null) {
-        return (false, message ?? '用户未登录');
+        return (false, message ?? 'User not logged in');
       }
 
       final response = await _videoApi.addVideoTask(
@@ -66,14 +66,14 @@ class VideoService extends ChangeNotifier {
       );
 
       if (response != null) {
-        return (true, '视频任务创建成功');
+        return (true, 'Video task created successfully');
       }
 
       // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
 
-      return (false, '视频任务创建失败：服务器响应为空');
+      return (false, 'Failed to create video task: Empty server response');
     } catch (e) {
-      return (false, '视频生成失败：$e');
+      return (false, 'Video generation failed: $e');
     }
   }
 
@@ -81,12 +81,15 @@ class VideoService extends ChangeNotifier {
     try {
       final (success, message, user) = await _authService.getCurrentUser();
       if (!success || user == null) {
-        return (false, message ?? '用户未登录');
+        return (false, message ?? 'User not logged in');
       }
 
       final response = await _videoApi.getUserTasks(uuid: user.uuid);
       if (response['response']['success'] != '1') {
-        return (false, '获取任务失败：${response['response']['description']}');
+        return (
+          false,
+          'Failed to get tasks: ${response['response']['description']}'
+        );
       }
 
       final List<VideoTask> videoTasks =
@@ -106,9 +109,9 @@ class VideoService extends ChangeNotifier {
       }).toList();
 
       await _databaseService.saveVideoTasks(videoTasks);
-      return (true, '获取任务成功');
+      return (true, 'Get tasks successfully');
     } catch (e) {
-      return (false, '获取任务失败：$e');
+      return (false, 'Failed to get tasks: $e');
     }
   }
 
@@ -124,7 +127,7 @@ class VideoService extends ChangeNotifier {
       }
       return null;
     } catch (e) {
-      debugPrint('获取本地视频路径失败: $e');
+      debugPrint('Failed to get local video path: $e');
       return null;
     }
   }
@@ -143,13 +146,13 @@ class VideoService extends ChangeNotifier {
 
       final response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) {
-        throw Exception('下载视频失败');
+        throw Exception('Failed to download video');
       }
 
       await file.writeAsBytes(response.bodyBytes);
       return videoPath;
     } catch (e) {
-      debugPrint('下载视频失败: $e');
+      debugPrint('Failed to download video: $e');
       return null;
     }
   }
