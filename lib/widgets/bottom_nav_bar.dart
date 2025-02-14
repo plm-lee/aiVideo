@@ -14,31 +14,28 @@ class BottomNavBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              context,
-              icon: Icons.home_rounded,
-              label: 'Home',
-              isSelected: currentPath == '/home',
-              onTap: () => context.go('/home'),
-            ),
-            _buildNavItem(
-              context,
-              icon: Icons.face_rounded,
-              label: 'Mine',
-              isSelected: currentPath == '/mine',
-              onTap: () => context.go('/mine'),
-            ),
-          ],
-        ),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            context,
+            icon: Icons.home_rounded,
+            label: 'Home',
+            isSelected: currentPath == '/home',
+            onTap: () => context.go('/home'),
+          ),
+          _buildNavItem(
+            context,
+            icon: Icons.face_rounded,
+            label: 'Mine',
+            isSelected: currentPath == '/mine',
+            onTap: () => context.go('/mine'),
+          ),
+        ],
       ),
     );
   }
