@@ -62,7 +62,41 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (result.success) {
         if (mounted) {
-          context.go('/login');
+          // 显示成功对话框
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              title: const Text(
+                'Registration Successful',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: const Text(
+                'Would you like to login now?',
+                style: TextStyle(color: Colors.white70),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // 关闭对话框
+                    context.go('/login'); // 返回登录页
+                  },
+                  child: const Text(
+                    'Yes',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Later',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          );
         }
       } else {
         if (mounted) {
