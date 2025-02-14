@@ -101,7 +101,7 @@ class VideoService extends ChangeNotifier {
         task['prompt'] = decodedPrompt;
 
         // 如果任务完成且有 object_key，将其作为视频地址
-        if (task['state'] == 1 && task['object_key'] != null) {
+        if (task['object_key'] != null) {
           task['video_url'] = task['object_key'];
         }
 

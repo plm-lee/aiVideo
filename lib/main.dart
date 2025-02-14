@@ -15,7 +15,6 @@ import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:ai_video/page/histories_page.dart';
-import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/page/purchase_history_page.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/page/mine_page.dart';
