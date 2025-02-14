@@ -19,6 +19,8 @@ class TaskDetailPage extends StatefulWidget {
 class _TaskDetailPageState extends State<TaskDetailPage> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
+  bool _isPlaying = false;
+  bool _isFullScreen = false;
 
   @override
   void initState() {
@@ -36,15 +38,34 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
-        autoPlay: true,
+        autoPlay: false,
         looping: true,
         aspectRatio: _videoController!.value.aspectRatio,
-        placeholder: const Center(child: CircularProgressIndicator()),
+        showControls: false,
         autoInitialize: true,
       );
 
       if (mounted) setState(() {});
     }
+  }
+
+  void _togglePlay() {
+    if (_videoController == null) return;
+
+    setState(() {
+      _isPlaying = !_isPlaying;
+      if (_isPlaying) {
+        _videoController!.play();
+      } else {
+        _videoController!.pause();
+      }
+    });
+  }
+
+  void _toggleFullScreen() {
+    setState(() {
+      _isFullScreen = !_isFullScreen;
+    });
   }
 
   @override
@@ -93,6 +114,32 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   Widget build(BuildContext context) {
     final decodedPrompt = _getDecodedPrompt(widget.task.prompt);
 
+    if (_isFullScreen && _videoController != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: AspectRatio(
+                  aspectRatio: _videoController!.value.aspectRatio,
+                  child: VideoPlayer(_videoController!),
+                ),
+              ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
+                  onPressed: _toggleFullScreen,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -111,29 +158,34 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 视频播放器
-            if (widget.task.videoUrl != null && _chewieController != null)
-              AspectRatio(
-                aspectRatio: _chewieController!.aspectRatio ?? 16 / 9,
-                child: Chewie(controller: _chewieController!),
-              )
-            else if (widget.task.state == 0)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    '视频未就绪',
-                    style: TextStyle(color: Colors.white),
-                  ),
+            // 视频预览框
+            Container(
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  children: [
+                    _buildVideoPreview(),
+                    if (_videoController?.value.isInitialized ?? false)
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.fullscreen,
+                            color: Colors.white,
+                          ),
+                          onPressed: _toggleFullScreen,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+            ),
 
             Padding(
               padding: const EdgeInsets.all(16),
@@ -185,26 +237,52 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    '创建时间',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.task.createdAt.toString().split('.')[0],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoPreview() {
+    if (widget.task.videoUrl != null &&
+        _videoController?.value.isInitialized == true) {
+      return GestureDetector(
+        onTap: _togglePlay,
+        child: AspectRatio(
+          aspectRatio: _videoController!.value.aspectRatio,
+          child: Stack(
+            children: [
+              VideoPlayer(_videoController!),
+              if (!_isPlaying)
+                Center(
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    } else if (widget.task.state == 0) {
+      return const AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
+    return const AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Center(
+        child: Text(
+          '视频未就绪',
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );
