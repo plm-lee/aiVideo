@@ -7,6 +7,7 @@ import 'package:ai_video/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
+import 'package:video_player/video_player.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -21,6 +22,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   final _purchaseService = PurchaseService();
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   bool _isLoading = false;
+  late VideoPlayerController _controller;
 
   @override
   void initState() {
@@ -30,12 +32,19 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     }
     _purchaseService.initialize();
     _applePaymentService.initialize();
+    _controller = VideoPlayerController.asset('assets/videos/background.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+        _controller.setLooping(true);
+      });
   }
 
   @override
   void dispose() {
     _purchaseService.dispose();
     _applePaymentService.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -252,31 +261,46 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                    'Get VideoMax Pro',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildFeatureItem('1200 Coins Refresh Weekly'),
-                  _buildFeatureItem('Up to 5 tasks in queue'),
-                  _buildFeatureItem('Pro Quality Videos'),
-                  _buildFeatureItem('Fast-track Generation'),
-                ],
+          if (_controller.value.isInitialized)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height / 2,
+              child: Opacity(
+                opacity: 0.5,
+                child: VideoPlayer(_controller),
               ),
             ),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        'Get VideoMax Pro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildFeatureItem('1200 Coins Refresh Weekly'),
+                      _buildFeatureItem('Up to 5 tasks in queue'),
+                      _buildFeatureItem('Pro Quality Videos'),
+                      _buildFeatureItem('Fast-track Generation'),
+                    ],
+                  ),
+                ),
+              ),
+              _buildBottomSection(),
+            ],
           ),
-          _buildBottomSection(),
         ],
       ),
     );
