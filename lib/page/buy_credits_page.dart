@@ -5,6 +5,7 @@ import 'package:ai_video/service/purchase_service.dart';
 import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_video/service/apple_payment_service.dart';
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -17,6 +18,8 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   int? _selectedIndex;
   static const List<int> _hotDealIndexes = [1, 2];
   final _purchaseService = PurchaseService();
+  final ApplePaymentService _applePaymentService = ApplePaymentService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -25,11 +28,13 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
       _selectedIndex = _hotDealIndexes[0];
     }
     _purchaseService.initialize();
+    _applePaymentService.initialize();
   }
 
   @override
   void dispose() {
     _purchaseService.dispose();
+    _applePaymentService.dispose();
     super.dispose();
   }
 
@@ -184,6 +189,28 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     }
   }
 
+  Future<void> _handleSubscription() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _applePaymentService.buySubscription(
+          'com.bigchallenger.magaVideo.subscription.weekly.pro');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('订阅成功')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('发生错误: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -333,9 +360,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: () {
-                // 处理订阅
-              },
+              onPressed: _handleSubscription,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
@@ -343,14 +368,16 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
-                'Continue',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text(
+                      'Continue',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 16),
