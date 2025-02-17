@@ -195,8 +195,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     });
 
     try {
-      await _applePaymentService.buySubscription(
-          'com.bigchallenger.magaVideo.subscription.weekly.pro');
+      await _applePaymentService.buySubscription('weekly');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('订阅成功')),
       );

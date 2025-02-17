@@ -10,6 +10,11 @@ class ApplePaymentService {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
+  // 定义商品ID
+  final Map<String, String> productIds = {
+    'weekly': 'com.bigchallenger.magaVideo.subscription.weekly.pro',
+    '1500': 'com.bigchallenger.magaVideo.consumable.coins1500',
+  };
 
   Future<void> initialize() async {
     if (await _inAppPurchase.isAvailable()) {
@@ -24,12 +29,8 @@ class ApplePaymentService {
   }
 
   Future<void> _loadProducts() async {
-    const Set<String> _kIds = {
-      'com.bigchallenger.magaVideo.subscription.weekly.pro',
-    };
-
     final ProductDetailsResponse response =
-        await _inAppPurchase.queryProductDetails(_kIds);
+        await _inAppPurchase.queryProductDetails(productIds.values.toSet());
 
     if (response.error != null) {
       debugPrint('Error loading products: ${response.error}');
@@ -39,11 +40,24 @@ class ApplePaymentService {
     _products = response.productDetails;
   }
 
-  Future<void> buySubscription(String productId) async {
-    final productDetails =
-        _products.firstWhere((product) => product.id == productId);
-    final purchaseParam = PurchaseParam(productDetails: productDetails);
-    await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+  Future<void> buySubscription(String productName) async {
+    try {
+      final String? productId = productIds[productName];
+      if (productId == null) {
+        throw Exception('未找到产品: $productName');
+      }
+
+      final productDetails = _products.firstWhere(
+        (product) => product.id == productId,
+        orElse: () => throw Exception('未找到产品详情: $productId'),
+      );
+
+      final purchaseParam = PurchaseParam(productDetails: productDetails);
+      await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      debugPrint('购买失败: $e');
+      rethrow;
+    }
   }
 
   Future<void> _handlePurchaseUpdates(
