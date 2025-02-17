@@ -6,6 +6,7 @@ import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
+import 'buy_coins_page.dart'; // 导入新页面
 
 class BuyCreditsPage extends StatefulWidget {
   const BuyCreditsPage({super.key});
@@ -229,16 +230,24 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
               color: const Color(0xFF4A4A4A),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.monetization_on,
-                    color: Colors.amber, size: 20),
-                const SizedBox(width: 4),
-                const Text(
-                  'Buy Coins',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BuyCoinsPage()),
+                );
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.monetization_on,
+                      color: Colors.amber, size: 20),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Buy Coins',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
