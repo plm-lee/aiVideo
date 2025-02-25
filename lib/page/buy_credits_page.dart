@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
-import 'package:ai_video/service/purchase_service.dart';
-import 'package:ai_video/constants/theme.dart';
-import 'package:ai_video/service/credits_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
@@ -43,129 +38,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     _applePaymentService.dispose();
     _controller.dispose();
     super.dispose();
-  }
-
-  Widget _buildCreditCard({
-    required String credits,
-    required String price,
-    required String expiration,
-    required int index,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isSelected = _selectedIndex == index;
-    final isHot = _hotDealIndexes.contains(index);
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryColor : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '¢ $credits',
-                      style: TextStyle(
-                        color: isDark
-                            ? AppTheme.darkTextColor
-                            : AppTheme.lightTextColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          color: Colors.amber,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$expiration天有效期',
-                          style: const TextStyle(
-                            color: Colors.amber,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Text(
-                  '\$$price',
-                  style: TextStyle(
-                    color: AppTheme.primaryColor,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            if (isHot)
-              Positioned(
-                right: -2,
-                top: -22,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'HOT',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBulletPoint(String text) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.smallSpacing),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '• ',
-            style: AppTheme.getSubtitleStyle(isDark),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTheme.getSubtitleStyle(isDark),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _handleSubscription() async {
@@ -250,8 +122,8 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      Text(
-                        'Get VideoMax Pro',
+                      const Text(
+                        'Get MagaVideo Pro',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 28,
