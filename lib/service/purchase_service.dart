@@ -16,11 +16,7 @@ class PurchaseService {
 
   // 定义商品ID
   final Map<String, String> productIds = {
-    '600': 'com.ai_video.app.credits.600',
-    '1200': 'com.ai_video.app.credits.1200',
-    '5000': 'com.ai_video.app.credits.5000',
-    '10000': 'com.ai_video.app.credits.10000',
-    '38000': 'com.ai_video.app.credits.38000',
+    "weekly": 'com.bigchallenger.magaVideo.subscription.weekly.pro',
   };
 
   Future<void> initialize() async {

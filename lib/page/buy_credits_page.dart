@@ -19,7 +19,6 @@ class BuyCreditsPage extends StatefulWidget {
 class _BuyCreditsPageState extends State<BuyCreditsPage> {
   int? _selectedIndex;
   static const List<int> _hotDealIndexes = [1, 2];
-  final _purchaseService = PurchaseService();
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   bool _isLoading = false;
   late VideoPlayerController _controller;
@@ -30,7 +29,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     if (_hotDealIndexes.isNotEmpty) {
       _selectedIndex = _hotDealIndexes[0];
     }
-    _purchaseService.initialize();
     _applePaymentService.initialize();
     _controller = VideoPlayerController.asset('assets/videos/background.mp4')
       ..initialize().then((_) {
@@ -42,7 +40,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
 
   @override
   void dispose() {
-    _purchaseService.dispose();
     _applePaymentService.dispose();
     _controller.dispose();
     super.dispose();
@@ -169,34 +166,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
         ],
       ),
     );
-  }
-
-  void _handlePurchase() async {
-    if (_selectedIndex == null) return;
-
-    final credits = ['600', '1200', '5000', '10000', '38000'][_selectedIndex!];
-    final price = ['0.99', '1.99', '4.99', '9.99', '29.99'][_selectedIndex!];
-
-    try {
-      final success = await _purchaseService.buyProduct(credits);
-      if (success) {
-        await context.read<CreditsService>().addCredits(int.parse(credits));
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('成功购买 $credits 金币')),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('购买失败，请稍后重试')),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('发生错误: $e')),
-      );
-    }
   }
 
   Future<void> _handleSubscription() async {
