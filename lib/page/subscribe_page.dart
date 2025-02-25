@@ -5,16 +5,14 @@ import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
 import 'package:video_player/video_player.dart';
 
-class BuyCreditsPage extends StatefulWidget {
-  const BuyCreditsPage({super.key});
+class SubscribePage extends StatefulWidget {
+  const SubscribePage({super.key});
 
   @override
-  State<BuyCreditsPage> createState() => _BuyCreditsPageState();
+  State<SubscribePage> createState() => _SubscribePageState();
 }
 
-class _BuyCreditsPageState extends State<BuyCreditsPage> {
-  int? _selectedIndex;
-  static const List<int> _hotDealIndexes = [1, 2];
+class _SubscribePageState extends State<SubscribePage> {
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   bool _isLoading = false;
   late VideoPlayerController _controller;
@@ -22,9 +20,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   @override
   void initState() {
     super.initState();
-    if (_hotDealIndexes.isNotEmpty) {
-      _selectedIndex = _hotDealIndexes[0];
-    }
     _applePaymentService.initialize('subscribe');
     _controller = VideoPlayerController.asset('assets/videos/background.mp4')
       ..initialize().then((_) {

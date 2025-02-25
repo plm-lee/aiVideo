@@ -53,7 +53,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.pop(context);
-                  context.push('/buy-credits');
+                  context.push('/subscribe');
                 },
                 child: Text(
                   'Buy',

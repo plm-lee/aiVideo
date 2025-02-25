@@ -229,7 +229,7 @@ class _AIVideoState extends State<AIVideo> {
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: GestureDetector(
-              onTap: () => context.push('/buy-credits'),
+              onTap: () => context.push('/subscribe'),
               child: Consumer<CreditsService>(
                 builder: (context, creditsService, child) {
                   return Container(

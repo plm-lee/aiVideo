@@ -4,7 +4,7 @@ import 'package:ai_video/page/ai_video.dart';
 import 'package:ai_video/page/login_page.dart';
 import 'package:ai_video/page/register_page.dart';
 import 'package:ai_video/page/setting_page.dart';
-import 'package:ai_video/page/buy_credits_page.dart';
+import 'package:ai_video/page/subscribe_page.dart';
 import 'package:ai_video/page/img_to_video_page.dart';
 import 'package:ai_video/page/text_to_video_page.dart';
 import 'package:provider/provider.dart';
@@ -89,8 +89,8 @@ final _router = GoRouter(
       builder: (context, state) => const SettingPage(),
     ),
     GoRoute(
-      path: '/buy-credits',
-      builder: (context, state) => const BuyCreditsPage(),
+      path: '/subscribe',
+      builder: (context, state) => const SubscribePage(),
     ),
     GoRoute(
       path: '/img-to-video',
