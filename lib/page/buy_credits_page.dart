@@ -173,8 +173,6 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                       _buildFeatureItem('Up to 5 tasks in queue'),
                       _buildFeatureItem('Pro Quality Videos'),
                       _buildFeatureItem('Fast-track Generation'),
-                      const SizedBox(height: 20),
-                      _buildWeeklyRenewalCard(),
                     ],
                   ),
                 ),
@@ -217,48 +215,16 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     );
   }
 
-  Widget _buildWeeklyRenewalCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade800,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
-              'Weekly Renewal',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              '\$8.99',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          _buildWeeklyRenewalCard(),
+          const SizedBox(height: 16),
           const Text(
             '\$8.99 / week',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -312,6 +278,40 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklyRenewalCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade800,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text(
+              'Weekly Renewal',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '\$8.99',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
