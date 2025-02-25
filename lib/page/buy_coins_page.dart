@@ -1,14 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:video_player/video_player.dart';
+import 'package:ai_video/service/apple_payment_service.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 
-class BuyCoinsPage extends HookConsumerWidget {
+class BuyCoinsPage extends StatefulWidget {
   const BuyCoinsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedPlan = useState<int?>(null);
+  _BuyCoinsPageState createState() => _BuyCoinsPageState();
+}
 
+class _BuyCoinsPageState extends State<BuyCoinsPage> {
+  late VideoPlayerController _controller;
+  final ApplePaymentService _applePaymentService = ApplePaymentService();
+  int? selectedPlan;
+  List<ProductDetails> _products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideoPlayer();
+    _applePaymentService.initialize('coins');
+    _products = _applePaymentService.coinsProducts;
+
+    // 打印第一个商品
+    debugPrint("第一个商品：" + _products.first.title);
+  }
+
+  void _initializeVideoPlayer() {
+    _controller = VideoPlayerController.asset('assets/videos/background.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+        _controller.setLooping(true);
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -52,26 +87,17 @@ class BuyCoinsPage extends HookConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _buildCoinOption(
-            coins: '6000',
-            price: '39.99',
-            discount: '33%',
-            isSelected: selectedPlan.value == 0,
-            onTap: () => selectedPlan.value = 0,
-          ),
-          _buildCoinOption(
-            coins: '1500',
-            price: '12.99',
-            discount: '13%',
-            isSelected: selectedPlan.value == 1,
-            onTap: () => selectedPlan.value = 1,
-          ),
-          _buildCoinOption(
-            coins: '600',
-            price: '5.99',
-            isSelected: selectedPlan.value == 2,
-            onTap: () => selectedPlan.value = 2,
-          ),
+          // 遍历_products并构建选项
+          ..._products
+              .map((product) => _buildCoinOption(
+                    coins: product.title,
+                    price: product.price,
+                    discount: '33%',
+                    isSelected: selectedPlan == _products.indexOf(product),
+                    onTap: () => setState(
+                        () => selectedPlan = _products.indexOf(product)),
+                  ))
+              .toList(),
           _buildBottomSection(context),
         ],
       ),
@@ -156,7 +182,7 @@ class BuyCoinsPage extends HookConsumerWidget {
             width: double.infinity,
             height: 50,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
@@ -164,9 +190,16 @@ class BuyCoinsPage extends HookConsumerWidget {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: 处理购买逻辑
-              },
+              onPressed: selectedPlan != null
+                  ? () async {
+                      if (selectedPlan != null &&
+                          selectedPlan! < _products.length) {
+                        final product = _products[selectedPlan!];
+                        await _applePaymentService
+                            .buySubscription(product.title);
+                      }
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,

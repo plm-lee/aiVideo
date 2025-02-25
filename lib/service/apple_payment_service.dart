@@ -32,6 +32,12 @@ class ApplePaymentService {
     }
   }
 
+  // 返回订阅包
+  List<ProductDetails> get subscribeProducts => _subscribeProducts;
+
+  // 返回金币包
+  List<ProductDetails> get coinsProducts => _coinsProducts;
+
   Future<void> _loadProducts(String type) async {
     // 根据type获取对应的包
     await (type == 'subscribe'

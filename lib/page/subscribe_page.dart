@@ -128,7 +128,7 @@ class _SubscribePageState extends State<SubscribePage> {
       child: GestureDetector(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const BuyCoinsPage()),
+          MaterialPageRoute(builder: (context) => BuyCoinsPage()),
         ),
         child: Row(
           children: const [
