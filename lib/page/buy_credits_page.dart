@@ -159,12 +159,19 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                 child: Column(
                   children: [
                     const Spacer(), // 添加 Spacer 留出上方空白
-                    const Text(
-                      'Get MagaVideo Pro',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [Colors.orange, Colors.pink],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: const Text(
+                        'Get MagaVideo Pro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 5),
