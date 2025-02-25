@@ -83,48 +83,68 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const Spacer(),
-          const Text(
-            'Coins 33% OFF',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
-              ),
-            )
-          else if (_products.isEmpty)
-            const Center(
-              child: Text(
-                '暂无可用商品',
+          if (_controller.value.isInitialized) _buildVideoBackground(),
+          Column(
+            children: [
+              const Spacer(),
+              const Text(
+                'Coins 33% OFF',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            )
-          else
-            // 遍历_products并构建选项
-            ..._products
-                .map((product) => _buildCoinOption(
-                      coins: product.title,
-                      price: product.price,
-                      discount: '33%',
-                      isSelected: selectedPlan == _products.indexOf(product),
-                      onTap: () => setState(
-                          () => selectedPlan = _products.indexOf(product)),
-                    ))
-                .toList(),
-          _buildBottomSection(context),
+              const SizedBox(height: 20),
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                  ),
+                )
+              else if (_products.isEmpty)
+                const Center(
+                  child: Text(
+                    '暂无可用商品',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              else
+                // 遍历_products并构建选项
+                ..._products
+                    .map((product) => _buildCoinOption(
+                          coins: product.title,
+                          price: product.price,
+                          discount: '33%',
+                          isSelected:
+                              selectedPlan == _products.indexOf(product),
+                          onTap: () => setState(
+                              () => selectedPlan = _products.indexOf(product)),
+                        ))
+                    .toList(),
+              _buildBottomSection(context),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVideoBackground() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: MediaQuery.of(context).size.height / 2,
+      child: Opacity(
+        opacity: 0.5,
+        child: VideoPlayer(_controller),
       ),
     );
   }
