@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // 导入 Cupertino 库
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
@@ -47,18 +48,55 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
 
     try {
       await _applePaymentService.buySubscription('weekly');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('订阅成功')),
-      );
+      _showSuccessDialog();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('发生错误: $e')),
-      );
+      _showErrorDialog(e.toString());
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  void _showSuccessDialog() {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Subscription Successful'),
+          content:
+              const Text('Your subscription has been activated successfully.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: Text('An error occurred: $error'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

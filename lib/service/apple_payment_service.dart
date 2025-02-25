@@ -44,18 +44,18 @@ class ApplePaymentService {
     try {
       final String? productId = productIds[productName];
       if (productId == null) {
-        throw Exception('未找到产品: $productName');
+        throw Exception('Product not found: $productName');
       }
 
       final productDetails = _products.firstWhere(
         (product) => product.id == productId,
-        orElse: () => throw Exception('未找到产品详情: $productId'),
+        orElse: () => throw Exception('Product details not found: $productId'),
       );
 
       final purchaseParam = PurchaseParam(productDetails: productDetails);
       await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (e) {
-      debugPrint('购买失败: $e');
+      debugPrint('Error buying subscription: $e');
       rethrow;
     }
   }
