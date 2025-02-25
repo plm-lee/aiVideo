@@ -43,43 +43,34 @@ class BuyCoinsPage extends HookConsumerWidget {
       body: Column(
         children: [
           const Spacer(),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Coins 33% OFF',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildCoinOption(
-                    coins: '6000',
-                    price: '39.99',
-                    discount: '33%',
-                    isSelected: selectedPlan.value == 0,
-                    onTap: () => selectedPlan.value = 0,
-                  ),
-                  _buildCoinOption(
-                    coins: '1500',
-                    price: '12.99',
-                    discount: '13%',
-                    isSelected: selectedPlan.value == 1,
-                    onTap: () => selectedPlan.value = 1,
-                  ),
-                  _buildCoinOption(
-                    coins: '600',
-                    price: '5.99',
-                    isSelected: selectedPlan.value == 2,
-                    onTap: () => selectedPlan.value = 2,
-                  ),
-                ],
-              ),
+          const Text(
+            'Coins 33% OFF',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
             ),
+          ),
+          const SizedBox(height: 20),
+          _buildCoinOption(
+            coins: '6000',
+            price: '39.99',
+            discount: '33%',
+            isSelected: selectedPlan.value == 0,
+            onTap: () => selectedPlan.value = 0,
+          ),
+          _buildCoinOption(
+            coins: '1500',
+            price: '12.99',
+            discount: '13%',
+            isSelected: selectedPlan.value == 1,
+            onTap: () => selectedPlan.value = 1,
+          ),
+          _buildCoinOption(
+            coins: '600',
+            price: '5.99',
+            isSelected: selectedPlan.value == 2,
+            onTap: () => selectedPlan.value = 2,
           ),
           _buildBottomSection(context),
         ],
