@@ -156,25 +156,23 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
           Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Get MagaVideo Pro',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                child: Column(
+                  children: [
+                    const Spacer(), // 添加 Spacer 留出上方空白
+                    const Text(
+                      'Get MagaVideo Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 20),
-                      _buildFeatureItem('1200 Coins Refresh Weekly'),
-                      _buildFeatureItem('Up to 5 tasks in queue'),
-                      _buildFeatureItem('Pro Quality Videos'),
-                      _buildFeatureItem('Fast-track Generation'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 5),
+                    _buildFeatureItem('1200 Coins Refresh Weekly'),
+                    _buildFeatureItem('Up to 5 tasks in queue'),
+                    _buildFeatureItem('Pro Quality Videos'),
+                    _buildFeatureItem('Fast-track Generation'),
+                  ],
                 ),
               ),
               _buildBottomSection(),
