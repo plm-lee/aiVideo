@@ -168,10 +168,18 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    _buildFeatureItem('1200 Coins Refresh Weekly'),
-                    _buildFeatureItem('Up to 5 tasks in queue'),
-                    _buildFeatureItem('Pro Quality Videos'),
-                    _buildFeatureItem('Fast-track Generation'),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFeatureItem('1200 Coins Refresh Weekly'),
+                          _buildFeatureItem('Up to 5 tasks in queue'),
+                          _buildFeatureItem('Pro Quality Videos'),
+                          _buildFeatureItem('Fast-track Generation'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -184,31 +192,36 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
   }
 
   Widget _buildFeatureItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.pink.withOpacity(0.2),
-              shape: BoxShape.circle,
+    return SizedBox(
+      width: 280, // 设置固定宽度以保持一致性
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.pink.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.pink,
+                size: 20,
+              ),
             ),
-            child: const Icon(
-              Icons.check,
-              color: Colors.pink,
-              size: 20,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
