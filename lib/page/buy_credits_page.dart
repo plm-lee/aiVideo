@@ -173,6 +173,8 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                       _buildFeatureItem('Up to 5 tasks in queue'),
                       _buildFeatureItem('Pro Quality Videos'),
                       _buildFeatureItem('Fast-track Generation'),
+                      const SizedBox(height: 20),
+                      _buildWeeklyRenewalCard(),
                     ],
                   ),
                 ),
@@ -215,48 +217,53 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     );
   }
 
+  Widget _buildWeeklyRenewalCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade800,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text(
+              'Weekly Renewal',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '\$8.99',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Weekly Renewal',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '\$8.99',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  '\$8.99 / week',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Renews automatically, cancel anytime.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
+          const Text(
+            '\$8.99 / week',
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Renews automatically, cancel anytime.',
+            style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
           Container(
