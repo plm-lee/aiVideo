@@ -1,22 +1,26 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:ai_video/api/pay_api.dart';
+import 'package:ai_video/models/system.dart';
+import 'package:ai_video/service/auth_service.dart';
 
 class ApplePaymentService {
   static final ApplePaymentService _instance = ApplePaymentService._internal();
   factory ApplePaymentService() => _instance;
   ApplePaymentService._internal();
 
+  final AuthService _authService = AuthService();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
-  List<ProductDetails> _products = [];
+  List<ProductDetails> _products = []; // 订阅包
+  List<ProductDetails> _subscribeProducts = []; // 订阅包
+  List<ProductDetails> _coinsProducts = []; // 金币包
   // 定义商品ID
-  final Map<String, String> productIds = {
-    'weekly': 'com.bigchallenger.magaVideo.subscription.weekly.pro',
-    '1500': 'com.bigchallenger.magaVideo.consumable.coins1500',
-  };
+  final Map<String, String> productMap = {};
 
-  Future<void> initialize() async {
+  // 初始化 根据传入参数判断是订阅包还是金币包
+  Future<void> initialize(String type) async {
     if (await _inAppPurchase.isAvailable()) {
       _subscription = _inAppPurchase.purchaseStream.listen(
         _handlePurchaseUpdates,
@@ -24,25 +28,50 @@ class ApplePaymentService {
         onError: (error) => debugPrint('Error: $error'),
       );
 
-      await _loadProducts();
+      await _loadProducts(type);
     }
   }
 
-  Future<void> _loadProducts() async {
-    final ProductDetailsResponse response =
-        await _inAppPurchase.queryProductDetails(productIds.values.toSet());
+  Future<void> _loadProducts(String type) async {
+    // 根据type获取对应的包
+    await (type == 'subscribe'
+        ? fetchSubscribePackages()
+        : fetchCoinsPackages());
 
-    if (response.error != null) {
-      debugPrint('Error loading products: ${response.error}');
-      return;
+    final products = type == 'subscribe' ? _subscribeProducts : _coinsProducts;
+    final Set<String> productIds = products.map((p) => p.id).toSet();
+
+    // 将接口中获取到的商品信息添加到productMap中
+    productMap.addAll(Map.fromEntries(
+      products.map((p) => MapEntry(p.title, p.id)),
+    ));
+    debugPrint('productMap: $productMap');
+
+    try {
+      final ProductDetailsResponse response =
+          await _inAppPurchase.queryProductDetails(productIds);
+      if (response.error != null) {
+        debugPrint('Error loading products: ${response.error}');
+        return;
+      }
+      debugPrint('response: $response');
+
+      _products = response.productDetails;
+
+      if (_products.isEmpty) {
+        debugPrint('No products found');
+      }
+
+      // 打印商品信息
+      debugPrint('Products: $_products');
+    } catch (e) {
+      debugPrint('Error loading products: $e');
     }
-
-    _products = response.productDetails;
   }
 
   Future<void> buySubscription(String productName) async {
     try {
-      final String? productId = productIds[productName];
+      final String? productId = productMap[productName];
       if (productId == null) {
         throw Exception('Product not found: $productName');
       }
@@ -77,5 +106,66 @@ class ApplePaymentService {
 
   void dispose() {
     _subscription?.cancel();
+  }
+
+  // 获取订阅包
+  Future<void> fetchSubscribePackages() async {
+    final (success, message, user) = await _authService.getCurrentUser();
+    if (!success || user == null) {
+      throw Exception('Failed to fetch purchase packages: user not found');
+    }
+
+    final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
+    if (response['response']['success'] != '1') {
+      // 弹窗提醒
+      throw Exception(
+          'Failed to fetch purchase packages: ${response['response']['description']}');
+    }
+
+    final List<SubscriptionPackage> subscriptionPackages =
+        (response['subscribe_pkg'] as List)
+            .map((e) => SubscriptionPackage.fromJson(e))
+            .toList();
+
+    _subscribeProducts = subscriptionPackages
+        .map((e) => ProductDetails(
+              id: e.productId,
+              title: e.productName,
+              description: e.amount.toString(),
+              price: e.amount.toString(),
+              rawPrice: e.amount,
+              currencyCode: 'USD',
+            ))
+        .toList();
+  }
+
+  // 获取金币购买包
+  Future<void> fetchCoinsPackages() async {
+    final (success, message, user) = await _authService.getCurrentUser();
+    if (!success || user == null) {
+      throw Exception('Failed to fetch purchase packages: user not found');
+    }
+
+    final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
+    if (response['response']['success'] != '1') {
+      throw Exception(
+          'Failed to fetch purchase packages: ${response['response']['description']}');
+    }
+
+    final List<SubscriptionPackage> subscriptionPackages =
+        (response['coin_pkg'] as List)
+            .map((e) => SubscriptionPackage.fromJson(e))
+            .toList();
+
+    _coinsProducts = subscriptionPackages
+        .map((e) => ProductDetails(
+              id: e.productId,
+              title: e.productName,
+              description: e.amount.toString(),
+              price: e.amount.toString(),
+              rawPrice: e.amount,
+              currencyCode: 'USD',
+            ))
+        .toList();
   }
 }

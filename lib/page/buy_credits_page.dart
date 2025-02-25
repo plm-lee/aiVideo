@@ -25,7 +25,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
     if (_hotDealIndexes.isNotEmpty) {
       _selectedIndex = _hotDealIndexes[0];
     }
-    _applePaymentService.initialize();
+    _applePaymentService.initialize('subscribe');
     _controller = VideoPlayerController.asset('assets/videos/background.mp4')
       ..initialize().then((_) {
         setState(() {});
