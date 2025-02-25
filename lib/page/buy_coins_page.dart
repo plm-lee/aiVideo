@@ -27,7 +27,6 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   Future<void> _loadProducts() async {
     setState(() => _isLoading = true);
     try {
-      await _applePaymentService.initialize('coins');
       _products = _applePaymentService.coinsProducts;
     } catch (e) {
       debugPrint('加载商品失败: $e');

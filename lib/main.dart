@@ -18,6 +18,7 @@ import 'package:ai_video/page/histories_page.dart';
 import 'package:ai_video/page/purchase_history_page.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/page/mine_page.dart';
+import 'package:ai_video/service/apple_payment_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,9 @@ void main() async {
 
   // 加载语言设置
   await LocaleService().loadLocale();
+
+  // 初始化苹果支付
+  ApplePaymentService().initialize();
 
   runApp(
     MultiProvider(

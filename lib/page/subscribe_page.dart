@@ -26,7 +26,6 @@ class _SubscribePageState extends State<SubscribePage> {
   void initState() {
     super.initState();
     _initializeVideoPlayer();
-    _applePaymentService.initialize('subscribe');
   }
 
   void _initializeVideoPlayer() {
