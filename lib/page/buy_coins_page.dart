@@ -15,16 +15,25 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   int? selectedPlan;
   List<ProductDetails> _products = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _initializeVideoPlayer();
-    _applePaymentService.initialize('coins');
-    _products = _applePaymentService.coinsProducts;
+    _loadProducts();
+  }
 
-    // 打印第一个商品
-    debugPrint("第一个商品：" + _products.first.title);
+  Future<void> _loadProducts() async {
+    setState(() => _isLoading = true);
+    try {
+      await _applePaymentService.initialize('coins');
+      _products = _applePaymentService.coinsProducts;
+    } catch (e) {
+      debugPrint('加载商品失败: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _initializeVideoPlayer() {
@@ -87,17 +96,34 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
             ),
           ),
           const SizedBox(height: 20),
-          // 遍历_products并构建选项
-          ..._products
-              .map((product) => _buildCoinOption(
-                    coins: product.title,
-                    price: product.price,
-                    discount: '33%',
-                    isSelected: selectedPlan == _products.indexOf(product),
-                    onTap: () => setState(
-                        () => selectedPlan = _products.indexOf(product)),
-                  ))
-              .toList(),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+              ),
+            )
+          else if (_products.isEmpty)
+            const Center(
+              child: Text(
+                '暂无可用商品',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            )
+          else
+            // 遍历_products并构建选项
+            ..._products
+                .map((product) => _buildCoinOption(
+                      coins: product.title,
+                      price: product.price,
+                      discount: '33%',
+                      isSelected: selectedPlan == _products.indexOf(product),
+                      onTap: () => setState(
+                          () => selectedPlan = _products.indexOf(product)),
+                    ))
+                .toList(),
           _buildBottomSection(context),
         ],
       ),
