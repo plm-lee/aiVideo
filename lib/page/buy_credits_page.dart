@@ -161,7 +161,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
                     const Spacer(), // 添加 Spacer 留出上方空白
                     ShaderMask(
                       shaderCallback: (bounds) => LinearGradient(
-                        colors: [Color(0xFFFEE140), Color(0xFFFA709A)],
+                        colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ).createShader(bounds),
@@ -255,7 +255,7 @@ class _BuyCreditsPageState extends State<BuyCreditsPage> {
             height: 50,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFEE140), Color(0xFFFA709A)],
+                colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),

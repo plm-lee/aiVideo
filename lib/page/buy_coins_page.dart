@@ -102,7 +102,7 @@ class BuyCoinsPage extends HookConsumerWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-                  colors: [Colors.orange.shade200, Colors.pink],
+                  colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 )
@@ -166,7 +166,7 @@ class BuyCoinsPage extends HookConsumerWidget {
             height: 50,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange.shade200, Colors.pink],
+                colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),

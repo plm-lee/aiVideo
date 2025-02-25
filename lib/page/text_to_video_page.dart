@@ -167,7 +167,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFFF6B6B), Color(0xFFFF8E8E)],
+          colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
