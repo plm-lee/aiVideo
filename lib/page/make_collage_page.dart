@@ -133,32 +133,38 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(12),
+          const Spacer(flex: 1),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            height: MediaQuery.of(context).size.height * 2 / 3, // 占屏幕高度的 2/3
+            child: AspectRatio(
+              aspectRatio: 1.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _isSplitLayout
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: _buildUploadSection(isLeftSide: true),
+                          ),
+                          Container(
+                            width: 1,
+                            color: Colors.grey[800],
+                          ),
+                          Expanded(
+                            child: _buildUploadSection(isLeftSide: false),
+                          ),
+                        ],
+                      )
+                    : _buildUploadSection(isLeftSide: true),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: _isSplitLayout
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: _buildUploadSection(isLeftSide: true),
-                        ),
-                        Container(
-                          width: 1,
-                          color: Colors.grey[800],
-                        ),
-                        Expanded(
-                          child: _buildUploadSection(isLeftSide: false),
-                        ),
-                      ],
-                    )
-                  : _buildUploadSection(isLeftSide: true),
             ),
           ),
+          const Spacer(flex: 1),
           _buildBottomSection(),
         ],
       ),
