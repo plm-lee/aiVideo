@@ -42,7 +42,7 @@ class _AIVideoState extends State<AIVideo> {
           'title': 'Kiss Anime',
           'image': 'assets/images/kiss3.jpg',
           'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/Cji5LWe0bZoAAAAAAaOWDg-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T063028Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=e5be50a0b9cf03b7e57f4d5c1724de35bb141a8170b48d69257028849bba5bc6',
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T083755Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=64899a6707d89a235847f66dcd3320d05ba8b2664d8e51f4c3be348abcd7734e',
         },
       ]
     },
@@ -50,9 +50,21 @@ class _AIVideoState extends State<AIVideo> {
       'title': 'AI Hug',
       'icon': '🫂',
       'items': [
-        {'title': 'Hug my Crush', 'image': 'assets/images/hug1.jpg'},
-        {'title': 'Hug Manga', 'image': 'assets/images/hug2.jpg'},
-        {'title': 'Hug Anime', 'image': 'assets/images/hug3.jpg'},
+        {
+          'title': 'Hug my Crush',
+          'image': 'assets/images/hug1.jpg',
+          'video_url': 'assets/videos/kiss_manga.mp4'
+        },
+        {
+          'title': 'Hug Manga',
+          'image': 'assets/images/hug2.jpg',
+          'video_url': 'assets/videos/kiss_manga.mp4'
+        },
+        {
+          'title': 'Hug Anime',
+          'image': 'assets/images/hug3.jpg',
+          'video_url': 'assets/videos/kiss_manga.mp4'
+        },
       ]
     },
   ];
