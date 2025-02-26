@@ -19,6 +19,7 @@ import 'package:ai_video/page/purchase_history_page.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/page/mine_page.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
+import 'package:ai_video/page/theme_detail_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,6 +121,12 @@ final _router = GoRouter(
       path: '/mine',
       pageBuilder: (context, state) => NoTransitionPage(
         child: const MinePage(),
+      ),
+    ),
+    GoRoute(
+      path: '/theme-detail',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: const ThemeDetailPage(),
       ),
     ),
   ],

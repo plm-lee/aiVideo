@@ -6,6 +6,7 @@ import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
+import 'theme_detail_page.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -173,36 +174,40 @@ class _AIVideoState extends State<AIVideo> {
 
   Widget _buildCategoryCard(Map<String, dynamic> item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: _spacing),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_borderRadius),
-        color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-        border: Border.all(
-          color: AppTheme.primaryColor.withOpacity(0.3),
+    return GestureDetector(
+      onTap: () => context.push('/theme-detail'),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: _spacing),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_borderRadius),
+          color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+          border: Border.all(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+          ),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(item['image'], fit: BoxFit.cover),
-          if (item['title'].isNotEmpty)
-            Positioned(
-              left: 12,
-              bottom: 12,
-              child: Text(
-                item['title'],
-                style: TextStyle(
-                  color:
-                      isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(item['image'], fit: BoxFit.cover),
+            if (item['title'].isNotEmpty)
+              Positioned(
+                left: 12,
+                bottom: 12,
+                child: Text(
+                  item['title'],
+                  style: TextStyle(
+                    color: isDark
+                        ? AppTheme.darkTextColor
+                        : AppTheme.lightTextColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
