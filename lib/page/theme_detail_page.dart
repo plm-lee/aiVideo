@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
-class ThemeDetailPage extends StatelessWidget {
+class ThemeDetailPage extends StatefulWidget {
   final String title;
   final String imagePath;
 
@@ -9,6 +10,71 @@ class ThemeDetailPage extends StatelessWidget {
     required this.title,
     required this.imagePath,
   });
+
+  @override
+  State<ThemeDetailPage> createState() => _ThemeDetailPageState();
+}
+
+class _ThemeDetailPageState extends State<ThemeDetailPage> {
+  VideoPlayerController? _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    if (widget.imagePath.endsWith('.mp4')) {
+      _videoController = VideoPlayerController.asset(widget.imagePath)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController?.play(); // 自动开始播放
+          _videoController?.setLooping(true); // 设置循环播放
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Widget _buildMediaContent() {
+    if (widget.imagePath.endsWith('.mp4')) {
+      if (_videoController?.value.isInitialized ?? false) {
+        return AspectRatio(
+          aspectRatio: _videoController!.value.aspectRatio,
+          child: VideoPlayer(_videoController!),
+        );
+      } else {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        );
+      }
+    } else {
+      return Image.asset(
+        widget.imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[900],
+            child: const Center(
+              child: Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 48,
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,30 +88,14 @@ class ThemeDetailPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          title,
+          widget.title,
           style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[900],
-                  child: const Center(
-                    child: Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                      size: 48,
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: _buildMediaContent(),
           ),
           _buildBottomSection(),
         ],

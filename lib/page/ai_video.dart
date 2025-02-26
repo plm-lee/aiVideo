@@ -26,7 +26,7 @@ class _AIVideoState extends State<AIVideo> {
       'icon': '💗',
       'items': [
         {'title': 'Kiss my Crush', 'image': 'assets/images/kiss1.jpg'},
-        {'title': 'Kiss Manga', 'image': 'assets/images/kiss2.jpg'},
+        {'title': 'Kiss Manga', 'image': 'assets/videos/kiss_manga.mp4'},
         {'title': 'Kiss Anime', 'image': 'assets/images/kiss3.jpg'},
       ]
     },
