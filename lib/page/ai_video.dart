@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'theme_detail_page.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:async';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -75,23 +76,37 @@ class _AIVideoState extends State<AIVideo> {
         for (var item in category['items']) {
           final String? videoUrl = item['video_url'];
           if (videoUrl != null && !_videoControllers.containsKey(videoUrl)) {
-            final controller = videoUrl.startsWith('http')
-                ? VideoPlayerController.networkUrl(
-                    Uri.parse(videoUrl),
-                    videoPlayerOptions: VideoPlayerOptions(
-                      mixWithOthers: true,
-                      allowBackgroundPlayback: false,
-                    ),
-                  )
-                : VideoPlayerController.asset(videoUrl);
+            try {
+              final controller = videoUrl.startsWith('http')
+                  ? VideoPlayerController.networkUrl(
+                      Uri.parse(videoUrl),
+                      videoPlayerOptions: VideoPlayerOptions(
+                        mixWithOthers: true,
+                        allowBackgroundPlayback: false,
+                      ),
+                    )
+                  : VideoPlayerController.asset(videoUrl);
 
-            _videoControllers[videoUrl] = controller;
-            await controller.initialize();
-            controller.setLooping(true);
-            controller.setVolume(0.0); // 静音播放
-            if (mounted) {
-              controller.play();
-              setState(() {});
+              _videoControllers[videoUrl] = controller;
+
+              await controller.initialize().timeout(
+                const Duration(seconds: 5),
+                onTimeout: () {
+                  debugPrint('Video initialization timeout: $videoUrl');
+                  throw TimeoutException('Video initialization timeout');
+                },
+              );
+
+              if (mounted) {
+                controller.setLooping(true);
+                controller.setVolume(0.0);
+                controller.play();
+                setState(() {});
+              }
+            } catch (e) {
+              debugPrint('Error initializing video: $videoUrl, error: $e');
+              _videoControllers.remove(videoUrl);
+              continue;
             }
           }
         }
