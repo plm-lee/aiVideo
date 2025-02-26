@@ -272,7 +272,7 @@ class _AIVideoState extends State<AIVideo> {
         '/theme-detail',
         extra: {
           'title': item['title'] ?? 'Kiss my Crush',
-          'imagePath': item['image'],
+          'imagePath': item['video_url'] ?? item['image'],
         },
       ),
       child: Container(
