@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class MakeCollagePage extends StatefulWidget {
   const MakeCollagePage({
@@ -10,6 +12,20 @@ class MakeCollagePage extends StatefulWidget {
 }
 
 class _MakeCollagePageState extends State<MakeCollagePage> {
+  final ImagePicker _picker = ImagePicker();
+  XFile? _selectedImage;
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() => _selectedImage = image);
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,35 +59,49 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
                 color: Colors.grey[900],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD7905F).withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.add, color: Color(0xFFD7905F)),
-                        onPressed: () {
-                          // TODO: 选择图片
-                        },
+              clipBehavior: Clip.antiAlias,
+              child: _selectedImage != null
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Image.file(
+                            File(_selectedImage!.path),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() => _selectedImage = null);
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildUploadButton(),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Upload',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Upload',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
           _buildBottomSection(),
@@ -80,7 +110,24 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
     );
   }
 
+  Widget _buildUploadButton() {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFD7905F).withOpacity(0.2),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.add, color: Color(0xFFD7905F)),
+        onPressed: _pickImage,
+      ),
+    );
+  }
+
   Widget _buildBottomSection() {
+    final bool canGenerate = _selectedImage != null;
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -90,17 +137,22 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
             width: double.infinity,
             height: 50,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFD7905F).withOpacity(canGenerate ? 1 : 0.5),
+                  const Color(0xFFC060C3).withOpacity(canGenerate ? 1 : 0.5),
+                ],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: 生成拼图
-              },
+              onPressed: canGenerate
+                  ? () {
+                      // TODO: 生成拼图
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
