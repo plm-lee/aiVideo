@@ -58,6 +58,7 @@ class _AIVideoState extends State<AIVideo> {
 
   // 添加视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
+  bool _isInitializing = false;
 
   @override
   void initState() {
@@ -66,25 +67,39 @@ class _AIVideoState extends State<AIVideo> {
   }
 
   Future<void> _initializeVideoControllers() async {
-    for (var category in _categories) {
-      for (var item in category['items']) {
-        final String? videoUrl = item['video_url'];
-        if (videoUrl != null) {
-          try {
+    if (_isInitializing) return;
+    _isInitializing = true;
+
+    try {
+      for (var category in _categories) {
+        for (var item in category['items']) {
+          final String? videoUrl = item['video_url'];
+          if (videoUrl != null && !_videoControllers.containsKey(videoUrl)) {
             final controller = videoUrl.startsWith('http')
-                ? VideoPlayerController.networkUrl(Uri.parse(videoUrl))
+                ? VideoPlayerController.networkUrl(
+                    Uri.parse(videoUrl),
+                    videoPlayerOptions: VideoPlayerOptions(
+                      mixWithOthers: true,
+                      allowBackgroundPlayback: false,
+                    ),
+                  )
                 : VideoPlayerController.asset(videoUrl);
 
             _videoControllers[videoUrl] = controller;
             await controller.initialize();
             controller.setLooping(true);
-            controller.play();
-            if (mounted) setState(() {});
-          } catch (e) {
-            debugPrint('Error initializing video controller: $e');
+            controller.setVolume(0.0); // 静音播放
+            if (mounted) {
+              controller.play();
+              setState(() {});
+            }
           }
         }
       }
+    } catch (e) {
+      debugPrint('Error initializing video controllers: $e');
+    } finally {
+      _isInitializing = false;
     }
   }
 
@@ -93,6 +108,7 @@ class _AIVideoState extends State<AIVideo> {
     for (var controller in _videoControllers.values) {
       controller.dispose();
     }
+    _videoControllers.clear();
     super.dispose();
   }
 
@@ -233,35 +249,34 @@ class _AIVideoState extends State<AIVideo> {
     final bool isNetworkPath = videoUrl?.startsWith('http') ?? false;
 
     if (videoUrl != null) {
-      if (_videoControllers[videoUrl]?.value.isInitialized ?? false) {
+      final controller = _videoControllers[videoUrl];
+      if (controller?.value.isInitialized ?? false) {
         return FittedBox(
           fit: BoxFit.cover,
           child: SizedBox(
-            width: _videoControllers[videoUrl]!.value.size.width,
-            height: _videoControllers[videoUrl]!.value.size.height,
-            child: VideoPlayer(_videoControllers[videoUrl]!),
+            width: controller!.value.size.width,
+            height: controller.value.size.height,
+            child: VideoPlayer(controller),
           ),
         );
       }
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Colors.white,
-        ),
-      );
+      return Image.asset(imagePath, fit: BoxFit.cover);
     }
 
     return isNetworkPath
         ? Image.network(
             imagePath,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.black,
-                child: const Icon(Icons.error, color: Colors.white),
-              );
-            },
+            errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
           )
         : Image.asset(imagePath, fit: BoxFit.cover);
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      color: Colors.black,
+      child: const Icon(Icons.error, color: Colors.white),
+    );
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> item) {
