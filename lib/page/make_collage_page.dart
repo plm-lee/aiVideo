@@ -13,13 +13,96 @@ class MakeCollagePage extends StatefulWidget {
 
 class _MakeCollagePageState extends State<MakeCollagePage> {
   final ImagePicker _picker = ImagePicker();
-  XFile? _selectedImage;
+  XFile? _leftImage; // 左侧图片
+  XFile? _rightImage; // 右侧图片
+  bool _isSplitLayout = false;
 
-  Future<void> _pickImage() async {
+  void _toggleLayout() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildLayoutOption(
+                    isSelected: !_isSplitLayout,
+                    icon: Icons.crop_square,
+                    onTap: () {
+                      setState(() {
+                        _isSplitLayout = false;
+                        _rightImage = null; // 切换到单图时清除右侧图片
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildLayoutOption(
+                    isSelected: _isSplitLayout,
+                    icon: Icons.vertical_split,
+                    onTap: () {
+                      setState(() => _isSplitLayout = true);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLayoutOption({
+    required bool isSelected,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? const Color(0xFFD7905F) : Colors.grey,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? const Color(0xFFD7905F) : Colors.grey,
+          size: 32,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(bool isLeftImage) async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        setState(() => _selectedImage = image);
+        setState(() {
+          if (_isSplitLayout) {
+            if (isLeftImage) {
+              _leftImage = image;
+            } else {
+              _rightImage = image;
+            }
+          } else {
+            _leftImage = image;
+            _rightImage = null;
+          }
+        });
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
@@ -44,9 +127,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.grid_view, color: Colors.white),
-            onPressed: () {
-              // TODO: 切换布局
-            },
+            onPressed: _toggleLayout,
           ),
         ],
       ),
@@ -60,48 +141,22 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
-              child: _selectedImage != null
-                  ? Stack(
-                      fit: StackFit.expand,
+              child: _isSplitLayout
+                  ? Row(
                       children: [
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: Image.file(
-                            File(_selectedImage!.path),
-                            fit: BoxFit.cover,
-                          ),
+                        Expanded(
+                          child: _buildUploadSection(isLeftSide: true),
                         ),
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setState(() => _selectedImage = null);
-                            },
-                          ),
+                        Container(
+                          width: 1,
+                          color: Colors.grey[800],
+                        ),
+                        Expanded(
+                          child: _buildUploadSection(isLeftSide: false),
                         ),
                       ],
                     )
-                  : Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildUploadButton(),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Upload',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  : _buildUploadSection(isLeftSide: true),
             ),
           ),
           _buildBottomSection(),
@@ -110,7 +165,57 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
     );
   }
 
-  Widget _buildUploadButton() {
+  Widget _buildUploadSection({required bool isLeftSide}) {
+    final currentImage = isLeftSide ? _leftImage : _rightImage;
+
+    if (currentImage != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          GestureDetector(
+            onTap: () => _pickImage(isLeftSide),
+            child: Image.file(
+              File(currentImage.path),
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => setState(() {
+                if (isLeftSide) {
+                  _leftImage = null;
+                } else {
+                  _rightImage = null;
+                }
+              }),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildUploadButton(isLeftSide),
+          const SizedBox(height: 16),
+          const Text(
+            'Upload',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadButton(bool isLeftSide) {
     return Container(
       width: 60,
       height: 60,
@@ -120,13 +225,15 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       ),
       child: IconButton(
         icon: const Icon(Icons.add, color: Color(0xFFD7905F)),
-        onPressed: _pickImage,
+        onPressed: () => _pickImage(isLeftSide),
       ),
     );
   }
 
   Widget _buildBottomSection() {
-    final bool canGenerate = _selectedImage != null;
+    final bool canGenerate = _isSplitLayout
+        ? _leftImage != null && _rightImage != null
+        : _leftImage != null;
 
     return Container(
       padding: const EdgeInsets.all(16),
