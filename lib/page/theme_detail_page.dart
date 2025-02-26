@@ -33,15 +33,18 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
 
   Future<void> _initializeVideo() async {
     if (widget.videoUrl == null) return;
-
     debugPrint('初始化视频: ${widget.videoUrl}');
+
     setState(() => _isLoading = true);
 
     try {
       if (widget.preloadedController != null) {
         _videoController = widget.preloadedController;
-        _videoController!.play();
+        // 重置视频到开始位置并立即播放
+        await _videoController!.seekTo(Duration.zero);
+        _videoController!.setVolume(1.0);
         _videoController!.setLooping(true);
+        _videoController!.play();
         setState(() => _isLoading = false);
         return;
       }
@@ -56,9 +59,13 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
             )
           : VideoPlayerController.asset(widget.videoUrl!);
 
+      // 预加载视频
       await _videoController!.initialize();
-      _videoController!.play();
+      // 设置音量并开始播放
+      _videoController!.setVolume(1.0);
       _videoController!.setLooping(true);
+      _videoController!.play();
+
       if (mounted) setState(() => _isLoading = false);
     } catch (e) {
       debugPrint('Error initializing video: $e');
@@ -70,6 +77,9 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
   void dispose() {
     if (widget.preloadedController == null) {
       _videoController?.dispose();
+    } else {
+      // 返回列表页面时恢复静音
+      _videoController?.setVolume(0.0);
     }
     super.dispose();
   }
@@ -78,13 +88,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
     if (widget.videoUrl != null) {
       if (_isLoading) {
         return const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 16),
-            ],
-          ),
+          child: CircularProgressIndicator(color: Colors.white),
         );
       }
 
