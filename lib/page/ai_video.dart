@@ -7,6 +7,7 @@ import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'theme_detail_page.dart';
+import 'package:video_player/video_player.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -40,6 +41,38 @@ class _AIVideoState extends State<AIVideo> {
       ]
     },
   ];
+
+  // 添加视频控制器管理
+  final Map<String, VideoPlayerController> _videoControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideoControllers();
+  }
+
+  Future<void> _initializeVideoControllers() async {
+    for (var category in _categories) {
+      for (var item in category['items']) {
+        if (item['image'].toString().endsWith('.mp4')) {
+          final controller = VideoPlayerController.asset(item['image']);
+          _videoControllers[item['image']] = controller;
+          await controller.initialize();
+          controller.setLooping(true);
+          controller.play();
+          if (mounted) setState(() {});
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   void _handleVideoConversion(String type) {
     debugPrint('处理$type转视频');
@@ -174,6 +207,8 @@ class _AIVideoState extends State<AIVideo> {
 
   Widget _buildCategoryCard(Map<String, dynamic> item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isVideo = item['image'].toString().endsWith('.mp4');
+
     return GestureDetector(
       onTap: () => context.push(
         '/theme-detail',
@@ -195,8 +230,22 @@ class _AIVideoState extends State<AIVideo> {
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
-          children: [
-            Image.asset(item['image'], fit: BoxFit.cover),
+          children: <Widget>[
+            if (isVideo)
+              _videoControllers[item['image']]?.value.isInitialized ?? false
+                  ? FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width:
+                            _videoControllers[item['image']]!.value.size.width,
+                        height:
+                            _videoControllers[item['image']]!.value.size.height,
+                        child: VideoPlayer(_videoControllers[item['image']]!),
+                      ),
+                    )
+                  : Image.asset(item['image'], fit: BoxFit.cover)
+            else
+              Image.asset(item['image'], fit: BoxFit.cover),
             if (item['title'].isNotEmpty)
               Positioned(
                 left: 12,

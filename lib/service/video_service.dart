@@ -84,6 +84,7 @@ class VideoService extends ChangeNotifier {
         return (false, message ?? 'User not logged in');
       }
 
+      debugPrint('getUserTasks: ${user.uuid}');
       final response = await _videoApi.getUserTasks(uuid: user.uuid);
       if (response['response']['success'] != '1') {
         return (
