@@ -274,6 +274,9 @@ class _AIVideoState extends State<AIVideo> {
           'title': item['title'] ?? 'Kiss my Crush',
           'imagePath': item['image'],
           'videoUrl': item['video_url'],
+          'preloadedController': item['video_url'] != null
+              ? _videoControllers[item['video_url']]
+              : null,
         },
       ),
       child: Container(

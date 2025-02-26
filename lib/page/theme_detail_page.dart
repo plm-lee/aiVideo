@@ -7,12 +7,14 @@ class ThemeDetailPage extends StatefulWidget {
   final String title;
   final String imagePath;
   final String? videoUrl;
+  final VideoPlayerController? preloadedController;
 
   const ThemeDetailPage({
     super.key,
     required this.title,
     required this.imagePath,
     this.videoUrl,
+    this.preloadedController,
   });
 
   @override
@@ -36,8 +38,22 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
     setState(() => _isLoading = true);
 
     try {
+      if (widget.preloadedController != null) {
+        _videoController = widget.preloadedController;
+        _videoController!.play();
+        _videoController!.setLooping(true);
+        setState(() => _isLoading = false);
+        return;
+      }
+
       _videoController = widget.videoUrl!.startsWith('http')
-          ? VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl!))
+          ? VideoPlayerController.networkUrl(
+              Uri.parse(widget.videoUrl!),
+              videoPlayerOptions: VideoPlayerOptions(
+                mixWithOthers: true,
+                allowBackgroundPlayback: false,
+              ),
+            )
           : VideoPlayerController.asset(widget.videoUrl!);
 
       await _videoController!.initialize();
@@ -52,7 +68,9 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
 
   @override
   void dispose() {
-    _videoController?.dispose();
+    if (widget.preloadedController == null) {
+      _videoController?.dispose();
+    }
     super.dispose();
   }
 
@@ -65,10 +83,6 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
             children: [
               CircularProgressIndicator(color: Colors.white),
               SizedBox(height: 16),
-              Text(
-                '加载中...',
-                style: TextStyle(color: Colors.white),
-              ),
             ],
           ),
         );
