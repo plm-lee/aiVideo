@@ -131,6 +131,7 @@ final _router = GoRouter(
           child: ThemeDetailPage(
             title: extra['title'] as String,
             imagePath: extra['imagePath'] as String,
+            videoUrl: extra['videoUrl'] as String?,
           ),
         );
       },

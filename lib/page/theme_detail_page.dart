@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:ai_video/service/video_service.dart';
+import 'dart:io';
 
 class ThemeDetailPage extends StatefulWidget {
   final String title;
   final String imagePath;
+  final String? videoUrl;
 
   const ThemeDetailPage({
     super.key,
     required this.title,
     required this.imagePath,
+    this.videoUrl,
   });
 
   @override
@@ -17,6 +21,7 @@ class ThemeDetailPage extends StatefulWidget {
 
 class _ThemeDetailPageState extends State<ThemeDetailPage> {
   VideoPlayerController? _videoController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -25,13 +30,23 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
   }
 
   Future<void> _initializeVideo() async {
-    if (widget.imagePath.endsWith('.mp4')) {
-      _videoController = VideoPlayerController.asset(widget.imagePath)
-        ..initialize().then((_) {
-          setState(() {});
-          _videoController?.play(); // 自动开始播放
-          _videoController?.setLooping(true); // 设置循环播放
-        });
+    if (widget.videoUrl == null) return;
+
+    debugPrint('初始化视频: ${widget.videoUrl}');
+    setState(() => _isLoading = true);
+
+    try {
+      _videoController = widget.videoUrl!.startsWith('http')
+          ? VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl!))
+          : VideoPlayerController.asset(widget.videoUrl!);
+
+      await _videoController!.initialize();
+      _videoController!.play();
+      _videoController!.setLooping(true);
+      if (mounted) setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint('Error initializing video: $e');
+      setState(() => _isLoading = false);
     }
   }
 
@@ -42,38 +57,68 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
   }
 
   Widget _buildMediaContent() {
-    if (widget.imagePath.endsWith('.mp4')) {
+    if (widget.videoUrl != null) {
+      if (_isLoading) {
+        return const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text(
+                '加载中...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      }
+
       if (_videoController?.value.isInitialized ?? false) {
         return AspectRatio(
           aspectRatio: _videoController!.value.aspectRatio,
           child: VideoPlayer(_videoController!),
         );
-      } else {
-        return const Center(
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
-        );
       }
-    } else {
-      return Image.asset(
-        widget.imagePath,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[900],
-            child: const Center(
-              child: Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 48,
-              ),
-            ),
-          );
-        },
-      );
+
+      // 视频加载失败时显示图片
+      return _buildImage();
     }
+
+    return _buildImage();
+  }
+
+  Widget _buildImage() {
+    return widget.imagePath.startsWith('http')
+        ? Image.network(
+            widget.imagePath,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return _buildErrorWidget();
+            },
+          )
+        : Image.asset(
+            widget.imagePath,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return _buildErrorWidget();
+            },
+          );
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      color: Colors.grey[900],
+      child: const Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.white,
+          size: 48,
+        ),
+      ),
+    );
   }
 
   @override

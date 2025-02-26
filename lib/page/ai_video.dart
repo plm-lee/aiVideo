@@ -230,7 +230,7 @@ class _AIVideoState extends State<AIVideo> {
   Widget _buildMediaContent(Map<String, dynamic> item) {
     final String? videoUrl = item['video_url'];
     final String imagePath = item['image'];
-    final bool isNetworkPath = imagePath.startsWith('http');
+    final bool isNetworkPath = videoUrl?.startsWith('http') ?? false;
 
     if (videoUrl != null) {
       if (_videoControllers[videoUrl]?.value.isInitialized ?? false) {
@@ -272,7 +272,8 @@ class _AIVideoState extends State<AIVideo> {
         '/theme-detail',
         extra: {
           'title': item['title'] ?? 'Kiss my Crush',
-          'imagePath': item['video_url'] ?? item['image'],
+          'imagePath': item['image'],
+          'videoUrl': item['video_url'],
         },
       ),
       child: Container(
