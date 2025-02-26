@@ -26,9 +26,23 @@ class _AIVideoState extends State<AIVideo> {
       'title': 'AI Kiss',
       'icon': '💗',
       'items': [
-        {'title': 'Kiss my Crush', 'image': 'assets/images/kiss1.jpg'},
-        {'title': 'Kiss Manga', 'image': 'assets/videos/kiss_manga.mp4'},
-        {'title': 'Kiss Anime', 'image': 'assets/images/kiss3.jpg'},
+        {
+          'title': 'Kiss my Crush',
+          'image': 'assets/images/kiss1.jpg',
+          'video_url':
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T063028Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=4f370581f0dd0dfbf70deab35fc289ad7950c662bc7c37dbb07cd267437ccdd7',
+        },
+        {
+          'title': 'Kiss Manga',
+          'image': 'assets/images/kiss2.jpg',
+          'video_url': 'assets/videos/kiss_manga.mp4',
+        },
+        {
+          'title': 'Kiss Anime',
+          'image': 'assets/images/kiss3.jpg',
+          'video_url':
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/Cji5LWe0bZoAAAAAAaOWDg-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T063028Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=e5be50a0b9cf03b7e57f4d5c1724de35bb141a8170b48d69257028849bba5bc6',
+        },
       ]
     },
     {
@@ -54,13 +68,21 @@ class _AIVideoState extends State<AIVideo> {
   Future<void> _initializeVideoControllers() async {
     for (var category in _categories) {
       for (var item in category['items']) {
-        if (item['image'].toString().endsWith('.mp4')) {
-          final controller = VideoPlayerController.asset(item['image']);
-          _videoControllers[item['image']] = controller;
-          await controller.initialize();
-          controller.setLooping(true);
-          controller.play();
-          if (mounted) setState(() {});
+        final String? videoUrl = item['video_url'];
+        if (videoUrl != null) {
+          try {
+            final controller = videoUrl.startsWith('http')
+                ? VideoPlayerController.networkUrl(Uri.parse(videoUrl))
+                : VideoPlayerController.asset(videoUrl);
+
+            _videoControllers[videoUrl] = controller;
+            await controller.initialize();
+            controller.setLooping(true);
+            controller.play();
+            if (mounted) setState(() {});
+          } catch (e) {
+            debugPrint('Error initializing video controller: $e');
+          }
         }
       }
     }
@@ -205,9 +227,45 @@ class _AIVideoState extends State<AIVideo> {
     );
   }
 
+  Widget _buildMediaContent(Map<String, dynamic> item) {
+    final String? videoUrl = item['video_url'];
+    final String imagePath = item['image'];
+    final bool isNetworkPath = imagePath.startsWith('http');
+
+    if (videoUrl != null) {
+      if (_videoControllers[videoUrl]?.value.isInitialized ?? false) {
+        return FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: _videoControllers[videoUrl]!.value.size.width,
+            height: _videoControllers[videoUrl]!.value.size.height,
+            child: VideoPlayer(_videoControllers[videoUrl]!),
+          ),
+        );
+      }
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
+      );
+    }
+
+    return isNetworkPath
+        ? Image.network(
+            imagePath,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.black,
+                child: const Icon(Icons.error, color: Colors.white),
+              );
+            },
+          )
+        : Image.asset(imagePath, fit: BoxFit.cover);
+  }
+
   Widget _buildCategoryCard(Map<String, dynamic> item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bool isVideo = item['image'].toString().endsWith('.mp4');
 
     return GestureDetector(
       onTap: () => context.push(
@@ -231,21 +289,7 @@ class _AIVideoState extends State<AIVideo> {
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            if (isVideo)
-              _videoControllers[item['image']]?.value.isInitialized ?? false
-                  ? FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width:
-                            _videoControllers[item['image']]!.value.size.width,
-                        height:
-                            _videoControllers[item['image']]!.value.size.height,
-                        child: VideoPlayer(_videoControllers[item['image']]!),
-                      ),
-                    )
-                  : Image.asset(item['image'], fit: BoxFit.cover)
-            else
-              Image.asset(item['image'], fit: BoxFit.cover),
+            _buildMediaContent(item),
             if (item['title'].isNotEmpty)
               Positioned(
                 left: 12,
