@@ -327,9 +327,6 @@ class _AIVideoState extends State<AIVideo> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_borderRadius),
           color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-          border: Border.all(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
