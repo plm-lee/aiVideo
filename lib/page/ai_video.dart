@@ -25,18 +25,18 @@ class _AIVideoState extends State<AIVideo> {
       'title': 'AI Kiss',
       'icon': '💗',
       'items': [
-        {'title': '', 'image': 'assets/images/kiss1.jpg'},
-        {'title': '', 'image': 'assets/images/kiss2.jpg'},
-        {'title': '', 'image': 'assets/images/kiss3.jpg'},
+        {'title': 'Kiss my Crush', 'image': 'assets/images/kiss1.jpg'},
+        {'title': 'Kiss Manga', 'image': 'assets/images/kiss2.jpg'},
+        {'title': 'Kiss Anime', 'image': 'assets/images/kiss3.jpg'},
       ]
     },
     {
       'title': 'AI Hug',
       'icon': '🫂',
       'items': [
-        {'title': '', 'image': 'assets/images/hug1.jpg'},
-        {'title': '', 'image': 'assets/images/hug2.jpg'},
-        {'title': '', 'image': 'assets/images/hug3.jpg'},
+        {'title': 'Hug my Crush', 'image': 'assets/images/hug1.jpg'},
+        {'title': 'Hug Manga', 'image': 'assets/images/hug2.jpg'},
+        {'title': 'Hug Anime', 'image': 'assets/images/hug3.jpg'},
       ]
     },
   ];
@@ -175,7 +175,13 @@ class _AIVideoState extends State<AIVideo> {
   Widget _buildCategoryCard(Map<String, dynamic> item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
-      onTap: () => context.push('/theme-detail'),
+      onTap: () => context.push(
+        '/theme-detail',
+        extra: {
+          'title': item['title'] ?? 'Kiss my Crush',
+          'imagePath': item['image'],
+        },
+      ),
       child: Container(
         width: 140,
         margin: const EdgeInsets.only(right: _spacing),

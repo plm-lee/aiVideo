@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ThemeDetailPage extends StatelessWidget {
-  const ThemeDetailPage({super.key});
+  final String title;
+  final String imagePath;
+
+  const ThemeDetailPage({
+    super.key,
+    required this.title,
+    required this.imagePath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +21,30 @@ class ThemeDetailPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Kiss my Crush',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Column(
         children: [
           Expanded(
             child: Image.asset(
-              'assets/images/kiss1.jpg',
+              imagePath,
               fit: BoxFit.cover,
               width: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[900],
+                  child: const Center(
+                    child: Icon(
+                      Icons.error_outline,
+                      color: Colors.white,
+                      size: 48,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           _buildBottomSection(),

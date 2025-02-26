@@ -125,9 +125,15 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/theme-detail',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: const ThemeDetailPage(),
-      ),
+      pageBuilder: (context, state) {
+        final Map<String, dynamic> extra = state.extra as Map<String, dynamic>;
+        return NoTransitionPage(
+          child: ThemeDetailPage(
+            title: extra['title'] as String,
+            imagePath: extra['imagePath'] as String,
+          ),
+        );
+      },
     ),
   ],
 );
