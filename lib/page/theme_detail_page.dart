@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:ai_video/service/video_service.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 
 class ThemeDetailPage extends StatefulWidget {
   final String title;
@@ -184,9 +185,9 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: 实现主题使用逻辑
-              },
+              onPressed: () => context.push(
+                '/make-collage',
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,

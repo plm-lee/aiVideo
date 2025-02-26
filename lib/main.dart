@@ -20,6 +20,7 @@ import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/page/mine_page.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:ai_video/page/theme_detail_page.dart';
+import 'package:ai_video/page/make_collage_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -135,6 +136,12 @@ final _router = GoRouter(
           ),
         );
       },
+    ),
+    GoRoute(
+      path: '/make-collage',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: const MakeCollagePage(),
+      ),
     ),
   ],
 );
