@@ -16,6 +16,7 @@ class ApplePaymentService {
   List<ProductDetails> _products = [];
   List<ProductDetails> _subscribeProducts = [];
   List<ProductDetails> _coinsProducts = [];
+  Map<String, String> _productUuidMap = {}; // 商品id和uuid的映射
   bool _isInitialized = false;
 
   // 初始化所有商品
@@ -104,13 +105,16 @@ class ApplePaymentService {
               .map((e) => SubscriptionPackage.fromJson(e))
               .toList();
 
-      debugPrint('allPackages: $allPackages');
+      // 构建商品id和uuid的映射
+      _productUuidMap = Map.fromEntries(
+        allPackages.map((e) => MapEntry(e.description, e.uuid)),
+      );
 
       // 处理订阅产品
       _subscribeProducts = allPackages
           .where((e) => e.isSubscription)
           .map((e) => ProductDetails(
-                id: e.uuid,
+                id: e.description,
                 title: e.name,
                 description: e.description,
                 price: (e.price / 100).toStringAsFixed(2),
@@ -124,7 +128,7 @@ class ApplePaymentService {
       _coinsProducts = allPackages
           .where((e) => !e.isSubscription)
           .map((e) => ProductDetails(
-                id: e.uuid,
+                id: e.description,
                 title: e.name,
                 description: e.description,
                 price: (e.price / 100).toStringAsFixed(2),
@@ -161,7 +165,7 @@ class ApplePaymentService {
       );
     }
 
-    return response['response']['original_transaction_id'] as String;
+    return response['original_transaction_id'] as String;
   }
 
   // 购买金币
@@ -172,7 +176,8 @@ class ApplePaymentService {
       // 找到产品的uuid
       final product =
           _coinsProducts.firstWhere((p) => p.description == productId);
-      final orderId = await prepayOrder(productUuid: product.id);
+      final orderId =
+          await prepayOrder(productUuid: _productUuidMap[productId] ?? '');
 
       final purchaseParam = PurchaseParam(
         productDetails: product,
@@ -196,7 +201,8 @@ class ApplePaymentService {
       }
 
       final product = _subscribeProducts.first;
-      final orderId = await prepayOrder(productUuid: product.id);
+      final orderId =
+          await prepayOrder(productUuid: _productUuidMap[product.id] ?? '');
 
       final purchaseParam = PurchaseParam(
         productDetails: product,
