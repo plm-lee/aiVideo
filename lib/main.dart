@@ -137,6 +137,7 @@ final _router = GoRouter(
             preloadedController:
                 extra['preloadedController'] as VideoPlayerController?,
             imgNum: extra['imgNum'] as int,
+            themeId: extra['themeId'] as String,
           ),
         );
       },

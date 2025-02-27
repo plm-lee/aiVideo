@@ -206,15 +206,27 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
     setState(() => _isLoading = true);
 
     try {
-      // 先处理图片
-      final mergedImage = await _mergeAndCompressImages();
-      if (mergedImage == null) {
-        throw Exception('图片处理失败');
+      // 检查是否有必要的图片
+      if (_leftImage == null || (_isSplitLayout && _rightImage == null)) {
+        throw Exception('请选择所需的图片');
+      }
+
+      // 如果是双图模式，需要处理拼接
+      File imageToUse;
+      if (_isSplitLayout) {
+        final mergedImage = await _mergeAndCompressImages();
+        if (mergedImage == null) {
+          throw Exception('图片处理失败');
+        }
+        imageToUse = mergedImage;
+      } else {
+        // 单图模式，直接使用左侧图片
+        imageToUse = File(_leftImage!.path);
       }
 
       final videoService = VideoService();
       final (success, message) = await videoService.themeToVideo(
-        imageFile: mergedImage,
+        imageFile: imageToUse,
         themeId: widget.themeId,
       );
 
@@ -224,7 +236,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
         _showErrorMessage(message);
       }
     } catch (e) {
-      _showErrorMessage('生成视频时发生错误：$e');
+      _showErrorMessage(e.toString());
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -395,9 +407,9 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   }
 
   Widget _buildBottomSection() {
-    final bool canGenerate = _isSplitLayout
-        ? _leftImage != null && _rightImage != null
-        : _leftImage != null;
+    // 检查是否可以生成
+    final bool canGenerate = _leftImage != null &&
+        (!_isSplitLayout || (_isSplitLayout && _rightImage != null));
 
     return Container(
       padding: const EdgeInsets.all(16),

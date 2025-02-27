@@ -30,6 +30,7 @@ class _AIVideoState extends State<AIVideo> {
         {
           'title': 'Kiss my Crush',
           'img_num': 2,
+          'theme_id': '1',
           'image': 'assets/images/kiss1.jpg',
           'video_url':
               'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T131232Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=53105b11b87643998536e2821a45d4445c79351e8b8298f216ab056a6b540b80'
@@ -37,12 +38,14 @@ class _AIVideoState extends State<AIVideo> {
         {
           'title': 'Kiss Manga',
           'img_num': 2,
+          'theme_id': '2',
           'image': 'assets/images/kiss2.jpg',
           'video_url': 'assets/videos/kiss_manga.mp4',
         },
         {
           'title': 'Kiss Anime',
           'img_num': 1,
+          'theme_id': '3',
           'image': 'assets/images/kiss3.jpg',
           'video_url':
               'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T125100Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=a78b2d0a95f03fc45f08fdee5e7b8fc01ed8bd2ec42d26c24fbdf35ce2e31ad4',
@@ -50,23 +53,16 @@ class _AIVideoState extends State<AIVideo> {
       ]
     },
     {
-      'title': 'AI Hug',
-      'icon': '🫂',
+      'title': 'AI Dance',
+      'icon': '💃',
       'items': [
         {
-          'title': 'Hug my Crush',
-          'image': 'assets/images/hug1.jpg',
-          'video_url': 'assets/videos/kiss_manga.mp4'
-        },
-        {
-          'title': 'Hug Manga',
-          'image': 'assets/images/hug2.jpg',
-          'video_url': 'assets/videos/kiss_manga.mp4'
-        },
-        {
-          'title': 'Hug Anime',
-          'image': 'assets/images/hug3.jpg',
-          'video_url': 'assets/videos/kiss_manga.mp4'
+          'title': 'Dance my Crush',
+          'theme_id': '4',
+          'image':
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/aduio_img/d33096154a58418ab30102784c58c350?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=c9f11b65443876ab3f7f8e7b2b30c0475275d30140aa5e14648e6e04523d9983',
+          'video_url':
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/image_to_video/CjJi7me0aekAAAAAAd914g-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=f271ff2b9cf8fcaa4265f20f82bc346152a1f9d228dfb92bcb1f92e0b025f4ba'
         },
       ]
     },
@@ -352,6 +348,7 @@ class _AIVideoState extends State<AIVideo> {
       '/theme-detail',
       extra: {
         'title': item['title'] ?? 'Kiss my Crush',
+        'themeId': item['theme_id'],
         'imagePath': item['image'],
         'videoUrl': item['video_url'],
         'preloadedController': item['video_url'] != null
