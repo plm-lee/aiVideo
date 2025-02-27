@@ -31,9 +31,10 @@ class _AIVideoState extends State<AIVideo> {
           'title': 'Kiss my Crush',
           'img_num': 2,
           'theme_id': '1',
-          'image': 'assets/images/kiss1.jpg',
+          'image':
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/aduio_img/c9e449f2cfa844bfb1e706edf61fe9a0?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=09af1d0fcca4934af3781459de491bf19370e702135756eb45e218b5e1e70cf8',
           'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T131232Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=53105b11b87643998536e2821a45d4445c79351e8b8298f216ab056a6b540b80'
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/image_to_video/CjipVGe0a5oAAAAAAd6xOg-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5b91e896c7b4d266713c35cbde83fdb5932f95448595628e47a0aeacd20dcf52'
         },
         {
           'title': 'Kiss Manga',
@@ -270,10 +271,22 @@ class _AIVideoState extends State<AIVideo> {
   }
 
   Widget _buildMediaContent(Map<String, dynamic> item) {
+    final String imagePath = item['image'] ?? '';
     final String? videoUrl = item['video_url'];
-    final String imagePath = item['image'];
-    final bool isNetworkPath = videoUrl?.startsWith('http') ?? false;
+    final bool isNetworkPath = imagePath.startsWith('http');
 
+    // 默认灰色背景
+    Widget placeholder = Container(
+      color: Colors.grey[900],
+      child: const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+          strokeWidth: 2,
+        ),
+      ),
+    );
+
+    // 优先展示视频
     if (videoUrl != null) {
       final controller = _videoControllers[videoUrl];
       if (controller?.value.isInitialized ?? false) {
@@ -286,16 +299,30 @@ class _AIVideoState extends State<AIVideo> {
           ),
         );
       }
-      return Image.asset(imagePath, fit: BoxFit.cover);
     }
 
-    return isNetworkPath
-        ? Image.network(
-            imagePath,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
-          )
-        : Image.asset(imagePath, fit: BoxFit.cover);
+    // 如果视频未就绪，显示图片
+    if (imagePath.isNotEmpty) {
+      if (isNetworkPath) {
+        return Image.network(
+          imagePath,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return placeholder;
+          },
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        );
+      } else {
+        return Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        );
+      }
+    }
+
+    return placeholder;
   }
 
   Widget _buildErrorWidget() {
@@ -324,17 +351,26 @@ class _AIVideoState extends State<AIVideo> {
             _buildMediaContent(item),
             if (item['title'].isNotEmpty)
               Positioned(
-                left: 12,
-                bottom: 12,
+                left: 0,
+                right: 0,
+                bottom: 8,
                 child: Text(
                   item['title'],
-                  style: TextStyle(
-                    color: isDark
-                        ? AppTheme.darkTextColor
-                        : AppTheme.lightTextColor,
-                    fontSize: 16,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 3,
+                        color: Colors.black,
+                      ),
+                    ],
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
           ],
