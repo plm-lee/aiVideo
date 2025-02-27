@@ -31,7 +31,7 @@ class _AIVideoState extends State<AIVideo> {
           'title': 'Kiss my Crush',
           'image': 'assets/images/kiss1.jpg',
           'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T063028Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=4f370581f0dd0dfbf70deab35fc289ad7950c662bc7c37dbb07cd267437ccdd7',
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T131232Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=53105b11b87643998536e2821a45d4445c79351e8b8298f216ab056a6b540b80'
         },
         {
           'title': 'Kiss Manga',
@@ -42,7 +42,7 @@ class _AIVideoState extends State<AIVideo> {
           'title': 'Kiss Anime',
           'image': 'assets/images/kiss3.jpg',
           'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T083755Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=64899a6707d89a235847f66dcd3320d05ba8b2664d8e51f4c3be348abcd7734e',
+              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T125100Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=a78b2d0a95f03fc45f08fdee5e7b8fc01ed8bd2ec42d26c24fbdf35ce2e31ad4',
         },
       ]
     },
