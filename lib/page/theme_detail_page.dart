@@ -89,24 +89,28 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
 
   Widget _buildMediaContent() {
     if (widget.videoUrl != null) {
-      if (_isLoading) {
-        return const Center(
-          child: CircularProgressIndicator(color: Colors.white),
+      if (_isLoading || !(_videoController?.value.isInitialized ?? false)) {
+        return Container(
+          color: Colors.grey[900],
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ),
         );
       }
 
-      if (_videoController?.value.isInitialized ?? false) {
-        return AspectRatio(
-          aspectRatio: _videoController!.value.aspectRatio,
-          child: VideoPlayer(_videoController!),
-        );
-      }
-
-      // 视频加载失败时显示图片
-      return _buildImage();
+      return AspectRatio(
+        aspectRatio: _videoController!.value.aspectRatio,
+        child: VideoPlayer(_videoController!),
+      );
     }
 
-    return _buildImage();
+    // 如果没有视频，显示灰色背景
+    return Container(
+      color: Colors.grey[900],
+    );
   }
 
   Widget _buildImage() {
