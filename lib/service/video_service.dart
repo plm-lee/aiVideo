@@ -14,6 +14,16 @@ class VideoService extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final DatabaseService _databaseService = DatabaseService();
 
+  // 通过theme创建视频
+  Future<(bool, String)> themeToVideo({
+    required String themeId,
+    required File imageFile,
+  }) async {
+    // 调用imageToVideo，将拼接的图片和themeId作为prompt传入
+    final prompt = 'Create a video with the theme: $themeId';
+    return await imageToVideo(imageFile: imageFile, prompt: prompt);
+  }
+
   Future<(bool, String)> imageToVideo({
     required File imageFile,
     required String prompt,

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img; // 添加image包用于图片处理
+import 'package:ai_video/service/video_service.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
@@ -16,6 +20,7 @@ class MakeCollagePage extends StatefulWidget {
 
 class _MakeCollagePageState extends State<MakeCollagePage> {
   final ImagePicker _picker = ImagePicker();
+  final VideoService _videoService = VideoService();
   XFile? _leftImage; // 左侧图片
   XFile? _rightImage;
   bool _isSplitLayout = false;
@@ -118,6 +123,104 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
+    }
+  }
+
+  Future<File?> _mergeAndCompressImages() async {
+    try {
+      if (_leftImage == null) return null;
+
+      // 读取左侧图片
+      final leftImageBytes = await File(_leftImage!.path).readAsBytes();
+      final leftImage = img.decodeImage(leftImageBytes);
+      if (leftImage == null) return null;
+
+      img.Image finalImage;
+
+      if (_isSplitLayout && _rightImage != null) {
+        // 读取右侧图片
+        final rightImageBytes = await File(_rightImage!.path).readAsBytes();
+        final rightImage = img.decodeImage(rightImageBytes);
+        if (rightImage == null) return null;
+
+        // 调整两张图片到相同高度
+        final targetHeight = 512; // 设置目标高度
+        final targetWidth = 512; // 每张图片的宽度
+
+        final resizedLeft = img.copyResize(
+          leftImage,
+          width: targetWidth,
+          height: targetHeight,
+          interpolation: img.Interpolation.linear,
+        );
+
+        final resizedRight = img.copyResize(
+          rightImage,
+          width: targetWidth,
+          height: targetHeight,
+          interpolation: img.Interpolation.linear,
+        );
+
+        // 创建新图片并拼接
+        finalImage = img.Image(width: targetWidth * 2, height: targetHeight);
+        img.compositeImage(finalImage, resizedLeft);
+        img.compositeImage(finalImage, resizedRight, dstX: targetWidth);
+      } else {
+        // 单张图片只需调整大小
+        finalImage = img.copyResize(
+          leftImage,
+          width: 512,
+          height: 512,
+          interpolation: img.Interpolation.linear,
+        );
+      }
+
+      // 保存处理后的图片
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/merged_image.jpg');
+      await tempFile.writeAsBytes(img.encodeJpg(finalImage, quality: 90));
+
+      return tempFile;
+    } catch (e) {
+      debugPrint('Error merging images: $e');
+      return null;
+    }
+  }
+
+  Future<void> _generateVideo() async {
+    try {
+      final mergedImage = await _mergeAndCompressImages();
+      if (mergedImage == null) {
+        // 显示错误提示
+        return;
+      }
+
+      final (success, message) = await _videoService.themeToVideo(
+        themeId: '让图片中的人物拥抱', // 从路由参数获取主题ID
+        imageFile: mergedImage,
+      );
+
+      if (success) {
+        if (mounted) {
+          // 弹窗提示
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Success'),
+              content: Text('Video generated successfully'),
+            ),
+          );
+        }
+      } else {
+        // 显示错误提示
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error generating video: $e');
     }
   }
 
@@ -286,11 +389,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: canGenerate
-                  ? () {
-                      // TODO: 生成拼图
-                    }
-                  : null,
+              onPressed: canGenerate ? _generateVideo : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
