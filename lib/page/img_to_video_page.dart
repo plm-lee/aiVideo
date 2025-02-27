@@ -8,6 +8,7 @@ import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/video_service.dart';
+import 'package:ai_video/utils/dialog_utils.dart';
 
 class ImgToVideoPage extends StatefulWidget {
   const ImgToVideoPage({super.key});
@@ -327,22 +328,16 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
+    DialogUtils.showError(
+      context: context,
+      content: message,
     );
   }
 
   void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
+    DialogUtils.showSuccess(
+      context: context,
+      content: message,
     );
   }
 }
