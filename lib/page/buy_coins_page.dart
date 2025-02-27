@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:video_player/video_player.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -15,7 +16,8 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   int? selectedPlan;
   List<ProductDetails> _products = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+  bool _isLoadingProducts = true;
 
   @override
   void initState() {
@@ -25,13 +27,13 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   }
 
   Future<void> _loadProducts() async {
-    setState(() => _isLoading = true);
+    setState(() => _isLoadingProducts = true);
     try {
       _products = _applePaymentService.coinsProducts;
     } catch (e) {
       debugPrint('加载商品失败: $e');
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isLoadingProducts = false);
     }
   }
 
@@ -98,7 +100,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (_isLoading)
+              if (_isLoadingProducts)
                 const Center(
                   child: CircularProgressIndicator(
                     valueColor:
@@ -218,6 +220,76 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
     );
   }
 
+  Future<void> _handlePurchase() async {
+    if (selectedPlan == null || selectedPlan! >= _products.length) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final product = _products[selectedPlan!];
+
+      // 1. 获取预支付订单ID
+      final orderId = await _applePaymentService.prepayOrder(
+        coinPackageId: product.id,
+      );
+
+      // 2. 调用苹果支付
+      await _applePaymentService.buySubscription(
+        product.title,
+        orderId: orderId,
+      );
+
+      // 3. 支付成功
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog(e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showSuccessDialog() {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Purchase Successful'),
+          content: const Text('Your coins have been added to your account.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: Text('An error occurred: $error'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildBottomSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -235,45 +307,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: selectedPlan != null
-                  ? () async {
-                      if (selectedPlan != null &&
-                          selectedPlan! < _products.length) {
-                        try {
-                          final product = _products[selectedPlan!];
-
-                          // 1. 获取预支付订单ID
-                          final orderId =
-                              await _applePaymentService.prepayOrder(
-                            coinPackageId: product.id,
-                          );
-
-                          // 2. 调用苹果支付
-                          await _applePaymentService.buySubscription(
-                            product.title,
-                            orderId: orderId,
-                          );
-
-                          // 3. 支付成功
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Purchase successful!'),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Purchase failed: $e'),
-                              ),
-                            );
-                          }
-                        }
-                      }
-                    }
-                  : null,
+              onPressed: selectedPlan != null ? _handlePurchase : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
@@ -281,14 +315,19 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
-                'Continue',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    )
+                  : const Text(
+                      'Continue',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 16),
