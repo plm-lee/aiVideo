@@ -73,6 +73,14 @@ class _AIVideoState extends State<AIVideo> {
   final Map<String, VideoPlayerController> _videoControllers = {};
   bool _isInitializing = false;
 
+  // 添加渐变色列表
+  final List<List<Color>> _gradients = [
+    [const Color(0xFFD7905F), const Color(0xFFC060C3)], // 橙色到紫色
+    [const Color(0xFF4FACFE), const Color(0xFF00F2FE)], // 蓝色渐变
+    [const Color(0xFFFF5E50), const Color(0xFFFF4E50)], // 红色渐变
+    [const Color(0xFF13E2DA), const Color(0xFF00B4D8)], // 青色渐变
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -196,6 +204,10 @@ class _AIVideoState extends State<AIVideo> {
 
   Widget _buildCategorySection(Map<String, dynamic> category) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // 随机选择一个渐变色
+    final gradient =
+        _gradients[_categories.indexOf(category) % _gradients.length];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -208,13 +220,19 @@ class _AIVideoState extends State<AIVideo> {
                 style: const TextStyle(fontSize: 24),
               ),
               const SizedBox(width: 8),
-              Text(
-                category['title'],
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color:
-                      isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: gradient,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(bounds),
+                child: Text(
+                  category['title'],
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // 必须是白色才能显示渐变
+                  ),
                 ),
               ),
               const Spacer(),
