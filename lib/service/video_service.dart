@@ -20,7 +20,7 @@ class VideoService extends ChangeNotifier {
     required File imageFile,
   }) async {
     // 调用imageToVideo，将拼接的图片和themeId作为prompt传入
-    final prompt = 'Create a video with the theme: $themeId';
+    final prompt = '让图片中的人物自由舞动, 拥抱、亲吻、跳舞，选择一个行为';
     return await imageToVideo(imageFile: imageFile, prompt: prompt);
   }
 
