@@ -146,6 +146,7 @@ final _router = GoRouter(
       pageBuilder: (context, state) => NoTransitionPage(
         child: MakeCollagePage(
           imgNum: (state.extra as Map<String, dynamic>)['imgNum'] ?? 1,
+          themeId: (state.extra as Map<String, dynamic>)['themeId'] ?? '',
         ),
       ),
     ),

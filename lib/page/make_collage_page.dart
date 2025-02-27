@@ -9,10 +9,12 @@ import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
+  final String themeId;
 
   const MakeCollagePage({
     super.key,
     required this.imgNum,
+    required this.themeId,
   });
 
   @override
@@ -130,51 +132,62 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
 
   Future<File?> _mergeAndCompressImages() async {
     try {
-      if (_leftImage == null) return null;
-
-      // 读取左侧图片
+      // 读取图片
       final leftImageBytes = await File(_leftImage!.path).readAsBytes();
-      final leftImage = img.decodeImage(leftImageBytes);
-      if (leftImage == null) return null;
+      final leftImg = img.decodeImage(leftImageBytes);
+      if (leftImg == null) return null;
 
       img.Image finalImage;
 
       if (_isSplitLayout && _rightImage != null) {
-        // 读取右侧图片
+        // 双图模式
         final rightImageBytes = await File(_rightImage!.path).readAsBytes();
-        final rightImage = img.decodeImage(rightImageBytes);
-        if (rightImage == null) return null;
+        final rightImg = img.decodeImage(rightImageBytes);
+        if (rightImg == null) return null;
 
-        // 调整两张图片到相同高度
-        final targetHeight = 512; // 设置目标高度
-        final targetWidth = 512; // 每张图片的宽度
+        // 计算目标尺寸 (9:16 比例)
+        const targetAspectRatio = 9 / 16;
+        final targetWidth = 720; // 设置合适的宽度
+        final targetHeight = (targetWidth / targetAspectRatio).round();
 
+        // 调整每张图片的大小
+        final halfWidth = targetWidth ~/ 2;
         final resizedLeft = img.copyResize(
-          leftImage,
-          width: targetWidth,
+          leftImg,
+          width: halfWidth,
           height: targetHeight,
           interpolation: img.Interpolation.linear,
         );
-
         final resizedRight = img.copyResize(
-          rightImage,
+          rightImg,
+          width: halfWidth,
+          height: targetHeight,
+          interpolation: img.Interpolation.linear,
+        );
+
+        // 创建新图像并拼接
+        finalImage = img.Image(width: targetWidth, height: targetHeight);
+        img.compositeImage(finalImage, resizedLeft);
+        img.compositeImage(
+          finalImage,
+          resizedRight,
+          dstX: halfWidth,
+        );
+      } else {
+        // 单图模式
+        const targetAspectRatio = 9 / 16;
+        final targetWidth = 720;
+        final targetHeight = (targetWidth / targetAspectRatio).round();
+
+        // 调整图片大小并保持比例
+        final resized = img.copyResize(
+          leftImg,
           width: targetWidth,
           height: targetHeight,
           interpolation: img.Interpolation.linear,
         );
 
-        // 创建新图片并拼接
-        finalImage = img.Image(width: targetWidth * 2, height: targetHeight);
-        img.compositeImage(finalImage, resizedLeft);
-        img.compositeImage(finalImage, resizedRight, dstX: targetWidth);
-      } else {
-        // 单张图片只需调整大小
-        finalImage = img.copyResize(
-          leftImage,
-          width: 512,
-          height: 512,
-          interpolation: img.Interpolation.linear,
-        );
+        finalImage = resized;
       }
 
       // 保存处理后的图片
@@ -184,7 +197,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
 
       return tempFile;
     } catch (e) {
-      debugPrint('Error merging images: $e');
+      debugPrint('Error processing images: $e');
       return null;
     }
   }
@@ -193,10 +206,16 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
     setState(() => _isLoading = true);
 
     try {
+      // 先处理图片
+      final mergedImage = await _mergeAndCompressImages();
+      if (mergedImage == null) {
+        throw Exception('图片处理失败');
+      }
+
       final videoService = VideoService();
-      final (success, message) = await videoService.imageToVideo(
-        imageFile: File(_leftImage!.path),
-        prompt: 'Collage video',
+      final (success, message) = await videoService.themeToVideo(
+        imageFile: mergedImage,
+        themeId: widget.themeId,
       );
 
       if (success) {
