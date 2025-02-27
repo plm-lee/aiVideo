@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img; // 添加image包用于图片处理
 import 'package:ai_video/service/video_service.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
@@ -24,6 +25,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   XFile? _leftImage; // 左侧图片
   XFile? _rightImage;
   bool _isSplitLayout = false;
+  bool _isLoading = false; // 添加加载状态
 
   @override
   void initState() {
@@ -188,40 +190,49 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   }
 
   Future<void> _generateVideo() async {
-    try {
-      final mergedImage = await _mergeAndCompressImages();
-      if (mergedImage == null) {
-        // 显示错误提示
-        return;
-      }
+    setState(() => _isLoading = true);
 
-      final (success, message) = await _videoService.themeToVideo(
-        themeId: '让图片中的人物拥抱', // 从路由参数获取主题ID
-        imageFile: mergedImage,
+    try {
+      final videoService = VideoService();
+      final (success, message) = await videoService.imageToVideo(
+        imageFile: File(_leftImage!.path),
+        prompt: 'Collage video',
       );
 
       if (success) {
-        if (mounted) {
-          // 弹窗提示
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Success'),
-              content: Text('Video generated successfully'),
-            ),
-          );
-        }
+        _showSuccessMessage(message);
       } else {
-        // 显示错误提示
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
-        }
+        _showErrorMessage(message);
       }
     } catch (e) {
-      debugPrint('Error generating video: $e');
+      _showErrorMessage('生成视频时发生错误：$e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  void _showErrorMessage(String message) {
+    DialogUtils.showError(
+      context: context,
+      content: message,
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    DialogUtils.showSuccess(
+      context: context,
+      content: message,
+      autoDismiss: true, // 2秒后自动关闭
+      onDismissed: () {
+        // 清空选择的图片
+        setState(() {
+          _leftImage = null;
+          _rightImage = null;
+        });
+      },
+    );
   }
 
   @override
@@ -389,7 +400,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ElevatedButton(
-              onPressed: canGenerate ? _generateVideo : null,
+              onPressed: canGenerate && !_isLoading ? _generateVideo : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
@@ -397,14 +408,19 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
-                'Generate Now',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    )
+                  : const Text(
+                      'Generate Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 12),

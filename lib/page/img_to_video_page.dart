@@ -22,6 +22,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   File? _selectedImage;
   final _picker = ImagePicker();
   int _selectedLength = 15; // 默认15秒
+  bool _isLoading = false; // 添加加载状态
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +200,8 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildBottomButton() {
-    final bool canGenerate = _selectedImage != null;
+    final bool canGenerate =
+        _selectedImage != null && _promptController.text.trim().isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -231,38 +233,57 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
               ),
             ],
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: canGenerate
-                  ? const LinearGradient(
-                      colors: [Colors.white, Color(0xFFF0F0F0)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: canGenerate ? null : Colors.grey[400],
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: canGenerate
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+          _buildGenerateButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenerateButton() {
+    final bool canGenerate =
+        _selectedImage != null && _promptController.text.trim().isNotEmpty;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: canGenerate
+            ? const LinearGradient(
+                colors: [Colors.white, Color(0xFFF0F0F0)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: canGenerate ? null : Colors.grey[400],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: canGenerate
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: canGenerate && !_isLoading ? _generateVideo : null,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32,
+              vertical: 12,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: canGenerate ? _generateVideo : null,
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  child: Text(
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    ),
+                  )
+                : Text(
                     'Generate',
                     style: TextStyle(
                       color: canGenerate ? Colors.black : Colors.black38,
@@ -270,11 +291,8 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -293,26 +311,14 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Future<void> _generateVideo() async {
-    try {
-      // 显示加载对话框
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
-        ),
-      );
+    setState(() => _isLoading = true);
 
+    try {
       final videoService = VideoService();
       final (success, message) = await videoService.imageToVideo(
         imageFile: _selectedImage!,
         prompt: _promptController.text.trim(),
       );
-
-      // 关闭加载对话框
-      if (mounted) Navigator.of(context).pop();
 
       if (success) {
         _showSuccessMessage(message);
@@ -320,9 +326,10 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
         _showErrorMessage(message);
       }
     } catch (e) {
+      _showErrorMessage('生成视频时发生错误：$e');
+    } finally {
       if (mounted) {
-        Navigator.of(context).pop();
-        _showErrorMessage('生成视频时发生错误：$e');
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -338,6 +345,14 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
     DialogUtils.showSuccess(
       context: context,
       content: message,
+      autoDismiss: true, // 2秒后自动关闭
+      onDismissed: () {
+        // 清空选择和输入
+        setState(() {
+          _selectedImage = null;
+          _promptController.clear();
+        });
+      },
     );
   }
 }

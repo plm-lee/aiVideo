@@ -19,6 +19,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
   final _promptController = TextEditingController();
   int _selectedLength = 5; // 默认5秒
   bool _canGenerate = false; // 添加状态变量
+  bool _isLoading = false; // 添加加载状态
 
   @override
   void initState() {
@@ -194,38 +195,54 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
               ),
             ],
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: _canGenerate
-                  ? const LinearGradient(
-                      colors: [Colors.white, Color(0xFFF0F0F0)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: _canGenerate ? null : Colors.grey[400],
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: _canGenerate
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+          _buildGenerateButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenerateButton() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: _canGenerate
+            ? const LinearGradient(
+                colors: [Colors.white, Color(0xFFF0F0F0)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: _canGenerate ? null : Colors.grey[400],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: _canGenerate
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _canGenerate && !_isLoading ? _generateVideo : null,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32,
+              vertical: 12,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _canGenerate ? _generateVideo : null,
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  child: Text(
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    ),
+                  )
+                : Text(
                     'Generate',
                     style: TextStyle(
                       color: _canGenerate ? Colors.black : Colors.black38,
@@ -233,36 +250,21 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
   Future<void> _generateVideo() async {
-    try {
-      // 显示加载对话框
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
-        ),
-      );
+    setState(() => _isLoading = true);
 
+    try {
       final videoService = VideoService();
       final (success, message) = await videoService.textToVideo(
         prompt: _promptController.text.trim(),
         duration: _selectedLength,
       );
-
-      // 关闭加载对话框
-      if (mounted) Navigator.of(context).pop();
 
       if (success) {
         _showSuccessMessage(message);
@@ -270,9 +272,10 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
         _showErrorMessage(message);
       }
     } catch (e) {
+      _showErrorMessage('生成视频时发生错误：$e');
+    } finally {
       if (mounted) {
-        Navigator.of(context).pop();
-        _showErrorMessage('生成视频时发生错误：$e');
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -288,6 +291,14 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
     DialogUtils.showSuccess(
       context: context,
       content: message,
+      autoDismiss: true, // 2秒后自动关闭
+      onDismissed: () {
+        // 清空输入
+        setState(() {
+          _promptController.clear();
+          _canGenerate = false;
+        });
+      },
     );
   }
 }
