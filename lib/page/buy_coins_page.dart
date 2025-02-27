@@ -229,18 +229,12 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
     try {
       final product = _products[selectedPlan!];
 
-      // 1. 获取预支付订单ID
-      final orderId = await _applePaymentService.prepayOrder(
-        coinPackageId: product.id,
+      // 调用苹果支付
+      await _applePaymentService.purchaseCoins(
+        product.description,
       );
 
-      // 2. 调用苹果支付
-      await _applePaymentService.buySubscription(
-        product.title,
-        orderId: orderId,
-      );
-
-      // 3. 支付成功
+      // 支付成功
       if (mounted) {
         _showSuccessDialog();
       }

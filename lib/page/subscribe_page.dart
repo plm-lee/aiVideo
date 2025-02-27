@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'; // 导入 Cupertino 库
 import 'package:go_router/go_router.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
 import 'package:video_player/video_player.dart';
@@ -49,18 +50,9 @@ class _SubscribePageState extends State<SubscribePage> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. 获取预支付订单ID
-      final orderId = await _applePaymentService.prepayOrder(
-        coinPackageId: 'weekly', // 使用周订阅的包ID
-      );
-
-      // 2. 调用苹果支付
-      await _applePaymentService.buySubscription(
-        'weekly',
-        orderId: orderId, // 传入订单ID
-      );
-
-      // 3. 支付成功
+      // 调用订阅接口
+      await _applePaymentService.purchaseSubscription();
+      // 支付成功
       if (mounted) {
         _showSuccessDialog();
       }

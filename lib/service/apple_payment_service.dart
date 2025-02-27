@@ -16,7 +16,6 @@ class ApplePaymentService {
   List<ProductDetails> _products = [];
   List<ProductDetails> _subscribeProducts = [];
   List<ProductDetails> _coinsProducts = [];
-  final Map<String, String> productMap = {};
   bool _isInitialized = false;
 
   // 初始化所有商品
@@ -47,14 +46,6 @@ class ApplePaymentService {
           return;
         }
 
-        // 更新商品映射
-        productMap.clear();
-        productMap.addAll(Map.fromEntries(
-          _products.map((p) => MapEntry(p.title, p.id)),
-        ));
-
-        debugPrint('productMap: $productMap');
-
         if (_products.isEmpty) {
           debugPrint('No products found');
         }
@@ -74,31 +65,6 @@ class ApplePaymentService {
 
   // 返回金币包
   List<ProductDetails> get coinsProducts => _coinsProducts;
-
-  Future<void> buySubscription(String productName,
-      {required String orderId}) async {
-    try {
-      final String? productId = productMap[productName];
-      if (productId == null) {
-        throw Exception('Product not found: $productName');
-      }
-
-      final productDetails = _products.firstWhere(
-        (product) => product.id == productId,
-        orElse: () => throw Exception('Product details not found: $productId'),
-      );
-
-      final purchaseParam = PurchaseParam(
-        productDetails: productDetails,
-        applicationUserName: orderId,
-      );
-
-      await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-    } catch (e) {
-      debugPrint('Error buying subscription: $e');
-      rethrow;
-    }
-  }
 
   Future<void> _handlePurchaseUpdates(
       List<PurchaseDetails> purchaseDetailsList) async {
@@ -121,51 +87,62 @@ class ApplePaymentService {
 
   // 获取所有商品
   Future<void> fetchAllProducts() async {
-    final (success, message, user) = await _authService.getCurrentUser();
-    if (!success || user == null) {
-      throw Exception('Failed to fetch purchase packages: user not found');
+    try {
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        throw Exception('Failed to fetch products: user not found');
+      }
+
+      final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
+      if (response['response']['success'] != '1') {
+        throw Exception(
+            'Failed to fetch products: ${response['response']['description']}');
+      }
+
+      final List<SubscriptionPackage> allPackages =
+          (response['products'] as List)
+              .map((e) => SubscriptionPackage.fromJson(e))
+              .toList();
+
+      debugPrint('allPackages: $allPackages');
+
+      // 处理订阅产品
+      _subscribeProducts = allPackages
+          .where((e) => e.isSubscription)
+          .map((e) => ProductDetails(
+                id: e.uuid,
+                title: e.name,
+                description: e.description,
+                price: (e.price / 100).toStringAsFixed(2),
+                rawPrice: e.price / 100,
+                currencyCode: 'USD',
+                currencySymbol: '\$',
+              ))
+          .toList();
+
+      // 处理金币产品
+      _coinsProducts = allPackages
+          .where((e) => !e.isSubscription)
+          .map((e) => ProductDetails(
+                id: e.uuid,
+                title: e.name,
+                description: e.description,
+                price: (e.price / 100).toStringAsFixed(2),
+                rawPrice: e.price / 100,
+                currencyCode: 'USD',
+                currencySymbol: '\$',
+              ))
+          .toList();
+
+      _isInitialized = true;
+    } catch (e) {
+      debugPrint('Error fetching products: $e');
+      rethrow;
     }
-
-    final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
-    if (response['response']['success'] != '1') {
-      throw Exception(
-          'Failed to fetch purchase packages: ${response['response']['description']}');
-    }
-
-    final List<SubscriptionPackage> allPackages = (response['products'] as List)
-        .map((e) => SubscriptionPackage.fromJson(e))
-        .toList();
-
-    // 根据 is_subscription 分类处理
-    _subscribeProducts = allPackages
-        .where((e) => e.isSubscription)
-        .map((e) => ProductDetails(
-              id: e.description,
-              title: e.name,
-              description: e.description,
-              price: (e.price / 100).toStringAsFixed(2),
-              rawPrice: e.price / 100,
-              currencyCode: 'USD',
-              currencySymbol: '\$',
-            ))
-        .toList();
-
-    _coinsProducts = allPackages
-        .where((e) => !e.isSubscription)
-        .map((e) => ProductDetails(
-              id: e.description,
-              title: '${e.name} Coins',
-              description: e.description,
-              price: (e.price / 100).toStringAsFixed(2),
-              rawPrice: e.price / 100,
-              currencyCode: 'USD',
-              currencySymbol: '\$',
-            ))
-        .toList();
   }
 
   // 预支付获取订单号逻辑
-  Future<String> prepayOrder({required String coinPackageId}) async {
+  Future<String> prepayOrder({required String productUuid}) async {
     final (success, message, user) = await _authService.getCurrentUser();
     if (!success || user == null) {
       throw Exception('预支付失败: 用户未登录');
@@ -173,7 +150,7 @@ class ApplePaymentService {
 
     final response = await PayApi().prepayOrder(
       uuid: user.uuid,
-      coinPackageId: coinPackageId,
+      productUuid: productUuid,
     );
     // 打印response
     debugPrint('response: $response');
@@ -184,6 +161,52 @@ class ApplePaymentService {
       );
     }
 
-    return response['response']['order_id'] as String;
+    return response['response']['original_transaction_id'] as String;
+  }
+
+  // 购买金币
+  Future<void> purchaseCoins(String productId) async {
+    if (!_isInitialized) await fetchAllProducts();
+
+    try {
+      // 找到产品的uuid
+      final product =
+          _coinsProducts.firstWhere((p) => p.description == productId);
+      final orderId = await prepayOrder(productUuid: product.id);
+
+      final purchaseParam = PurchaseParam(
+        productDetails: product,
+        applicationUserName: orderId,
+      );
+
+      await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      debugPrint('Error purchasing coins: $e');
+      rethrow;
+    }
+  }
+
+  // 购买订阅
+  Future<void> purchaseSubscription() async {
+    if (!_isInitialized) await fetchAllProducts();
+
+    try {
+      if (_subscribeProducts.isEmpty) {
+        throw Exception('No subscription products available');
+      }
+
+      final product = _subscribeProducts.first;
+      final orderId = await prepayOrder(productUuid: product.id);
+
+      final purchaseParam = PurchaseParam(
+        productDetails: product,
+        applicationUserName: orderId,
+      );
+
+      await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      debugPrint('Error purchasing subscription: $e');
+      rethrow;
+    }
   }
 }

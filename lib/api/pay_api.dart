@@ -30,18 +30,18 @@ class PayApi {
 
   Future<Map<String, dynamic>> prepayOrder({
     required String uuid,
-    required String coinPackageId,
+    required String productUuid,
   }) async {
     try {
       final response = await _apiClient.post(
         '/api/ios_in_app_purchase/subscribe',
         {
           'uuid': uuid,
-          'coin_package_id': coinPackageId,
+          'product_uuid': productUuid,
         },
       );
 
-      debugPrint("uuid: $uuid, coinPackageId: $coinPackageId");
+      debugPrint("uuid: $uuid, productUuid: $productUuid, response: $response");
 
       if (response['response']['success'] == '1') {
         return response;
