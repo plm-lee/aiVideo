@@ -9,6 +9,7 @@ class ThemeDetailPage extends StatefulWidget {
   final String imagePath;
   final String? videoUrl;
   final VideoPlayerController? preloadedController;
+  final int imgNum;
 
   const ThemeDetailPage({
     super.key,
@@ -16,6 +17,7 @@ class ThemeDetailPage extends StatefulWidget {
     required this.imagePath,
     this.videoUrl,
     this.preloadedController,
+    required this.imgNum,
   });
 
   @override
@@ -187,6 +189,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
             child: ElevatedButton(
               onPressed: () => context.push(
                 '/make-collage',
+                extra: {'imgNum': widget.imgNum},
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,

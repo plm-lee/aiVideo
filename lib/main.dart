@@ -21,6 +21,7 @@ import 'package:ai_video/page/mine_page.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:ai_video/page/theme_detail_page.dart';
 import 'package:ai_video/page/make_collage_page.dart';
+import 'package:video_player/video_player.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -133,6 +134,9 @@ final _router = GoRouter(
             title: extra['title'] as String,
             imagePath: extra['imagePath'] as String,
             videoUrl: extra['videoUrl'] as String?,
+            preloadedController:
+                extra['preloadedController'] as VideoPlayerController?,
+            imgNum: extra['imgNum'] as int,
           ),
         );
       },
@@ -140,7 +144,9 @@ final _router = GoRouter(
     GoRoute(
       path: '/make-collage',
       pageBuilder: (context, state) => NoTransitionPage(
-        child: const MakeCollagePage(),
+        child: MakeCollagePage(
+          imgNum: (state.extra as Map<String, dynamic>)['imgNum'] ?? 1,
+        ),
       ),
     ),
   ],

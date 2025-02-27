@@ -3,8 +3,11 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class MakeCollagePage extends StatefulWidget {
+  final int imgNum;
+
   const MakeCollagePage({
     super.key,
+    required this.imgNum,
   });
 
   @override
@@ -14,10 +17,19 @@ class MakeCollagePage extends StatefulWidget {
 class _MakeCollagePageState extends State<MakeCollagePage> {
   final ImagePicker _picker = ImagePicker();
   XFile? _leftImage; // 左侧图片
-  XFile? _rightImage; // 右侧图片
+  XFile? _rightImage;
   bool _isSplitLayout = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _isSplitLayout = widget.imgNum == 2; // 根据imgNum设置布局
+  }
+
   void _toggleLayout() {
+    // 如果imgNum为2，不允许切换布局
+    if (widget.imgNum == 2) return;
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -125,10 +137,12 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.grid_view, color: Colors.white),
-            onPressed: _toggleLayout,
-          ),
+          // 只有在imgNum为1时显示布局切换按钮
+          if (widget.imgNum == 1)
+            IconButton(
+              icon: const Icon(Icons.grid_view, color: Colors.white),
+              onPressed: _toggleLayout,
+            ),
         ],
       ),
       body: Column(

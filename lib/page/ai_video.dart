@@ -29,17 +29,20 @@ class _AIVideoState extends State<AIVideo> {
       'items': [
         {
           'title': 'Kiss my Crush',
+          'img_num': 2,
           'image': 'assets/images/kiss1.jpg',
           'video_url':
               'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaPuuA-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T131232Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=53105b11b87643998536e2821a45d4445c79351e8b8298f216ab056a6b540b80'
         },
         {
           'title': 'Kiss Manga',
+          'img_num': 2,
           'image': 'assets/images/kiss2.jpg',
           'video_url': 'assets/videos/kiss_manga.mp4',
         },
         {
           'title': 'Kiss Anime',
+          'img_num': 1,
           'image': 'assets/images/kiss3.jpg',
           'video_url':
               'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T125100Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=a78b2d0a95f03fc45f08fdee5e7b8fc01ed8bd2ec42d26c24fbdf35ce2e31ad4',
@@ -310,17 +313,7 @@ class _AIVideoState extends State<AIVideo> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: () => context.push(
-        '/theme-detail',
-        extra: {
-          'title': item['title'] ?? 'Kiss my Crush',
-          'imagePath': item['image'],
-          'videoUrl': item['video_url'],
-          'preloadedController': item['video_url'] != null
-              ? _videoControllers[item['video_url']]
-              : null,
-        },
-      ),
+      onTap: () => _navigateToThemeDetail(item),
       child: Container(
         width: 140,
         margin: const EdgeInsets.only(right: _spacing),
@@ -351,6 +344,21 @@ class _AIVideoState extends State<AIVideo> {
           ],
         ),
       ),
+    );
+  }
+
+  void _navigateToThemeDetail(Map<String, dynamic> item) {
+    context.push(
+      '/theme-detail',
+      extra: {
+        'title': item['title'] ?? 'Kiss my Crush',
+        'imagePath': item['image'],
+        'videoUrl': item['video_url'],
+        'preloadedController': item['video_url'] != null
+            ? _videoControllers[item['video_url']]
+            : null,
+        'imgNum': item['img_num'] ?? 1, // 添加imgNum参数
+      },
     );
   }
 
