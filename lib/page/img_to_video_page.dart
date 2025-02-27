@@ -347,7 +347,9 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
       content: message,
       autoDismiss: true, // 2秒后自动关闭
       onDismissed: () {
-        // 清空选择和输入
+        // 先移除焦点，避免自动打开键盘
+        FocusScope.of(context).unfocus();
+
         setState(() {
           _selectedImage = null;
           _promptController.clear();

@@ -293,7 +293,9 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
       content: message,
       autoDismiss: true, // 2秒后自动关闭
       onDismissed: () {
-        // 清空输入
+        // 先移除焦点，避免自动打开键盘
+        FocusScope.of(context).unfocus();
+
         setState(() {
           _promptController.clear();
           _canGenerate = false;
