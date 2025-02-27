@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'buy_coins_page.dart'; // 导入新页面
 import 'package:video_player/video_player.dart';
+import 'package:ai_video/utils/dialog_utils.dart';
 
 class SubscribePage extends StatefulWidget {
   const SubscribePage({super.key});
@@ -75,34 +76,16 @@ class _SubscribePageState extends State<SubscribePage> {
   }
 
   void _showSuccessDialog() {
-    _showDialog(
-      title: 'Subscription Successful',
+    DialogUtils.showSuccess(
+      context: context,
       content: 'Your subscription has been activated successfully.',
     );
   }
 
   void _showErrorDialog(String error) {
-    _showDialog(
-      title: 'Error',
-      content: 'An error occurred: $error',
-    );
-  }
-
-  void _showDialog({required String title, required String content}) {
-    showCupertinoDialog(
+    DialogUtils.showError(
       context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
+      content: 'An error occurred: $error',
     );
   }
 

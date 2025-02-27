@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:video_player/video_player.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:ai_video/utils/dialog_utils.dart';
 
 class BuyCoinsPage extends StatefulWidget {
   const BuyCoinsPage({super.key});
@@ -255,38 +256,16 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   }
 
   void _showSuccessDialog() {
-    showCupertinoDialog(
+    DialogUtils.showSuccess(
       context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text('Purchase Successful'),
-          content: const Text('Your coins have been added to your account.'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
+      content: 'Your coins have been added to your account.',
     );
   }
 
   void _showErrorDialog(String error) {
-    showCupertinoDialog(
+    DialogUtils.showError(
       context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text('Error'),
-          content: Text('An error occurred: $error'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
+      content: 'An error occurred: $error',
     );
   }
 
