@@ -1,27 +1,25 @@
 class SubscriptionPackage {
-  final String productName;
-  final String productId;
-  final double amount;
+  final String name;
+  final String description;
+  final int price;
+  final bool isSubscription;
+  final String uuid;
 
   SubscriptionPackage({
-    required this.productName,
-    required this.productId,
-    required this.amount,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.isSubscription,
+    required this.uuid,
   });
 
   factory SubscriptionPackage.fromJson(Map<String, dynamic> json) {
     return SubscriptionPackage(
-      productName: json['productName'] as String,
-      productId: json['productId'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: json['price'] as int,
+      isSubscription: json['is_subscription'] as bool,
+      uuid: json['uuid'] as String,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'productName': productName,
-      'productId': productId,
-      'amount': amount,
-    };
   }
 }

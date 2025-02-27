@@ -128,40 +128,38 @@ class ApplePaymentService {
 
     final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
     if (response['response']['success'] != '1') {
-      // 弹窗提醒
       throw Exception(
           'Failed to fetch purchase packages: ${response['response']['description']}');
     }
 
-    final List<SubscriptionPackage> subscriptionPackages =
-        (response['subscribe_pkg'] as List)
-            .map((e) => SubscriptionPackage.fromJson(e))
-            .toList();
+    final List<SubscriptionPackage> allPackages = (response['products'] as List)
+        .map((e) => SubscriptionPackage.fromJson(e))
+        .toList();
 
-    _subscribeProducts = subscriptionPackages
+    // 根据 is_subscription 分类处理
+    _subscribeProducts = allPackages
+        .where((e) => e.isSubscription)
         .map((e) => ProductDetails(
-              id: e.productId,
-              title: e.productName,
-              description: e.amount.toString(),
-              price: e.amount.toString(),
-              rawPrice: e.amount,
+              id: e.description,
+              title: e.name,
+              description: e.description,
+              price: (e.price / 100).toStringAsFixed(2),
+              rawPrice: e.price / 100,
               currencyCode: 'USD',
+              currencySymbol: '\$',
             ))
         .toList();
 
-    final List<SubscriptionPackage> coinPackages =
-        (response['coin_pkg'] as List)
-            .map((e) => SubscriptionPackage.fromJson(e))
-            .toList();
-
-    _coinsProducts = coinPackages
+    _coinsProducts = allPackages
+        .where((e) => !e.isSubscription)
         .map((e) => ProductDetails(
-              id: e.productId,
-              title: e.productName,
-              description: e.amount.toString(),
-              price: e.amount.toString(),
-              rawPrice: e.amount,
+              id: e.description,
+              title: '${e.name} Coins',
+              description: e.description,
+              price: (e.price / 100).toStringAsFixed(2),
+              rawPrice: e.price / 100,
               currencyCode: 'USD',
+              currencySymbol: '\$',
             ))
         .toList();
   }
