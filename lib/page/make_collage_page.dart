@@ -192,11 +192,16 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       return Stack(
         fit: StackFit.expand,
         children: [
-          GestureDetector(
-            onTap: () => _pickImage(isLeftSide),
-            child: Image.file(
-              File(currentImage.path),
-              fit: BoxFit.cover,
+          Image.file(
+            File(currentImage.path),
+            fit: BoxFit.cover,
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _pickImage(isLeftSide),
+              ),
             ),
           ),
           Positioned(
@@ -217,20 +222,26 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       );
     }
 
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildUploadButton(isLeftSide),
-          const SizedBox(height: 16),
-          const Text(
-            'Upload',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+    return Material(
+      color: Colors.grey[900],
+      child: InkWell(
+        onTap: () => _pickImage(isLeftSide),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildUploadButton(isLeftSide),
+              const SizedBox(height: 16),
+              const Text(
+                'Upload',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
