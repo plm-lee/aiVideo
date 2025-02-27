@@ -31,6 +31,9 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
     setState(() => _isLoadingProducts = true);
     try {
       _products = _applePaymentService.coinsProducts;
+      if (_products.isNotEmpty) {
+        selectedPlan = 0;
+      }
     } catch (e) {
       debugPrint('加载商品失败: $e');
     } finally {
