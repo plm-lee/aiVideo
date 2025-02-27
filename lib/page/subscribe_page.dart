@@ -48,12 +48,29 @@ class _SubscribePageState extends State<SubscribePage> {
     setState(() => _isLoading = true);
 
     try {
-      await _applePaymentService.buySubscription('weekly');
-      _showSuccessDialog();
+      // 1. 获取预支付订单ID
+      final orderId = await _applePaymentService.prepayOrder(
+        coinPackageId: 'weekly', // 使用周订阅的包ID
+      );
+
+      // 2. 调用苹果支付
+      await _applePaymentService.buySubscription(
+        'weekly',
+        orderId: orderId, // 传入订单ID
+      );
+
+      // 3. 支付成功
+      if (mounted) {
+        _showSuccessDialog();
+      }
     } catch (e) {
-      _showErrorDialog(e.toString());
+      if (mounted) {
+        _showErrorDialog(e.toString());
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

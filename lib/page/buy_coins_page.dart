@@ -239,9 +239,38 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
                   ? () async {
                       if (selectedPlan != null &&
                           selectedPlan! < _products.length) {
-                        final product = _products[selectedPlan!];
-                        await _applePaymentService
-                            .buySubscription(product.title);
+                        try {
+                          final product = _products[selectedPlan!];
+
+                          // 1. 获取预支付订单ID
+                          final orderId =
+                              await _applePaymentService.prepayOrder(
+                            coinPackageId: product.id,
+                          );
+
+                          // 2. 调用苹果支付
+                          await _applePaymentService.buySubscription(
+                            product.title,
+                            orderId: orderId,
+                          );
+
+                          // 3. 支付成功
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Purchase successful!'),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Purchase failed: $e'),
+                              ),
+                            );
+                          }
+                        }
                       }
                     }
                   : null,
