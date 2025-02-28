@@ -2,41 +2,98 @@ import 'package:flutter/foundation.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/models/purchase_record.dart';
+import 'package:ai_video/api/user_api.dart';
 
 class CreditsService extends ChangeNotifier {
   static final CreditsService _instance = CreditsService._internal();
   factory CreditsService() => _instance;
 
   @visibleForTesting
-  factory CreditsService.test() => CreditsService._internal();
+  factory CreditsService.test({
+    DatabaseService? databaseService,
+    UserApi? userApi,
+  }) =>
+      CreditsService._internal(
+        databaseService: databaseService,
+        userApi: userApi,
+      );
 
-  CreditsService._internal();
+  CreditsService._internal({
+    DatabaseService? databaseService,
+    UserApi? userApi,
+  })  : _databaseService = databaseService ?? DatabaseService(),
+        _userApi = userApi ?? UserApi();
 
   int _credits = 0;
-  DatabaseService _databaseService = DatabaseService();
+  String? _uuid;
+  final DatabaseService _databaseService;
+  final UserApi _userApi;
 
   @visibleForTesting
   set credits(int value) {
     _credits = value;
   }
 
-  set databaseService(DatabaseService service) {
-    _databaseService = service;
-  }
-
   int get credits => _credits;
 
+  void setUuid(String uuid) {
+    _uuid = uuid;
+    loadCredits(); // 设置 UUID 后自动加载金币数量
+  }
+
   Future<void> loadCredits() async {
-    final config = await _databaseService.getConfig('user_credits');
-    if (config != null) {
-      _credits = int.parse(config.value);
-    } else {
-      _credits = 0;
+    if (_uuid == null) {
+      debugPrint('UUID 未设置，无法加载金币');
+      return;
     }
 
-    debugPrint('加载金币: ${_credits}');
+    try {
+      // 从 API 获取金币数量
+      final coins = await _userApi.getCoins(uuid: _uuid!);
+      _credits = coins;
 
-    notifyListeners();
+      // 保存到本地数据库作为缓存
+      await _databaseService.saveConfig(
+        UserConfig(
+          key: 'user_credits',
+          value: _credits.toString(),
+        ),
+      );
+
+      notifyListeners();
+      debugPrint('加载金币成功: $_credits');
+    } catch (e) {
+      debugPrint('加载金币失败: $e');
+      // 如果 API 请求失败，尝试从本地缓存加载
+      final config = await _databaseService.getConfig('user_credits');
+      if (config != null) {
+        _credits = int.parse(config.value);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> refreshCredits() async {
+    if (_uuid == null) {
+      debugPrint('UUID 未设置，无法刷新金币');
+      return;
+    }
+
+    try {
+      final coins = await _userApi.getCoins(uuid: _uuid!);
+      _credits = coins;
+      notifyListeners();
+
+      // 更新本地缓存
+      await _databaseService.saveConfig(
+        UserConfig(
+          key: 'user_credits',
+          value: _credits.toString(),
+        ),
+      );
+    } catch (e) {
+      debugPrint('刷新金币失败: $e');
+    }
   }
 
   Future<void> addCredits(int amount) async {
