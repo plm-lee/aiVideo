@@ -9,6 +9,8 @@ import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'theme_detail_page.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
+import 'package:ai_video/service/video_service.dart';
+import 'package:ai_video/models/video_sample.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -21,53 +23,9 @@ class _AIVideoState extends State<AIVideo> {
   static const double _cardHeight = 130.0;
   static const double _spacing = 16.0;
   static const double _borderRadius = 16.0;
+  final VideoService _videoService = VideoService();
 
-  final List<Map<String, dynamic>> _categories = [
-    {
-      'title': 'AI Kiss',
-      'icon': '💗',
-      'items': [
-        {
-          'title': 'Kiss my Crush',
-          'img_num': 2,
-          'theme_id': '1',
-          'image':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/aduio_img/c9e449f2cfa844bfb1e706edf61fe9a0?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=09af1d0fcca4934af3781459de491bf19370e702135756eb45e218b5e1e70cf8',
-          'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/image_to_video/CjipVGe0a5oAAAAAAd6xOg-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5b91e896c7b4d266713c35cbde83fdb5932f95448595628e47a0aeacd20dcf52'
-        },
-        {
-          'title': 'Kiss Manga',
-          'img_num': 2,
-          'theme_id': '2',
-          'image': 'assets/images/kiss2.jpg',
-          'video_url': 'assets/videos/kiss_manga.mp4',
-        },
-        {
-          'title': 'Kiss Anime',
-          'img_num': 1,
-          'theme_id': '3',
-          'image': 'assets/images/kiss3.jpg',
-          'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/26/image_to_video/ChFBUme0a_IAAAAAAaaBqw-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250226%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250226T125100Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=a78b2d0a95f03fc45f08fdee5e7b8fc01ed8bd2ec42d26c24fbdf35ce2e31ad4',
-        },
-      ]
-    },
-    {
-      'title': 'AI Dance',
-      'icon': '💃',
-      'items': [
-        {
-          'title': 'Dance my Crush',
-          'theme_id': '4',
-          'image':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/aduio_img/d33096154a58418ab30102784c58c350?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=c9f11b65443876ab3f7f8e7b2b30c0475275d30140aa5e14648e6e04523d9983',
-          'video_url':
-              'https://magaai.s3.us-west-1.amazonaws.com/2025/02/27/image_to_video/CjJi7me0aekAAAAAAd914g-0_raw_video_2.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4NSA4KUYKEC6U7L%2F20250227%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250227T064639Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=f271ff2b9cf8fcaa4265f20f82bc346152a1f9d228dfb92bcb1f92e0b025f4ba'
-        },
-      ]
-    },
-  ];
+  List<VideoSample> _categories = [];
 
   // 添加视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
@@ -85,6 +43,15 @@ class _AIVideoState extends State<AIVideo> {
   void initState() {
     super.initState();
     _initializeVideoControllers();
+    _getVideoSamples();
+  }
+
+  Future<void> _getVideoSamples() async {
+    final videoSamples = await _videoService.getVideoSamples();
+    setState(() {
+      _categories = videoSamples;
+    });
+    debugPrint('videoSamples: $videoSamples');
   }
 
   Future<void> _initializeVideoControllers() async {
@@ -93,8 +60,8 @@ class _AIVideoState extends State<AIVideo> {
 
     try {
       for (var category in _categories) {
-        for (var item in category['items']) {
-          final String? videoUrl = item['video_url'];
+        for (var item in category.items) {
+          final String? videoUrl = item.videoUrl;
           if (videoUrl != null && !_videoControllers.containsKey(videoUrl)) {
             try {
               final controller = videoUrl.startsWith('http')
@@ -202,9 +169,8 @@ class _AIVideoState extends State<AIVideo> {
     );
   }
 
-  Widget _buildCategorySection(Map<String, dynamic> category) {
+  Widget _buildCategorySection(VideoSample category) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // 随机选择一个渐变色
     final gradient =
         _gradients[_categories.indexOf(category) % _gradients.length];
 
@@ -216,7 +182,7 @@ class _AIVideoState extends State<AIVideo> {
           child: Row(
             children: [
               Text(
-                category['icon'],
+                category.icon,
                 style: const TextStyle(fontSize: 24),
               ),
               const SizedBox(width: 8),
@@ -227,16 +193,16 @@ class _AIVideoState extends State<AIVideo> {
                   end: Alignment.bottomRight,
                 ).createShader(bounds),
                 child: Text(
-                  category['title'],
+                  category.title,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // 必须是白色才能显示渐变
+                    color: Colors.white,
                   ),
                 ),
               ),
               const Spacer(),
-              _buildAllButton(category['title']),
+              _buildAllButton(category.title),
             ],
           ),
         ),
@@ -245,9 +211,9 @@ class _AIVideoState extends State<AIVideo> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: _spacing),
-            itemCount: (category['items'] as List).length,
+            itemCount: category.items.length,
             itemBuilder: (context, index) {
-              final item = category['items'][index];
+              final item = category.items[index];
               return _buildCategoryCard(item);
             },
           ),
@@ -288,9 +254,9 @@ class _AIVideoState extends State<AIVideo> {
     );
   }
 
-  Widget _buildMediaContent(Map<String, dynamic> item) {
-    final String imagePath = item['image'] ?? '';
-    final String? videoUrl = item['video_url'];
+  Widget _buildMediaContent(VideoSampleItem item) {
+    final String imagePath = item.image;
+    final String videoUrl = item.videoUrl;
     final bool isNetworkPath = imagePath.startsWith('http');
 
     // 默认灰色背景
@@ -305,7 +271,7 @@ class _AIVideoState extends State<AIVideo> {
     );
 
     // 优先展示视频
-    if (videoUrl != null) {
+    if (videoUrl.isNotEmpty) {
       final controller = _videoControllers[videoUrl];
       if (controller?.value.isInitialized ?? false) {
         return FittedBox(
@@ -350,7 +316,7 @@ class _AIVideoState extends State<AIVideo> {
     );
   }
 
-  Widget _buildCategoryCard(Map<String, dynamic> item) {
+  Widget _buildCategoryCard(VideoSampleItem item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
@@ -367,13 +333,13 @@ class _AIVideoState extends State<AIVideo> {
           fit: StackFit.expand,
           children: <Widget>[
             _buildMediaContent(item),
-            if (item['title'].isNotEmpty)
+            if (item.title.isNotEmpty)
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 8,
                 child: Text(
-                  item['title'],
+                  item.title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
@@ -397,18 +363,17 @@ class _AIVideoState extends State<AIVideo> {
     );
   }
 
-  void _navigateToThemeDetail(Map<String, dynamic> item) {
+  void _navigateToThemeDetail(VideoSampleItem item) {
     context.push(
       '/theme-detail',
       extra: {
-        'title': item['title'] ?? 'Kiss my Crush',
-        'themeId': item['theme_id'],
-        'imagePath': item['image'],
-        'videoUrl': item['video_url'],
-        'preloadedController': item['video_url'] != null
-            ? _videoControllers[item['video_url']]
-            : null,
-        'imgNum': item['img_num'] ?? 1, // 添加imgNum参数
+        'title': item.title,
+        'themeId': item.prompt,
+        'imagePath': item.image,
+        'videoUrl': item.videoUrl,
+        'preloadedController':
+            item.videoUrl.isNotEmpty ? _videoControllers[item.videoUrl] : null,
+        'imgNum': item.imgNum,
       },
     );
   }

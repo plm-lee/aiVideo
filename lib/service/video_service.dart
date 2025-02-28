@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ai_video/api/video_api.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/models/video_task.dart';
+import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
@@ -165,6 +166,30 @@ class VideoService extends ChangeNotifier {
     } catch (e) {
       debugPrint('Failed to download video: $e');
       return null;
+    }
+  }
+
+  // 获取视频样例库
+  Future<List<VideoSample>> getVideoSamples() async {
+    try {
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        return [];
+      }
+
+      final response = await _videoApi.getVideoSamples(uuid: user.uuid);
+      if (response['response']['success'] != '1') {
+        return [];
+      }
+
+      debugPrint('getVideoSamples: ${response['samples']}');
+
+      return (response['samples'] as List)
+          .map((sample) => VideoSample.fromJson(sample as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting video samples: $e');
+      return [];
     }
   }
 }

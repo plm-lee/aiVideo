@@ -1,4 +1,5 @@
 import 'package:ai_video/api/api_client.dart';
+import 'package:flutter/foundation.dart';
 
 class VideoApi {
   static const String baseUrl = 'https://chat.bigchallenger.com';
@@ -34,6 +35,16 @@ class VideoApi {
       queryParameters: {
         'uuid': uuid,
       },
+    );
+  }
+
+  // 获取视频样例库
+  Future<Map<String, dynamic>> getVideoSamples({
+    required String uuid,
+  }) async {
+    return await _apiClient.get(
+      '/api/ai_video/samples',
+      queryParameters: {'uuid': uuid},
     );
   }
 }
