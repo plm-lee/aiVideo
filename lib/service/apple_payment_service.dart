@@ -22,7 +22,10 @@ class ApplePaymentService {
   // 添加支付状态跟踪
   final StreamController<bool> _loadingController =
       StreamController<bool>.broadcast();
+  final StreamController<bool> _purchaseSuccessController =
+      StreamController<bool>.broadcast();
   Stream<bool> get loadingStream => _loadingController.stream;
+  Stream<bool> get purchaseSuccessStream => _purchaseSuccessController.stream;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -84,8 +87,6 @@ class ApplePaymentService {
         switch (purchaseDetails.status) {
           case PurchaseStatus.pending:
             debugPrint('Purchase pending...');
-            _isLoading = true;
-            _loadingController.add(true);
             continue;
           case PurchaseStatus.purchased:
           case PurchaseStatus.restored:
@@ -93,15 +94,22 @@ class ApplePaymentService {
             if (valid) {
               await _deliverProduct(purchaseDetails);
               debugPrint('Purchase completed successfully');
+              _isLoading = false;
+              _loadingController.add(false);
+              _purchaseSuccessController.add(true);
             } else {
               throw Exception('Purchase verification failed');
             }
             break;
           case PurchaseStatus.error:
+            _isLoading = false;
+            _loadingController.add(false);
             throw Exception(
                 purchaseDetails.error?.message ?? 'Purchase failed');
           case PurchaseStatus.canceled:
             debugPrint('Purchase canceled');
+            _isLoading = false;
+            _loadingController.add(false);
             break;
         }
 
@@ -110,10 +118,9 @@ class ApplePaymentService {
         }
       } catch (e) {
         debugPrint('Error handling purchase: $e');
-        rethrow;
-      } finally {
         _isLoading = false;
         _loadingController.add(false);
+        rethrow;
       }
     }
   }
@@ -141,6 +148,7 @@ class ApplePaymentService {
   void dispose() {
     _subscription?.cancel();
     _loadingController.close();
+    _purchaseSuccessController.close();
   }
 
   // 获取所有商品
@@ -253,6 +261,9 @@ class ApplePaymentService {
     if (!_isInitialized) await fetchAllProducts();
 
     try {
+      _isLoading = true;
+      _loadingController.add(true);
+
       if (_subscribeProducts.isEmpty) {
         throw Exception('No subscription products available');
       }
@@ -269,6 +280,8 @@ class ApplePaymentService {
       await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (e) {
       debugPrint('Error purchasing subscription: $e');
+      _isLoading = false;
+      _loadingController.add(false);
       rethrow;
     }
   }

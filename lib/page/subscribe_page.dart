@@ -28,6 +28,18 @@ class _SubscribePageState extends State<SubscribePage> {
   void initState() {
     super.initState();
     _initializeVideoPlayer();
+    // 监听支付状态
+    _applePaymentService.loadingStream.listen((isLoading) {
+      if (mounted) {
+        setState(() => _isLoading = isLoading);
+      }
+    });
+    // 监听支付成功
+    _applePaymentService.purchaseSuccessStream.listen((_) {
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    });
   }
 
   void _initializeVideoPlayer() {
@@ -47,22 +59,12 @@ class _SubscribePageState extends State<SubscribePage> {
   }
 
   Future<void> _handleSubscription() async {
-    setState(() => _isLoading = true);
-
     try {
       // 调用订阅接口
       await _applePaymentService.purchaseSubscription();
-      // 支付成功
-      if (mounted) {
-        _showSuccessDialog();
-      }
     } catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
