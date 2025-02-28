@@ -17,6 +17,7 @@ class SubscribePage extends StatefulWidget {
 class _SubscribePageState extends State<SubscribePage> {
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   bool _isLoading = false;
+  bool _hasShownSuccessDialog = false;
   late VideoPlayerController _controller;
 
   static const Color _backgroundColor = Colors.black;
@@ -37,7 +38,11 @@ class _SubscribePageState extends State<SubscribePage> {
     // 监听支付成功
     _applePaymentService.purchaseSuccessStream.listen((_) {
       if (mounted) {
-        _showSuccessDialog();
+        // 只弹窗一次
+        if (!_hasShownSuccessDialog) {
+          _showSuccessDialog();
+          _hasShownSuccessDialog = true;
+        }
       }
     });
   }

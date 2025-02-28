@@ -18,6 +18,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   int? selectedPlan;
   List<ProductDetails> _products = [];
   bool _isLoading = false;
+  bool _hasShownSuccessDialog = false;
   bool _isLoadingProducts = true;
 
   @override
@@ -25,6 +26,23 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
     super.initState();
     _initializeVideoPlayer();
     _loadProducts();
+    // 监听支付状态
+    _applePaymentService.loadingStream.listen((isLoading) {
+      if (mounted) {
+        setState(() => _isLoading = isLoading);
+      }
+    });
+    // 监听支付成功
+    _applePaymentService.purchaseSuccessStream.listen((_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // 只弹窗一次
+        if (!_hasShownSuccessDialog) {
+          _showSuccessDialog();
+          _hasShownSuccessDialog = true;
+        }
+      }
+    });
   }
 
   Future<void> _loadProducts() async {
@@ -52,6 +70,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
 
   @override
   void dispose() {
+    _applePaymentService.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -236,18 +255,9 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
       await _applePaymentService.purchaseCoins(
         product.description,
       );
-
-      // 支付成功
-      if (mounted) {
-        _showSuccessDialog();
-      }
     } catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
