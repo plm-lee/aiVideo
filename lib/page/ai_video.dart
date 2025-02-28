@@ -11,6 +11,8 @@ import 'package:video_player/video_player.dart';
 import 'dart:async';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -23,6 +25,9 @@ class _AIVideoState extends State<AIVideo> {
   static const double _cardHeight = 130.0;
   static const double _spacing = 16.0;
   static const double _borderRadius = 16.0;
+  static const String _cacheKey = 'video_categories_cache';
+  static const String _cacheDateKey = 'video_categories_cache_date';
+
   final VideoService _videoService = VideoService();
 
   List<VideoSample> _categories = [];
@@ -42,16 +47,105 @@ class _AIVideoState extends State<AIVideo> {
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     _initializeVideoControllers();
-    _getVideoSamples();
+  }
+
+  Future<bool> _shouldUpdateCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? lastUpdateStr = prefs.getString(_cacheDateKey);
+
+      if (lastUpdateStr == null) return true;
+
+      final DateTime lastUpdate = DateTime.parse(lastUpdateStr);
+      final DateTime now = DateTime.now();
+
+      // 如果缓存时间超过24小时，则更新
+      return now.difference(lastUpdate).inHours >= 24;
+    } catch (e) {
+      debugPrint('Error checking cache update time: $e');
+      return true;
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    // 先尝试加载缓存数据
+    await _loadCachedCategories();
+    // 检查是否需要更新缓存
+    if (await _shouldUpdateCache()) {
+      await _getVideoSamples();
+    }
+  }
+
+  Future<void> _loadCachedCategories() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? cachedData = prefs.getString(_cacheKey);
+
+      if (cachedData != null) {
+        final List<dynamic> decoded = json.decode(cachedData);
+        setState(() {
+          _categories = decoded
+              .map((item) => VideoSample.fromJson(item as Map<String, dynamic>))
+              .toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading cached categories: $e');
+    }
   }
 
   Future<void> _getVideoSamples() async {
-    final videoSamples = await _videoService.getVideoSamples();
-    setState(() {
-      _categories = videoSamples;
-    });
-    debugPrint('videoSamples: $videoSamples');
+    try {
+      final videoSamples = await _videoService.getVideoSamples();
+
+      if (mounted) {
+        setState(() {
+          _categories = videoSamples;
+        });
+      }
+
+      // 更新缓存
+      await _updateCache(videoSamples);
+    } catch (e) {
+      debugPrint('Error getting video samples: $e');
+    }
+  }
+
+  Future<void> _updateCache(List<VideoSample> categories) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 缓存分类数据
+      final String encodedData = json.encode(
+        categories
+            .map((category) => {
+                  'title': category.title,
+                  'icon': category.icon,
+                  'items': category.items
+                      .map((item) => {
+                            'title': item.title,
+                            'image': item.image,
+                            'video_url': item.videoUrl,
+                            'img_num': item.imgNum,
+                            'prompt': item.prompt,
+                          })
+                      .toList(),
+                })
+            .toList(),
+      );
+
+      await prefs.setString(_cacheKey, encodedData);
+
+      // 更新缓存时间
+      await prefs.setString(
+        _cacheDateKey,
+        DateTime.now().toIso8601String(),
+      );
+    } catch (e) {
+      debugPrint('Error updating cache: $e');
+    }
   }
 
   Future<void> _initializeVideoControllers() async {
