@@ -19,6 +19,13 @@ class ApplePaymentService {
   Map<String, String> _productUuidMap = {}; // 商品id和uuid的映射
   bool _isInitialized = false;
 
+  // 添加支付状态跟踪
+  final StreamController<bool> _loadingController =
+      StreamController<bool>.broadcast();
+  Stream<bool> get loadingStream => _loadingController.stream;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   // 初始化所有商品
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -70,20 +77,70 @@ class ApplePaymentService {
   Future<void> _handlePurchaseUpdates(
       List<PurchaseDetails> purchaseDetailsList) async {
     for (final purchaseDetails in purchaseDetailsList) {
-      if (purchaseDetails.status == PurchaseStatus.purchased) {
-        // Handle successful purchase
-      } else if (purchaseDetails.status == PurchaseStatus.error) {
-        // Handle error
-      }
+      debugPrint('Purchase status: ${purchaseDetails.status}');
+      debugPrint('Product ID: ${purchaseDetails.productID}');
 
-      if (purchaseDetails.pendingCompletePurchase) {
-        await _inAppPurchase.completePurchase(purchaseDetails);
+      try {
+        switch (purchaseDetails.status) {
+          case PurchaseStatus.pending:
+            debugPrint('Purchase pending...');
+            _isLoading = true;
+            _loadingController.add(true);
+            continue;
+          case PurchaseStatus.purchased:
+          case PurchaseStatus.restored:
+            final valid = await _verifyPurchase(purchaseDetails);
+            if (valid) {
+              await _deliverProduct(purchaseDetails);
+              debugPrint('Purchase completed successfully');
+            } else {
+              throw Exception('Purchase verification failed');
+            }
+            break;
+          case PurchaseStatus.error:
+            throw Exception(
+                purchaseDetails.error?.message ?? 'Purchase failed');
+          case PurchaseStatus.canceled:
+            debugPrint('Purchase canceled');
+            break;
+        }
+
+        if (purchaseDetails.pendingCompletePurchase) {
+          await _inAppPurchase.completePurchase(purchaseDetails);
+        }
+      } catch (e) {
+        debugPrint('Error handling purchase: $e');
+        rethrow;
+      } finally {
+        _isLoading = false;
+        _loadingController.add(false);
       }
+    }
+  }
+
+  Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
+    try {
+      // TODO: 实现购买验证逻辑
+      debugPrint(
+          'purchaseDetails: ${purchaseDetails.productID}, ${purchaseDetails.purchaseID}, ${purchaseDetails.verificationData.serverVerificationData}');
+      return true;
+    } catch (e) {
+      debugPrint('Error verifying purchase: $e');
+      return false;
+    }
+  }
+
+  Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
+    try {
+      // TODO: 实现商品交付逻辑
+    } catch (e) {
+      debugPrint('Error delivering product: $e');
     }
   }
 
   void dispose() {
     _subscription?.cancel();
+    _loadingController.close();
   }
 
   // 获取所有商品

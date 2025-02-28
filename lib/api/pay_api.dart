@@ -54,4 +54,26 @@ class PayApi {
       throw Exception('Error creating prepay order: $e');
     }
   }
+
+  Future<Map<String, dynamic>> verifyPurchase({
+    required String uuid,
+    required String productId,
+    required String transactionId,
+    required String receipt,
+  }) async {
+    try {
+      return await _apiClient.post(
+        '/api/v1/pay/verify',
+        {
+          'uuid': uuid,
+          'product_id': productId,
+          'transaction_id': transactionId,
+          'receipt': receipt,
+        },
+      );
+    } catch (e) {
+      debugPrint('Error verifying purchase: $e');
+      rethrow;
+    }
+  }
 }
