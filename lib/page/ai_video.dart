@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/page/drawer.dart';
 import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
-import 'theme_detail_page.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'package:ai_video/service/video_cache.dart';
 
 class AIVideo extends StatefulWidget {
@@ -26,8 +22,6 @@ class _AIVideoState extends State<AIVideo> {
   static const double _cardHeight = 130.0;
   static const double _spacing = 16.0;
   static const double _borderRadius = 16.0;
-  static const String _cacheKey = 'video_categories_cache';
-  static const String _cacheDateKey = 'video_categories_cache_date';
 
   final VideoService _videoService = VideoService();
   final VideoCache _videoCache = VideoCache();
@@ -51,24 +45,6 @@ class _AIVideoState extends State<AIVideo> {
     super.initState();
     _loadCategories();
     _initializeVideoControllers();
-  }
-
-  Future<bool> _shouldUpdateCache() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? lastUpdateStr = prefs.getString(_cacheDateKey);
-
-      if (lastUpdateStr == null) return true;
-
-      final DateTime lastUpdate = DateTime.parse(lastUpdateStr);
-      final DateTime now = DateTime.now();
-
-      // 如果缓存时间超过24小时，则更新
-      return now.difference(lastUpdate).inHours >= 24;
-    } catch (e) {
-      debugPrint('Error checking cache update time: $e');
-      return true;
-    }
   }
 
   Future<void> _loadCategories() async {
