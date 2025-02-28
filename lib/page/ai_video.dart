@@ -13,6 +13,7 @@ import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:ai_video/service/video_cache.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -29,6 +30,7 @@ class _AIVideoState extends State<AIVideo> {
   static const String _cacheDateKey = 'video_categories_cache_date';
 
   final VideoService _videoService = VideoService();
+  final VideoCache _videoCache = VideoCache();
 
   List<VideoSample> _categories = [];
 
@@ -71,28 +73,16 @@ class _AIVideoState extends State<AIVideo> {
 
   Future<void> _loadCategories() async {
     // 先尝试加载缓存数据
-    await _loadCachedCategories();
-    // 检查是否需要更新缓存
-    if (await _shouldUpdateCache()) {
-      await _getVideoSamples();
+    final cachedCategories = await _videoCache.loadCachedCategories();
+    if (cachedCategories.isNotEmpty) {
+      setState(() {
+        _categories = cachedCategories;
+      });
     }
-  }
 
-  Future<void> _loadCachedCategories() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? cachedData = prefs.getString(_cacheKey);
-
-      if (cachedData != null) {
-        final List<dynamic> decoded = json.decode(cachedData);
-        setState(() {
-          _categories = decoded
-              .map((item) => VideoSample.fromJson(item as Map<String, dynamic>))
-              .toList();
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading cached categories: $e');
+    // 检查是否需要更新缓存
+    if (await _videoCache.shouldUpdateCache()) {
+      await _getVideoSamples();
     }
   }
 
@@ -107,44 +97,9 @@ class _AIVideoState extends State<AIVideo> {
       }
 
       // 更新缓存
-      await _updateCache(videoSamples);
+      await _videoCache.updateCache(videoSamples);
     } catch (e) {
       debugPrint('Error getting video samples: $e');
-    }
-  }
-
-  Future<void> _updateCache(List<VideoSample> categories) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // 缓存分类数据
-      final String encodedData = json.encode(
-        categories
-            .map((category) => {
-                  'title': category.title,
-                  'icon': category.icon,
-                  'items': category.items
-                      .map((item) => {
-                            'title': item.title,
-                            'image': item.image,
-                            'video_url': item.videoUrl,
-                            'img_num': item.imgNum,
-                            'prompt': item.prompt,
-                          })
-                      .toList(),
-                })
-            .toList(),
-      );
-
-      await prefs.setString(_cacheKey, encodedData);
-
-      // 更新缓存时间
-      await prefs.setString(
-        _cacheDateKey,
-        DateTime.now().toIso8601String(),
-      );
-    } catch (e) {
-      debugPrint('Error updating cache: $e');
     }
   }
 
