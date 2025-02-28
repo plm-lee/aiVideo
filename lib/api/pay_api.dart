@@ -55,25 +55,28 @@ class PayApi {
     }
   }
 
-  Future<Map<String, dynamic>> verifyPurchase({
+  Future<bool> verifyPurchase({
     required String uuid,
     required String productId,
     required String transactionId,
     required String receipt,
   }) async {
     try {
-      return await _apiClient.post(
-        '/api/v1/pay/verify',
+      final response = await _apiClient.post(
+        '/api/ios_in_app_purchase/verify_receipt_with_apple',
         {
           'uuid': uuid,
           'product_id': productId,
-          'transaction_id': transactionId,
-          'receipt': receipt,
+          'original_transaction_id': transactionId,
+          'receipt_data': receipt,
         },
       );
+
+      debugPrint('verifyPurchase response: $response');
+      return response['response']['success'] == '1';
     } catch (e) {
       debugPrint('Error verifying purchase: $e');
-      rethrow;
+      return false;
     }
   }
 }

@@ -127,10 +127,22 @@ class ApplePaymentService {
 
   Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      // TODO: 实现购买验证逻辑
       debugPrint(
           'purchaseDetails: ${purchaseDetails.productID}, ${purchaseDetails.purchaseID}, ${purchaseDetails.verificationData.serverVerificationData}');
-      return true;
+
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        throw Exception('Failed to verify purchase: user not found');
+      }
+
+      final ok = await PayApi().verifyPurchase(
+        uuid: user.uuid,
+        productId: purchaseDetails.productID,
+        transactionId: purchaseDetails.purchaseID ?? '',
+        receipt: purchaseDetails.verificationData.serverVerificationData,
+      );
+
+      return ok;
     } catch (e) {
       debugPrint('Error verifying purchase: $e');
       return false;
