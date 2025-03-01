@@ -106,11 +106,9 @@ class VideoService extends ChangeNotifier {
 
       final List<VideoTask> videoTasks =
           (response['video_tasks'] as List).map((task) {
-        // 处理中文编码
-        final decodedPrompt = utf8.decode(
-          utf8.encode(task['prompt'] as String),
-        );
-        task['prompt'] = decodedPrompt;
+        // 直接使用服务器返回的已解码字符串
+        final prompt = task['prompt'] as String;
+        task['prompt'] = prompt;
 
         // 如果任务完成且有 object_key，将其作为视频地址
         if (task['object_key'] != null) {

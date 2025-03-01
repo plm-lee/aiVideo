@@ -183,7 +183,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final decodedPrompt = _getDecodedPrompt(widget.task.prompt);
+    final decodedPrompt = widget.task.prompt;
 
     if (_isFullScreen && _videoController != null) {
       return Scaffold(

@@ -203,7 +203,7 @@ class _MinePageState extends State<MinePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    getDecodedPrompt(task.prompt),
+                    task.prompt,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
