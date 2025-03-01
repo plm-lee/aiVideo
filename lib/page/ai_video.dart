@@ -20,7 +20,7 @@ class AIVideo extends StatefulWidget {
   State<AIVideo> createState() => _AIVideoState();
 }
 
-class _AIVideoState extends State<AIVideo> {
+class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   static const double _cardHeight = 130.0;
   static const double _spacing = 16.0;
   static const double _borderRadius = 16.0;
@@ -45,8 +45,32 @@ class _AIVideoState extends State<AIVideo> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadCategories();
     _initializeVideoControllers();
+    _updateCredits();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
+    _videoControllers.clear();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _updateCredits();
+    }
+  }
+
+  void _updateCredits() {
+    final creditsService = Provider.of<CreditsService>(context, listen: false);
+    creditsService.loadCredits();
   }
 
   Future<void> _loadCategories() async {
@@ -130,15 +154,6 @@ class _AIVideoState extends State<AIVideo> {
     } finally {
       _isInitializing = false;
     }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _videoControllers.values) {
-      controller.dispose();
-    }
-    _videoControllers.clear();
-    super.dispose();
   }
 
   void _handleVideoConversion(String type) {
