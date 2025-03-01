@@ -7,9 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
+import 'dart:ui';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/video_cache.dart';
+import 'package:flutter/rendering.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -206,9 +208,25 @@ class _AIVideoState extends State<AIVideo> {
           padding: const EdgeInsets.all(_spacing),
           child: Row(
             children: [
-              Text(
-                category.icon,
-                style: const TextStyle(fontSize: 24),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category.icon,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               ShaderMask(
