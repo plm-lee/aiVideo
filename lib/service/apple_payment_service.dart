@@ -4,11 +4,15 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:ai_video/api/pay_api.dart';
 import 'package:ai_video/models/system.dart';
 import 'package:ai_video/service/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApplePaymentService {
   static final ApplePaymentService _instance = ApplePaymentService._internal();
   factory ApplePaymentService() => _instance;
   ApplePaymentService._internal();
+
+  static const String _prepayOrderPrefix = 'prepay_order_';
+  SharedPreferences? _prefs;
 
   final AuthService _authService = AuthService();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -29,9 +33,34 @@ class ApplePaymentService {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // 初始化 SharedPreferences
+  Future<void> _initPrefs() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
+
+  // 保存预支付订单号
+  Future<void> _savePrepayOrder(String productId, String orderId) async {
+    await _initPrefs();
+    await _prefs?.setString('$_prepayOrderPrefix$productId', orderId);
+  }
+
+  // 获取预支付订单号
+  Future<String?> _getPrepayOrder(String productId) async {
+    await _initPrefs();
+    return _prefs?.getString('$_prepayOrderPrefix$productId');
+  }
+
+  // 删除预支付订单号
+  Future<void> _removePrepayOrder(String productId) async {
+    await _initPrefs();
+    await _prefs?.remove('$_prepayOrderPrefix$productId');
+  }
+
   // 初始化所有商品
   Future<void> initialize() async {
     if (_isInitialized) return;
+
+    await _initPrefs();
 
     if (await _inAppPurchase.isAvailable()) {
       _subscription = _inAppPurchase.purchaseStream.listen(
@@ -77,11 +106,54 @@ class ApplePaymentService {
   // 返回金币包
   List<ProductDetails> get coinsProducts => _coinsProducts;
 
+  Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
+    try {
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        throw Exception('Failed to verify purchase: user not found');
+      }
+
+      // 获取预支付订单号
+      String? orderId = await _getPrepayOrder(purchaseDetails.productID);
+      debugPrint('获取到的预支付订单号: $orderId');
+
+      if (orderId == null) {
+        // 如果找不到预支付订单号，尝试从 applicationUsername 获取
+        orderId = purchaseDetails.purchaseID;
+        debugPrint('使用 purchaseID 作为订单号: $orderId');
+      }
+
+      if (orderId == null) {
+        throw Exception('无效的交易ID');
+      }
+
+      debugPrint('使用订单号验证支付: $orderId');
+      final ok = await PayApi().verifyPurchase(
+        uuid: user.uuid,
+        productId: purchaseDetails.productID,
+        transactionId: orderId,
+        receipt: purchaseDetails.verificationData.serverVerificationData,
+      );
+
+      if (!ok) {
+        debugPrint('服务端验证支付失败');
+      }
+
+      // 清理预支付订单缓存
+      await _removePrepayOrder(purchaseDetails.productID);
+      return true;
+    } catch (e) {
+      debugPrint('Error verifying purchase: $e');
+      return false;
+    }
+  }
+
   Future<void> _handlePurchaseUpdates(
       List<PurchaseDetails> purchaseDetailsList) async {
     for (final purchaseDetails in purchaseDetailsList) {
-      debugPrint('Purchase status: ${purchaseDetails.status}');
       debugPrint('Product ID: ${purchaseDetails.productID}');
+      // 支付状态，只有成功的才回调验证
+      debugPrint('Purchase status: ${purchaseDetails.status}');
 
       try {
         switch (purchaseDetails.status) {
@@ -122,30 +194,6 @@ class ApplePaymentService {
         _loadingController.add(false);
         rethrow;
       }
-    }
-  }
-
-  Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
-    try {
-      debugPrint(
-          'purchaseDetails: ${purchaseDetails.productID}, ${purchaseDetails.purchaseID}, ${purchaseDetails.verificationData.serverVerificationData}');
-
-      final (success, message, user) = await _authService.getCurrentUser();
-      if (!success || user == null) {
-        throw Exception('Failed to verify purchase: user not found');
-      }
-
-      final ok = await PayApi().verifyPurchase(
-        uuid: user.uuid,
-        productId: purchaseDetails.productID,
-        transactionId: purchaseDetails.purchaseID ?? '',
-        receipt: purchaseDetails.verificationData.serverVerificationData,
-      );
-
-      return ok;
-    } catch (e) {
-      debugPrint('Error verifying purchase: $e');
-      return false;
     }
   }
 
@@ -256,6 +304,10 @@ class ApplePaymentService {
       final orderId =
           await prepayOrder(productUuid: _productUuidMap[productId] ?? '');
 
+      // 缓存预支付订单号到 SharedPreferences
+      await _savePrepayOrder(productId, orderId);
+      debugPrint('保存预支付订单号: productId=$productId, orderId=$orderId');
+
       final purchaseParam = PurchaseParam(
         productDetails: product,
         applicationUserName: orderId,
@@ -264,6 +316,83 @@ class ApplePaymentService {
       await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
     } catch (e) {
       debugPrint('Error purchasing coins: $e');
+      rethrow;
+    }
+  }
+
+  // 清理所有未完成的交易
+  Future<void> cleanupPendingTransactions() async {
+    try {
+      debugPrint('开始清理未完成的交易...');
+
+      // 创建一个新的 Stream 订阅来处理未完成的交易
+      final completer = Completer<void>();
+      StreamSubscription<List<PurchaseDetails>>? subscription;
+      bool hasCompletedAnyPurchase = false;
+
+      subscription = _inAppPurchase.purchaseStream.listen(
+        (purchaseDetailsList) async {
+          try {
+            for (var purchase in purchaseDetailsList) {
+              debugPrint(
+                  '检查交易状态: ${purchase.productID}, status: ${purchase.status}');
+
+              if (purchase.pendingCompletePurchase) {
+                debugPrint('发现未完成的交易: ${purchase.productID}');
+                try {
+                  await _inAppPurchase.completePurchase(purchase);
+                  // 清理相关的预支付订单缓存
+                  await _removePrepayOrder(purchase.productID);
+                  hasCompletedAnyPurchase = true;
+                  debugPrint('成功完成交易: ${purchase.productID}');
+                } catch (e) {
+                  debugPrint('完成交易失败: ${purchase.productID}, 错误: $e');
+                }
+              }
+            }
+
+            if (!hasCompletedAnyPurchase) {
+              debugPrint('没有发现需要清理的待处理交易');
+            }
+
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
+          } catch (e) {
+            debugPrint('处理交易时出错: $e');
+            if (!completer.isCompleted) {
+              completer.completeError(e);
+            }
+          }
+        },
+        onError: (error) {
+          debugPrint('清理交易流监听错误: $error');
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
+          subscription?.cancel();
+        },
+        onDone: () {
+          debugPrint('清理交易流监听完成');
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+          subscription?.cancel();
+        },
+      );
+
+      // 等待10秒或直到完成
+      await completer.future.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          subscription?.cancel();
+          debugPrint('清理交易超时 - 已等待2秒');
+        },
+      );
+
+      debugPrint('清理交易流程完成');
+    } catch (e) {
+      debugPrint('清理未完成交易失败: $e');
       rethrow;
     }
   }
@@ -283,6 +412,13 @@ class ApplePaymentService {
       final product = _subscribeProducts.first;
       final orderId =
           await prepayOrder(productUuid: _productUuidMap[product.id] ?? '');
+
+      // 缓存预支付订单号到 SharedPreferences
+      await _savePrepayOrder(product.id, orderId);
+      debugPrint('保存预支付订单号: productId=${product.id}, orderId=$orderId');
+
+      // 清理未完成的交易
+      await cleanupPendingTransactions();
 
       final purchaseParam = PurchaseParam(
         productDetails: product,

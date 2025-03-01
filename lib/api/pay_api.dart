@@ -66,13 +66,12 @@ class PayApi {
         '/api/ios_in_app_purchase/verify_receipt_with_apple',
         {
           'uuid': uuid,
-          'product_id': productId,
           'original_transaction_id': transactionId,
           'receipt_data': receipt,
         },
       );
 
-      debugPrint('verifyPurchase response: $response');
+      debugPrint('verifyPurchase orderId: $transactionId, response: $response');
       return response['response']['success'] == '1';
     } catch (e) {
       debugPrint('Error verifying purchase: $e');
