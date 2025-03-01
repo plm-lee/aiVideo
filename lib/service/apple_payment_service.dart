@@ -38,10 +38,24 @@ class ApplePaymentService {
     _prefs ??= await SharedPreferences.getInstance();
   }
 
-  // 保存预支付订单号
+  // 保存预支付订单号，确保重复的key会被覆盖
   Future<void> _savePrepayOrder(String productId, String orderId) async {
-    await _initPrefs();
-    await _prefs?.setString('$_prepayOrderPrefix$productId', orderId);
+    try {
+      await _initPrefs();
+      final key = '$_prepayOrderPrefix$productId';
+
+      // 检查是否存在旧的订单号
+      final oldOrderId = _prefs?.getString(key);
+      if (oldOrderId != null) {
+        debugPrint('发现旧的预支付订单号: $oldOrderId，将被新订单号覆盖: $orderId');
+      }
+
+      // 强制覆盖旧值
+      await _prefs?.setString(key, orderId);
+    } catch (e) {
+      debugPrint('保存预支付订单号失败: $e');
+      rethrow;
+    }
   }
 
   // 获取预支付订单号
@@ -139,8 +153,6 @@ class ApplePaymentService {
         debugPrint('服务端验证支付失败');
       }
 
-      // 清理预支付订单缓存
-      await _removePrepayOrder(purchaseDetails.productID);
       return true;
     } catch (e) {
       debugPrint('Error verifying purchase: $e');
@@ -341,8 +353,6 @@ class ApplePaymentService {
                 debugPrint('发现未完成的交易: ${purchase.productID}');
                 try {
                   await _inAppPurchase.completePurchase(purchase);
-                  // 清理相关的预支付订单缓存
-                  await _removePrepayOrder(purchase.productID);
                   hasCompletedAnyPurchase = true;
                   debugPrint('成功完成交易: ${purchase.productID}');
                 } catch (e) {
