@@ -51,6 +51,13 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
       _products = _applePaymentService.coinsProducts;
       if (_products.isNotEmpty) {
         selectedPlan = 0;
+      } else {
+        // 更新订阅产品
+        await _applePaymentService.fetchAllProducts();
+        _products = _applePaymentService.coinsProducts;
+        if (_products.isNotEmpty) {
+          selectedPlan = 0;
+        }
       }
     } catch (e) {
       debugPrint('加载商品失败: $e');
