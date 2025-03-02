@@ -320,6 +320,9 @@ class ApplePaymentService {
       await _savePrepayOrder(productId, orderId);
       debugPrint('保存预支付订单号: productId=$productId, orderId=$orderId');
 
+      // 清理未完成的交易
+      await cleanupPendingTransactions();
+
       final purchaseParam = PurchaseParam(
         productDetails: product,
         applicationUserName: orderId,
