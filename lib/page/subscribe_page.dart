@@ -18,6 +18,7 @@ class _SubscribePageState extends State<SubscribePage> {
   final ApplePaymentService _applePaymentService = ApplePaymentService();
   bool _isLoading = false;
   bool _hasShownSuccessDialog = false;
+  ProductDetails? _subscribeProduct;
   late VideoPlayerController _controller;
 
   static const Color _backgroundColor = Colors.black;
@@ -29,6 +30,7 @@ class _SubscribePageState extends State<SubscribePage> {
   void initState() {
     super.initState();
     _initializeVideoPlayer();
+    _loadProducts();
     // 监听支付状态
     _applePaymentService.loadingStream.listen((isLoading) {
       if (mounted) {
@@ -45,6 +47,27 @@ class _SubscribePageState extends State<SubscribePage> {
         }
       }
     });
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() => _isLoading = true);
+    try {
+      final _products = _applePaymentService.subscribeProducts;
+      if (_products.isNotEmpty) {
+        _subscribeProduct = _products.first;
+      } else {
+        // 更新订阅产品
+        await _applePaymentService.fetchAllProducts();
+        final _products = _applePaymentService.subscribeProducts;
+        if (_products.isNotEmpty) {
+          _subscribeProduct = _products.first;
+        }
+      }
+    } catch (e) {
+      debugPrint('加载商品失败: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _initializeVideoPlayer() {
