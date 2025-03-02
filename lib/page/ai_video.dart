@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ai_video/page/drawer.dart';
 import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/service/credits_service.dart';
 import 'package:provider/provider.dart';
@@ -441,7 +440,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Colors.black,
-      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: isDark
             ? AppTheme.darkBackgroundColor
