@@ -246,7 +246,12 @@ class _SubscribePageState extends State<SubscribePage> {
         children: [
           _buildWeeklyRenewalCard(),
           const SizedBox(height: 16),
-          const Text('\$8.99 / week', style: TextStyle(color: Colors.white)),
+          Text(
+            _subscribeProduct != null
+                ? '${_subscribeProduct!.price} / week'
+                : '\$8.99 / week',
+            style: const TextStyle(color: Colors.white),
+          ),
           const SizedBox(height: 4),
           const Text(
             'Renews automatically, cancel anytime.',
@@ -272,8 +277,8 @@ class _SubscribePageState extends State<SubscribePage> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'Weekly Renewal',
               style: TextStyle(
                 color: Colors.white,
@@ -282,8 +287,8 @@ class _SubscribePageState extends State<SubscribePage> {
               ),
             ),
             Text(
-              '\$8.99',
-              style: TextStyle(
+              _subscribeProduct?.price ?? '\$8.99',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
