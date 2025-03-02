@@ -74,41 +74,87 @@ class ApplePaymentService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    await _initPrefs();
+    try {
+      await _initPrefs();
 
-    if (await _inAppPurchase.isAvailable()) {
+      if (!await _inAppPurchase.isAvailable()) {
+        throw Exception('In-app purchases are not available');
+      }
+
+      // 设置购买监听
       _subscription = _inAppPurchase.purchaseStream.listen(
         _handlePurchaseUpdates,
         onDone: () => _subscription?.cancel(),
-        onError: (error) => debugPrint('Error: $error'),
+        onError: (error) {
+          debugPrint('Purchase stream error: $error');
+          _subscription?.cancel();
+        },
       );
 
+      // 获取商品信息
       await fetchAllProducts();
 
       // 合并两种商品到 _products
       _products = [..._subscribeProducts, ..._coinsProducts];
 
-      // 查询所有商品详情
-      final Set<String> productIds = _products.map((p) => p.id).toSet();
-
-      try {
-        final ProductDetailsResponse response =
-            await _inAppPurchase.queryProductDetails(productIds);
-
-        if (response.error != null) {
-          debugPrint('Error loading products: ${response.error}');
-          return;
-        }
-
-        if (_products.isEmpty) {
-          debugPrint('No products found');
-        }
-      } catch (e) {
-        debugPrint('Error loading products: $e');
-      }
+      // 查询苹果商店的商品详情
+      await _queryStoreProducts();
 
       _isInitialized = true;
+    } catch (e) {
+      debugPrint('初始化支付服务失败: $e');
+      rethrow;
     }
+  }
+
+  // 查询苹果商店的商品详情
+  Future<void> _queryStoreProducts() async {
+    try {
+      final Set<String> productIds = _products.map((p) => p.id).toSet();
+      if (productIds.isEmpty) {
+        debugPrint('没有可查询的商品ID');
+        return;
+      }
+
+      final ProductDetailsResponse response =
+          await _inAppPurchase.queryProductDetails(productIds);
+
+      if (response.error != null) {
+        throw Exception('查询商品详情失败: ${response.error}');
+      }
+
+      if (response.productDetails.isEmpty) {
+        throw Exception('未找到商品信息');
+      }
+
+      // 更新商品信息
+      // _updateProductsWithStoreInfo(response.productDetails);
+    } catch (e) {
+      debugPrint('查询商品详情失败: $e');
+      rethrow;
+    }
+  }
+
+  // 使用苹果商店的信息更新商品详情
+  void _updateProductsWithStoreInfo(List<ProductDetails> storeProducts) {
+    for (var storeProduct in storeProducts) {
+      // 更新订阅商品
+      final subIndex =
+          _subscribeProducts.indexWhere((p) => p.id == storeProduct.id);
+      if (subIndex != -1) {
+        _subscribeProducts[subIndex] = storeProduct;
+      }
+
+      // 更新金币商品
+      final coinIndex =
+          _coinsProducts.indexWhere((p) => p.id == storeProduct.id);
+      if (coinIndex != -1) {
+        _coinsProducts[coinIndex] = storeProduct;
+      }
+    }
+
+    // 更新合并的商品列表
+    _products = [..._subscribeProducts, ..._coinsProducts];
   }
 
   // 返回所有商品
@@ -163,50 +209,73 @@ class ApplePaymentService {
   Future<void> _handlePurchaseUpdates(
       List<PurchaseDetails> purchaseDetailsList) async {
     for (final purchaseDetails in purchaseDetailsList) {
-      debugPrint('Product ID: ${purchaseDetails.productID}');
-      // 支付状态，只有成功的才回调验证
-      debugPrint('Purchase status: ${purchaseDetails.status}');
+      debugPrint(
+          '处理购买更新: ${purchaseDetails.productID}, 状态: ${purchaseDetails.status}');
 
       try {
         switch (purchaseDetails.status) {
           case PurchaseStatus.pending:
-            debugPrint('Purchase pending...');
-            continue;
+            _setLoading(true);
+            debugPrint('购买处理中...');
+            break;
+
           case PurchaseStatus.purchased:
           case PurchaseStatus.restored:
-            final valid = await _verifyPurchase(purchaseDetails);
-            if (valid) {
-              await _deliverProduct(purchaseDetails);
-              debugPrint('Purchase completed successfully');
-              _isLoading = false;
-              _loadingController.add(false);
-              _purchaseSuccessController.add(true);
-            } else {
-              throw Exception('Purchase verification failed');
-            }
+            await _handleSuccessfulPurchase(purchaseDetails);
             break;
+
           case PurchaseStatus.error:
-            _isLoading = false;
-            _loadingController.add(false);
-            throw Exception(
-                purchaseDetails.error?.message ?? 'Purchase failed');
+            await _handlePurchaseError(purchaseDetails);
+            break;
+
           case PurchaseStatus.canceled:
-            debugPrint('Purchase canceled');
-            _isLoading = false;
-            _loadingController.add(false);
+            _handlePurchaseCancel();
             break;
         }
 
         if (purchaseDetails.pendingCompletePurchase) {
+          debugPrint('完成待处理的购买');
           await _inAppPurchase.completePurchase(purchaseDetails);
         }
       } catch (e) {
-        debugPrint('Error handling purchase: $e');
-        _isLoading = false;
-        _loadingController.add(false);
+        debugPrint('处理购买更新时出错: $e');
+        _setLoading(false);
         rethrow;
       }
     }
+  }
+
+  Future<void> _handleSuccessfulPurchase(
+      PurchaseDetails purchaseDetails) async {
+    debugPrint('处理成功的购买');
+    try {
+      final valid = await _verifyPurchase(purchaseDetails);
+      if (valid) {
+        await _deliverProduct(purchaseDetails);
+        debugPrint('购买完成并验证成功');
+        _purchaseSuccessController.add(true);
+      } else {
+        throw Exception('购买验证失败');
+      }
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _handlePurchaseError(PurchaseDetails purchaseDetails) async {
+    debugPrint('购买错误: ${purchaseDetails.error?.message ?? "未知错误"}');
+    _setLoading(false);
+    throw Exception(purchaseDetails.error?.message ?? '购买失败');
+  }
+
+  void _handlePurchaseCancel() {
+    debugPrint('购买已取消');
+    _setLoading(false);
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    _loadingController.add(value);
   }
 
   Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
@@ -232,6 +301,7 @@ class ApplePaymentService {
       }
 
       final response = await PayApi().fetchPurchasePackages(uuid: user.uuid);
+      debugPrint('fetchPurchasePackages response: $response');
       if (response['response']['success'] != '1') {
         throw Exception(
             'Failed to fetch products: ${response['response']['description']}');
@@ -307,30 +377,40 @@ class ApplePaymentService {
 
   // 购买金币
   Future<void> purchaseCoins(String productId) async {
-    if (!_isInitialized) await fetchAllProducts();
+    if (!_isInitialized) {
+      await initialize();
+    }
 
     try {
-      // 找到产品的uuid
-      final product =
-          _coinsProducts.firstWhere((p) => p.description == productId);
-      final orderId =
-          await prepayOrder(productUuid: _productUuidMap[productId] ?? '');
+      _setLoading(true);
 
-      // 缓存预支付订单号到 SharedPreferences
-      await _savePrepayOrder(productId, orderId);
-      debugPrint('保存预支付订单号: productId=$productId, orderId=$orderId');
+      final product = _coinsProducts.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => throw Exception('未找到商品: $productId'),
+      );
 
       // 清理未完成的交易
       await cleanupPendingTransactions();
+
+      // 获取预支付订单号
+      final orderId =
+          await prepayOrder(productUuid: _productUuidMap[productId] ?? '');
+      await _savePrepayOrder(productId, orderId);
+      debugPrint('金币预支付订单号: productId=$productId, orderId=$orderId');
 
       final purchaseParam = PurchaseParam(
         productDetails: product,
         applicationUserName: orderId,
       );
 
-      await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+      final success =
+          await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+      if (!success) {
+        throw Exception('启动购买失败');
+      }
     } catch (e) {
-      debugPrint('Error purchasing coins: $e');
+      debugPrint('购买金币失败: $e');
+      _setLoading(false);
       rethrow;
     }
   }
@@ -412,37 +492,41 @@ class ApplePaymentService {
 
   // 购买订阅
   Future<void> purchaseSubscription() async {
-    if (!_isInitialized) await fetchAllProducts();
+    if (!_isInitialized) {
+      await initialize();
+    }
 
     try {
-      _isLoading = true;
-      _loadingController.add(true);
+      _setLoading(true);
 
       if (_subscribeProducts.isEmpty) {
-        throw Exception('No subscription products available');
+        throw Exception('没有可用的订阅产品');
       }
 
       final product = _subscribeProducts.first;
-      final orderId =
-          await prepayOrder(productUuid: _productUuidMap[product.id] ?? '');
-
-      // 缓存预支付订单号到 SharedPreferences
-      await _savePrepayOrder(product.id, orderId);
-      debugPrint('保存预支付订单号: productId=${product.id}, orderId=$orderId');
 
       // 清理未完成的交易
       await cleanupPendingTransactions();
+
+      // 获取预支付订单号
+      final orderId =
+          await prepayOrder(productUuid: _productUuidMap[product.id] ?? '');
+      await _savePrepayOrder(product.id, orderId);
+      debugPrint('订阅预支付订单号: productId=${product.id}, orderId=$orderId');
 
       final purchaseParam = PurchaseParam(
         productDetails: product,
         applicationUserName: orderId,
       );
 
-      await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+      final success =
+          await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+      if (!success) {
+        throw Exception('启动购买失败');
+      }
     } catch (e) {
-      debugPrint('Error purchasing subscription: $e');
-      _isLoading = false;
-      _loadingController.add(false);
+      debugPrint('购买订阅失败: $e');
+      _setLoading(false);
       rethrow;
     }
   }
