@@ -1,4 +1,5 @@
 import 'package:ai_video/api/api_client.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthApi {
   static const String baseUrl = 'https://chat.bigchallenger.com';
@@ -20,11 +21,14 @@ class AuthApi {
     required String verificationCode,
     required String password,
   }) async {
-    return await _apiClient.post('/api/customer/register', {
+    final response = await _apiClient.post('/api/customer/register', {
       'email': email,
       'code': verificationCode,
       'password': password,
     });
+    debugPrint(
+        '注册响应:email: $email, verificationCode: $verificationCode, password: $password, $response');
+    return response;
   }
 
   // 登录

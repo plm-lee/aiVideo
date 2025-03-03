@@ -287,7 +287,7 @@ class _SubscribePageState extends State<SubscribePage> {
               ),
             ),
             Text(
-              '\$${_subscribeProduct?.price ?? '8.99'}',
+              _subscribeProduct?.price ?? '8.99',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,

@@ -87,12 +87,13 @@ class _LoginPageState extends State<LoginPage> {
                   child: Row(
                     children: [
                       Image.asset(
-                        'assets/images/logo.jpg',
-                        height: 32,
+                        'assets/images/logo.png',
+                        height: 36,
+                        width: 36,
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'ChatMax',
+                        'MagaVideo',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,

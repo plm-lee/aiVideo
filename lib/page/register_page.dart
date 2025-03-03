@@ -281,12 +281,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Image.asset(
-                        'assets/images/logo.jpg',
+                        'assets/images/logo.png',
                         height: 32,
+                        width: 32,
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'ChatMax',
+                        'MagaVideo',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
