@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/locale_service.dart';
+import 'package:ai_video/service/credits_service.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -15,6 +16,17 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
+  @override
+  void initState() {
+    super.initState();
+    _updateCredits();
+  }
+
+  void _updateCredits() {
+    final creditsService = Provider.of<CreditsService>(context, listen: false);
+    creditsService.loadCredits();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -36,15 +48,19 @@ class _SettingPageState extends State<SettingPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
-                const SizedBox(width: 4),
-                Text(
-                  '0 Coins',
-                  style: const TextStyle(color: Color(0xFFFF69B4)),
-                ),
-              ],
+            child: Consumer<CreditsService>(
+              builder: (context, creditsService, child) {
+                return Row(
+                  children: [
+                    const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
+                    const SizedBox(width: 4),
+                    Text(
+                      creditsService.credits.toString(),
+                      style: const TextStyle(color: Color(0xFFFF69B4)),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
