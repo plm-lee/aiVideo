@@ -93,7 +93,7 @@ class _SettingPageState extends State<SettingPage> {
                     Image.asset('assets/images/diamond.png', width: 40),
                     const SizedBox(width: 12),
                     const Text(
-                      'Get VideoMax Pro',
+                      'Get MagaVideo Pro',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,

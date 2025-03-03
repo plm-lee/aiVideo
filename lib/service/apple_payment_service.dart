@@ -128,7 +128,7 @@ class ApplePaymentService {
       }
 
       // 更新商品信息
-      // _updateProductsWithStoreInfo(response.productDetails);
+      _updateProductsWithStoreInfo(response.productDetails);
     } catch (e) {
       debugPrint('查询商品详情失败: $e');
       rethrow;
