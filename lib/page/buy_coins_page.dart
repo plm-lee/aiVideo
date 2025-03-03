@@ -235,7 +235,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
                     ),
                   ),
                 Text(
-                  '\$$price',
+                  price,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
