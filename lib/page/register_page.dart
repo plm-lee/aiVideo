@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'dart:math';
+import 'dart:async';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -20,6 +21,8 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isVerificationCodeSent = false;
   int _countDown = 60;
   bool _isCountingDown = false;
+  bool _isSendingCode = false;
+  Timer? _timer;
 
   // 移除实时验证相关变量
   String? _emailError;
@@ -44,6 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _verificationCodeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _timer?.cancel(); // 取消定时器
     super.dispose();
   }
 
@@ -192,21 +196,21 @@ class _RegisterPageState extends State<RegisterPage> {
       _countDown = 60;
     });
 
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
+    _timer?.cancel(); // 确保之前的定时器被取消
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
 
       setState(() {
-        _countDown--;
-      });
-
-      if (_countDown <= 0) {
-        setState(() {
+        if (_countDown > 0) {
+          _countDown--;
+        } else {
           _isCountingDown = false;
-        });
-        return false;
-      }
-      return true;
+          timer.cancel();
+        }
+      });
     });
   }
 
@@ -225,24 +229,38 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    setState(() {
+      _isSendingCode = true;
+      _emailError = null; // 清除之前的错误信息
+    });
+
     try {
       final result =
           await AuthService().sendVerificationCode(_emailController.text);
 
-      if (result) {
-        // 发送成功，开始倒计时
-        _startCountDown();
-      } else {
-        // 发送失败，显示错误
-        setState(() {
-          _emailError = 'Failed to send verification code';
-        });
+      if (mounted) {
+        if (result) {
+          // 发送成功，开始倒计时
+          _startCountDown();
+        } else {
+          setState(() {
+            _emailError = 'Failed to send verification code';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        _emailError = 'Error sending verification code';
-      });
+      if (mounted) {
+        setState(() {
+          _emailError = 'Error sending verification code';
+        });
+      }
       debugPrint('Send verification code error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingCode = false;
+        });
+      }
     }
   }
 
@@ -426,7 +444,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             width: 100,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: _isCountingDown
+                              onPressed: (_isCountingDown || _isSendingCode)
                                   ? null
                                   : () {
                                       if (_isEmailValid) {
@@ -448,13 +466,27 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 disabledBackgroundColor: Colors.grey,
                               ),
-                              child: Text(
-                                _isCountingDown ? '$_countDown s' : 'Send',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              child: _isSendingCode
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Text(
+                                      _isCountingDown
+                                          ? '$_countDown s'
+                                          : 'Send',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
