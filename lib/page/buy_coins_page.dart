@@ -48,6 +48,11 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
   Future<void> _loadProducts() async {
     setState(() => _isLoadingProducts = true);
     try {
+      // 等待 ApplePaymentService 初始化完成
+      if (!_applePaymentService.isInitialized) {
+        await _applePaymentService.initialize();
+      }
+
       _products = _applePaymentService.coinsProducts;
       if (_products.isNotEmpty) {
         selectedPlan = 0;

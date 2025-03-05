@@ -52,6 +52,11 @@ class _SubscribePageState extends State<SubscribePage> {
   Future<void> _loadProducts() async {
     setState(() => _isLoading = true);
     try {
+      // 等待 ApplePaymentService 初始化完成
+      if (!_applePaymentService.isInitialized) {
+        await _applePaymentService.initialize();
+      }
+
       final _products = _applePaymentService.subscribeProducts;
       if (_products.isNotEmpty) {
         _subscribeProduct = _products.first;

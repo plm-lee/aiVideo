@@ -25,6 +25,7 @@ class ApplePaymentService {
   List<ProductDetails> _coinsProducts = [];
   Map<String, String> _productUuidMap = {}; // 商品id和uuid的映射
   bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
 
   // 添加支付状态跟踪
   final StreamController<bool> _loadingController =
@@ -350,8 +351,6 @@ class ApplePaymentService {
                 currencySymbol: '\$',
               ))
           .toList();
-
-      _isInitialized = true;
     } catch (e) {
       debugPrint('Error fetching products: $e');
       rethrow;
