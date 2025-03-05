@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:ai_video/api/pay_api.dart';
 import 'package:ai_video/models/system.dart';
 import 'package:ai_video/service/auth_service.dart';
@@ -99,6 +102,9 @@ class ApplePaymentService {
 
       // 查询苹果商店的商品详情
       await _queryStoreProducts();
+
+      // 清理未完成的交易
+      await cleanupPendingTransactions();
 
       _isInitialized = true;
     } catch (e) {
@@ -420,6 +426,21 @@ class ApplePaymentService {
     try {
       debugPrint('开始清理未完成的交易...');
 
+      if (Platform.isIOS) {
+        debugPrint('iOS平台，直接清理交易队列...');
+        final transactions = await SKPaymentQueueWrapper().transactions();
+        debugPrint('发现 ${transactions.length} 个待处理交易');
+
+        for (var transaction in transactions) {
+          try {
+            await SKPaymentQueueWrapper().finishTransaction(transaction);
+            debugPrint('成功完成交易: ${transaction.transactionIdentifier}');
+          } catch (e) {
+            debugPrint('完成交易失败: ${transaction.transactionIdentifier}, 错误: $e');
+          }
+        }
+      }
+
       // 创建一个新的 Stream 订阅来处理未完成的交易
       final completer = Completer<void>();
       StreamSubscription<List<PurchaseDetails>>? subscription;
@@ -474,14 +495,17 @@ class ApplePaymentService {
         },
       );
 
-      // 等待10秒或直到完成
+      // 等待5秒或直到完成
       await completer.future.timeout(
-        const Duration(seconds: 2),
+        const Duration(seconds: 5),
         onTimeout: () {
           subscription?.cancel();
-          debugPrint('清理交易超时 - 已等待2秒');
+          debugPrint('清理交易超时 - 已等待5秒');
         },
       );
+
+      // 额外等待1秒确保所有状态都已更新
+      await Future.delayed(const Duration(seconds: 1));
 
       debugPrint('清理交易流程完成');
     } catch (e) {
