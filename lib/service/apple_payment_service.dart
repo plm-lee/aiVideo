@@ -497,15 +497,12 @@ class ApplePaymentService {
 
       // 等待5秒或直到完成
       await completer.future.timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 2),
         onTimeout: () {
           subscription?.cancel();
-          debugPrint('清理交易超时 - 已等待5秒');
+          debugPrint('清理交易超时 - 已等待2秒');
         },
       );
-
-      // 额外等待1秒确保所有状态都已更新
-      await Future.delayed(const Duration(seconds: 1));
 
       debugPrint('清理交易流程完成');
     } catch (e) {

@@ -260,7 +260,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
 
       // 调用苹果支付
       await _applePaymentService.purchaseCoins(
-        product.description,
+        product.id,
       );
     } catch (e) {
       if (mounted) {
