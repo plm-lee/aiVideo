@@ -21,7 +21,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   final _promptController = TextEditingController();
   File? _selectedImage;
   final _picker = ImagePicker();
-  int _selectedLength = 15; // 默认15秒
+  int _selectedLength = 5; // 默认5秒
   bool _isLoading = false; // 添加加载状态
 
   @override
@@ -161,9 +161,9 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          _buildLengthOption(15),
+                          _buildLengthOption(5),
                           const SizedBox(width: 16),
-                          _buildLengthOption(30),
+                          _buildLengthOption(10),
                         ],
                       ),
                     ],
@@ -189,7 +189,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         child: Text(
-          '$seconds Seconds',
+          '${seconds}s',
           style: TextStyle(
             color: isSelected ? Colors.black : Colors.white,
             fontWeight: FontWeight.bold,
