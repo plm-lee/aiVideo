@@ -285,6 +285,14 @@ class ApplePaymentService {
     _loadingController.add(value);
   }
 
+  // 取消正在进行的支付
+  void cancelPurchase() {
+    debugPrint('取消正在进行的支付');
+    _setLoading(false);
+    // 取消所有待处理的交易
+    cleanupPendingTransactions();
+  }
+
   Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
     try {
       // TODO: 实现商品交付逻辑
@@ -388,14 +396,13 @@ class ApplePaymentService {
 
     try {
       _setLoading(true);
+      // 必须清理未完成的交易后，再进行购买
+      await cleanupPendingTransactions();
 
       final product = _coinsProducts.firstWhere(
         (p) => p.id == productId,
         orElse: () => throw Exception('未找到商品: $productId'),
       );
-
-      // 清理未完成的交易
-      await cleanupPendingTransactions();
 
       // 获取预支付订单号
       final orderId =

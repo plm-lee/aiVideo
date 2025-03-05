@@ -82,7 +82,11 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
 
   @override
   void dispose() {
-    _applePaymentService.dispose();
+    // 如果正在加载（支付中），取消支付
+    if (_isLoading) {
+      _applePaymentService.cancelPurchase();
+    }
+    // _applePaymentService.dispose();
     _controller.dispose();
     super.dispose();
   }
