@@ -318,6 +318,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
       final (success, message) = await videoService.imageToVideo(
         imageFile: _selectedImage!,
         prompt: _promptController.text.trim(),
+        duration: _selectedLength,
       );
 
       if (success) {

@@ -9,12 +9,12 @@ import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
-  final String themeId;
+  final String prompt;
 
   const MakeCollagePage({
     super.key,
     required this.imgNum,
-    required this.themeId,
+    required this.prompt,
   });
 
   @override
@@ -227,7 +227,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       final videoService = VideoService();
       final (success, message) = await videoService.themeToVideo(
         imageFile: imageToUse,
-        themeId: widget.themeId,
+        prompt: widget.prompt,
       );
 
       if (success) {

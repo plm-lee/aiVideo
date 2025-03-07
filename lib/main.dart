@@ -137,7 +137,7 @@ final _router = GoRouter(
             preloadedController:
                 extra['preloadedController'] as VideoPlayerController?,
             imgNum: extra['imgNum'] as int,
-            themeId: extra['themeId'] as String,
+            prompt: extra['prompt'] as String,
           ),
         );
       },
@@ -147,7 +147,7 @@ final _router = GoRouter(
       pageBuilder: (context, state) => NoTransitionPage(
         child: MakeCollagePage(
           imgNum: (state.extra as Map<String, dynamic>)['imgNum'] ?? 1,
-          themeId: (state.extra as Map<String, dynamic>)['themeId'] ?? '',
+          prompt: (state.extra as Map<String, dynamic>)['prompt'] ?? '',
         ),
       ),
     ),

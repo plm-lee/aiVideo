@@ -425,7 +425,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       '/theme-detail',
       extra: {
         'title': item.title,
-        'themeId': item.prompt,
+        'prompt': item.prompt,
         'imagePath': item.image,
         'videoUrl': item.videoUrl,
         'preloadedController':

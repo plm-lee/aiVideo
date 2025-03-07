@@ -14,6 +14,7 @@ class VideoApi {
     required String image,
     required String prompt,
     required String model,
+    required int duration,
   }) async {
     return await _apiClient.post(
       '/api/ai_video/add_task',
@@ -22,6 +23,7 @@ class VideoApi {
         'image': image,
         'prompt': prompt,
         'model': model,
+        'duration': duration,
       },
     );
   }

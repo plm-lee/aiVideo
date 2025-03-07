@@ -10,7 +10,7 @@ class ThemeDetailPage extends StatefulWidget {
   final String? videoUrl;
   final VideoPlayerController? preloadedController;
   final int imgNum;
-  final String themeId;
+  final String prompt;
 
   const ThemeDetailPage({
     super.key,
@@ -19,7 +19,7 @@ class ThemeDetailPage extends StatefulWidget {
     this.videoUrl,
     this.preloadedController,
     required this.imgNum,
-    required this.themeId,
+    required this.prompt,
   });
 
   @override
@@ -197,7 +197,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
                 '/make-collage',
                 extra: {
                   'imgNum': widget.imgNum,
-                  'themeId': widget.themeId,
+                  'prompt': widget.prompt,
                 },
               ),
               style: ElevatedButton.styleFrom(

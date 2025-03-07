@@ -17,17 +17,21 @@ class VideoService extends ChangeNotifier {
 
   // 通过theme创建视频
   Future<(bool, String)> themeToVideo({
-    required String themeId,
+    required String prompt,
     required File imageFile,
   }) async {
-    // 调用imageToVideo，将拼接的图片和themeId作为prompt传入
-    final prompt = '让图片中的人物自由舞动, 拥抱、亲吻、跳舞，选择一个行为';
-    return await imageToVideo(imageFile: imageFile, prompt: prompt);
+    // 调用imageToVideo，将拼接的图片和prompt传入
+    return await imageToVideo(
+      imageFile: imageFile,
+      prompt: prompt,
+      duration: 5,
+    );
   }
 
   Future<(bool, String)> imageToVideo({
     required File imageFile,
     required String prompt,
+    required int duration,
   }) async {
     try {
       // 获取当前用户信息
@@ -43,6 +47,7 @@ class VideoService extends ChangeNotifier {
         image: base64Image,
         prompt: prompt,
         model: 'VideoMax-A',
+        duration: duration,
         uuid: user.uuid,
       );
 
@@ -73,6 +78,7 @@ class VideoService extends ChangeNotifier {
         image: '', // 文本转视频不需要图片
         prompt: prompt,
         model: 'VideoMax-A', // 使用文本转视频模型
+        duration: duration,
         uuid: user.uuid,
       );
 
