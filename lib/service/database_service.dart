@@ -358,6 +358,12 @@ class DatabaseService {
     );
   }
 
+  Future<void> deleteAllSavedVideos() async {
+    final db = await database;
+    await db.delete('generated_videos');
+    await db.delete('video_tasks');
+  }
+
   Future<void> saveVideoTasks(List<VideoTask> tasks) async {
     final db = await database;
     await db.transaction((txn) async {

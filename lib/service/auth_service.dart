@@ -43,6 +43,8 @@ class AuthService extends ChangeNotifier {
       if (_currentUser?.id != null) {
         await _databaseService.clearUserData(_currentUser!.id!);
         await _databaseService.clearUserConfigs();
+        // 删除保存db的视频
+        await _databaseService.deleteAllSavedVideos();
       }
       _currentUser = null;
       notifyListeners();
