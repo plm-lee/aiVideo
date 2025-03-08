@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/locale_service.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -23,8 +23,8 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   void _updateCredits() {
-    final creditsService = Provider.of<CreditsService>(context, listen: false);
-    creditsService.loadCredits();
+    final userService = Provider.of<UserService>(context, listen: false);
+    userService.loadCredits();
   }
 
   @override
@@ -48,14 +48,14 @@ class _SettingPageState extends State<SettingPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Consumer<CreditsService>(
-              builder: (context, creditsService, child) {
+            child: Consumer<UserService>(
+              builder: (context, userService, child) {
                 return Row(
                   children: [
                     const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
                     const SizedBox(width: 4),
                     Text(
-                      creditsService.credits.toString(),
+                      userService.credits.toString(),
                       style: const TextStyle(color: Color(0xFFFF69B4)),
                     ),
                   ],

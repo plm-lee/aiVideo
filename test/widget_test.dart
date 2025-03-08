@@ -29,7 +29,7 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(create: (_) => AuthService()),
-          ChangeNotifierProvider(create: (_) => CreditsService()),
+          ChangeNotifierProvider(create: (_) => UserService()),
         ],
         child: const MyApp(),
       ),

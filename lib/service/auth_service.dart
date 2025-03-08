@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ai_video/models/user.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/api/auth_api.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 
 // 添加一个注册结果类
 class RegisterResult {
@@ -20,7 +20,7 @@ class AuthService extends ChangeNotifier {
   User? _currentUser;
   final DatabaseService _databaseService = DatabaseService();
   final AuthApi _authApi = AuthApi();
-  final CreditsService _creditsService = CreditsService();
+  final UserService _userService = UserService();
 
   User? get currentUser => _currentUser;
 
@@ -30,7 +30,7 @@ class AuthService extends ChangeNotifier {
       if (_currentUser != null) {
         debugPrint('加载用户: ${_currentUser!.email}');
         // 设置用户 UUID 到 CreditsService
-        _creditsService.setUuid(_currentUser!.uuid);
+        _userService.setUuid(_currentUser!.uuid);
       }
       notifyListeners();
     } catch (e) {
@@ -117,7 +117,7 @@ class AuthService extends ChangeNotifier {
         _currentUser = user;
 
         // 设置用户 UUID 到 CreditsService
-        _creditsService.setUuid(user.uuid);
+        _userService.setUuid(user.uuid);
 
         notifyListeners();
         debugPrint('登录用户uuid: ${user.uuid}');

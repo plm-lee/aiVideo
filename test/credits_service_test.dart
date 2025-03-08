@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/models/user.dart';
@@ -10,14 +10,13 @@ import 'package:mockito/annotations.dart';
 import 'credits_service_test.mocks.dart';
 
 void main() {
-  late CreditsService creditsService;
+  late UserService userService;
   late MockDatabaseService mockDatabaseService;
 
   setUp(() {
     mockDatabaseService = MockDatabaseService();
     // 重新创建 CreditsService 实例，而不是使用单例
-    creditsService = CreditsService.test();
-    creditsService.databaseService = mockDatabaseService;
+    userService = UserService.test();
   });
 
   group('CreditsService Tests', () {
@@ -28,10 +27,10 @@ void main() {
           .thenAnswer((_) async => testConfig);
 
       // 执行测试
-      await creditsService.loadCredits();
+      await userService.loadCredits();
 
       // 验证结果
-      expect(creditsService.credits, 1000);
+      expect(userService.credits, 1000);
       verify(mockDatabaseService.getConfig('user_credits')).called(1);
     });
 
@@ -40,10 +39,10 @@ void main() {
       when(mockDatabaseService.saveConfig(any)).thenAnswer((_) async => 1);
 
       // 执行测试
-      await creditsService.addCredits(500);
+      await userService.addCredits(500);
 
       // 验证结果
-      expect(creditsService.credits, 500);
+      expect(userService.credits, 500);
       verify(mockDatabaseService.saveConfig(any)).called(1);
     });
 
@@ -51,25 +50,25 @@ void main() {
       when(mockDatabaseService.saveConfig(any)).thenAnswer((_) async => 1);
 
       // 使用公开的 setter
-      creditsService.credits = 1000;
+      userService.credits = 1000;
 
-      final result = await creditsService.useCredits(500);
+      final result = await userService.useCredits(500);
 
       // 验证结果
       expect(result, true);
-      expect(creditsService.credits, 500);
+      expect(userService.credits, 500);
       verify(mockDatabaseService.saveConfig(any)).called(1);
     });
 
     test('useCredits should fail if insufficient balance', () async {
       // 使用公开的 setter
-      creditsService.credits = 100;
+      userService.credits = 100;
 
-      final result = await creditsService.useCredits(500);
+      final result = await userService.useCredits(500);
 
       // 验证结果
       expect(result, false);
-      expect(creditsService.credits, 100);
+      expect(userService.credits, 100);
       verifyNever(mockDatabaseService.saveConfig(any));
     });
 
@@ -80,6 +79,7 @@ void main() {
         email: 'test@example.com',
         token: 'test_token',
         loginTime: DateTime.now(),
+        uuid: 'test_uuid',
       );
       when(mockDatabaseService.saveConfig(any)).thenAnswer((_) async => 1);
       when(mockDatabaseService.getConfig('user_credits_${testUser.id}'))
@@ -89,7 +89,7 @@ void main() {
               ));
 
       // 执行测试
-      await creditsService.addCreditsToUser(testUser.id!, 500);
+      await userService.addCreditsToUser(testUser.id!, 500);
 
       // 验证结果
       verify(mockDatabaseService.getConfig('user_credits_${testUser.id}'))

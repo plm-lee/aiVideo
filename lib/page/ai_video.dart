@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/constants/theme.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:video_player/video_player.dart';
@@ -68,8 +68,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   }
 
   void _updateCredits() {
-    final creditsService = Provider.of<CreditsService>(context, listen: false);
-    creditsService.loadCredits();
+    final userService = Provider.of<UserService>(context, listen: false);
+    userService.loadCredits();
   }
 
   Future<void> _loadCategories() async {
@@ -457,8 +457,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
             margin: const EdgeInsets.only(right: 16),
             child: GestureDetector(
               onTap: () => context.push('/subscribe'),
-              child: Consumer<CreditsService>(
-                builder: (context, creditsService, child) {
+              child: Consumer<UserService>(
+                builder: (context, userService, child) {
                   return Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -477,7 +477,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${creditsService.credits}',
+                          '${userService.credits}',
                           style: TextStyle(
                             color: isDark
                                 ? AppTheme.darkTextColor

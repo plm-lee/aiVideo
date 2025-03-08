@@ -13,7 +13,7 @@ import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/page/video_history_page.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/auth_service.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:ai_video/page/histories_page.dart';
 import 'package:ai_video/page/purchase_history_page.dart';
 import 'package:ai_video/service/locale_service.dart';
@@ -36,7 +36,7 @@ void main() async {
   await AuthService().checkAuth();
 
   // 加载用户金币
-  await CreditsService().loadCredits();
+  await UserService().loadCredits();
 
   // 加载语言设置
   await LocaleService().loadLocale();
@@ -49,7 +49,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => CreditsService()),
+        ChangeNotifierProvider(create: (_) => UserService()),
         ChangeNotifierProvider(create: (_) => LocaleService()),
       ],
       child: const MyApp(),

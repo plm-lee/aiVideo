@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ai_video/service/credits_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:ai_video/service/video_service.dart';
@@ -275,8 +275,8 @@ class _MinePageState extends State<MinePage> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
-            child: Consumer<CreditsService>(
-              builder: (context, creditsService, child) {
+            child: Consumer<UserService>(
+              builder: (context, userService, child) {
                 return Row(
                   children: [
                     const Icon(
@@ -286,7 +286,7 @@ class _MinePageState extends State<MinePage> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${creditsService.credits} Coins',
+                      '${userService.credits} Coins',
                       style: const TextStyle(
                         color: Color(0xFFFF6B6B),
                         fontSize: 16,

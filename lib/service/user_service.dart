@@ -4,21 +4,21 @@ import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/models/purchase_record.dart';
 import 'package:ai_video/api/user_api.dart';
 
-class CreditsService extends ChangeNotifier {
-  static final CreditsService _instance = CreditsService._internal();
-  factory CreditsService() => _instance;
+class UserService extends ChangeNotifier {
+  static final UserService _instance = UserService._internal();
+  factory UserService() => _instance;
 
   @visibleForTesting
-  factory CreditsService.test({
+  factory UserService.test({
     DatabaseService? databaseService,
     UserApi? userApi,
   }) =>
-      CreditsService._internal(
+      UserService._internal(
         databaseService: databaseService,
         userApi: userApi,
       );
 
-  CreditsService._internal({
+  UserService._internal({
     DatabaseService? databaseService,
     UserApi? userApi,
   })  : _databaseService = databaseService ?? DatabaseService(),
