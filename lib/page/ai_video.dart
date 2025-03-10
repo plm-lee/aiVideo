@@ -62,6 +62,12 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     [const Color(0xFF13E2DA), const Color(0xFF00B4D8)], // 青色渐变
   ];
 
+  // 金币渐变色
+  static const List<Color> _coinGradient = [
+    Color(0xFFD7905F), // 金色
+    Color(0xFFC060C3), // 橙色
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -494,31 +500,30 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
               },
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
-                  return Container(
-                    padding: _buttonPadding,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[850] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.monetization_on,
-                          color: Colors.amber,
-                          size: _smallIconSize,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${userService.credits}',
-                          style: TextStyle(
-                            color: isDark
-                                ? AppTheme.darkTextColor
-                                : AppTheme.lightTextColor,
-                            fontSize: _subtitleFontSize,
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.monetization_on,
+                        color: Colors.amber, // 金色
+                        size: _smallIconSize,
+                      ),
+                      const SizedBox(width: 4),
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: _coinGradient,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ).createShader(bounds),
+                        child: Text(
+                          '${userService.credits} Coins',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 },
               ),
