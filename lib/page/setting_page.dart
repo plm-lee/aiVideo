@@ -227,7 +227,7 @@ class _SettingPageState extends State<SettingPage> {
       leading: Icon(icon, color: Colors.grey),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,

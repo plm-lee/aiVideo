@@ -61,7 +61,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
           ),
           title: const Text(
             'Text to Video',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
         body: Column(

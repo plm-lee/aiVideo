@@ -222,7 +222,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         ),
         title: const Text(
           'Task Details',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
           IconButton(

@@ -167,7 +167,8 @@ class _SubscribePageState extends State<SubscribePage> {
           children: const [
             Icon(Icons.monetization_on, color: Colors.amber, size: 20),
             SizedBox(width: 4),
-            Text('Buy Coins', style: TextStyle(color: Colors.white)),
+            Text('Buy Coins',
+                style: TextStyle(color: Colors.white, fontSize: 12)),
           ],
         ),
       ),

@@ -105,20 +105,24 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
         actions: [
           Container(
             margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: const Color(0xFF4A4A4A),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: TextButton.icon(
-              onPressed: () {
+            child: GestureDetector(
+              onTap: () {
                 // TODO: 显示金币详情
               },
-              icon:
-                  const Icon(Icons.info_outline, color: Colors.white, size: 20),
-              label: const Text(
-                'Coins Details',
-                style: TextStyle(color: Colors.white),
+              child: Row(
+                children: const [
+                  Icon(Icons.info_outline, color: Colors.white, size: 20),
+                  SizedBox(width: 4),
+                  Text(
+                    'Coins Details',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ],
               ),
             ),
           ),

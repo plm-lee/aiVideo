@@ -161,7 +161,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
         ),
         title: Text(
           widget.title,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
       body: Column(

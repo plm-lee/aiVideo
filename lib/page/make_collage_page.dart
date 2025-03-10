@@ -279,7 +279,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
         ),
         title: const Text(
           'Make Collage',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
           // 只有在imgNum为1时显示布局切换按钮
