@@ -32,9 +32,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
   // 字体大小
 
-  static const double _subtitleFontSize = 16.0; // 卡片中字体大小
+  static const double _subtitleFontSize = 14.0; // 卡片中字体大小
   static const double _iconFontSize = 16.0; // 图标中字体大小
-  static const double _smallIconSize = 16.0;
+  static const double _smallIconSize = 16.0; // 小图标大小
 
   // 内边距
   static const EdgeInsets _buttonPadding =
@@ -61,12 +61,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     [const Color(0xFF4FACFE), const Color(0xFF00F2FE)], // 蓝色渐变
     [const Color(0xFFFF5E50), const Color(0xFFFF4E50)], // 红色渐变
     [const Color(0xFF13E2DA), const Color(0xFF00B4D8)], // 青色渐变
-  ];
-
-  // 金币渐变色
-  static const List<Color> _coinGradient = [
-    Color(0xFFD7905F), // 金色
-    Color(0xFFC060C3), // 橙色
   ];
 
   @override
@@ -214,16 +208,34 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[850] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppTheme.primaryColor.withOpacity(0.3),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[850] : Colors.grey[400],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.3),
+                          ),
+                        ),
+                        child:
+                            Icon(icon, color: AppTheme.primaryColor, size: 20),
                       ),
-                    ),
-                    child: Icon(icon, color: AppTheme.primaryColor, size: 20),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[850],
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Text(
