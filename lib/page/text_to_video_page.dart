@@ -181,13 +181,13 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
-              SizedBox(width: 8),
+              const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
+              const SizedBox(width: 8),
               Text(
-                '150 Coins',
-                style: TextStyle(
+                '${_selectedLength == 10 ? 300 : 150} Coins',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
