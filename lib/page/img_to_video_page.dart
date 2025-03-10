@@ -39,7 +39,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
           ),
           title: const Text(
             'Image to Video',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
         body: Column(
@@ -154,7 +154,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                         'Video Length',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

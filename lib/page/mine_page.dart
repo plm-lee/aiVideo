@@ -266,7 +266,7 @@ class _MinePageState extends State<MinePage> {
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 0),
+            margin: const EdgeInsets.only(right: 1),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
                 return CoinDisplay(coins: userService.credits);

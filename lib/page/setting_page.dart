@@ -48,7 +48,7 @@ class _SettingPageState extends State<SettingPage> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 0),
+            padding: const EdgeInsets.only(right: 1),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
                 return CoinDisplay(coins: userService.credits);

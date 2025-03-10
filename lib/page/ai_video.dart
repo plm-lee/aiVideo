@@ -483,35 +483,28 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: isDark
-            ? AppTheme.darkBackgroundColor
-            : AppTheme.lightBackgroundColor,
+        backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.settings,
-            color: isDark ? AppTheme.darkTextColor : AppTheme.lightTextColor,
-          ),
+          icon: const Icon(Icons.settings, color: Colors.white),
           onPressed: () => context.push('/settings'),
         ),
         actions: [
-          Positioned(
-            top: 50,
-            right: 16,
-            child: GestureDetector(
-              onTap: () {
-                final userService =
-                    Provider.of<UserService>(context, listen: false);
-                if (userService.isSubscribed) {
-                  context.push('/buy-coins');
-                } else {
-                  context.push('/subscribe');
-                }
-              },
+          GestureDetector(
+            onTap: () {
+              final userService =
+                  Provider.of<UserService>(context, listen: false);
+              if (userService.isSubscribed) {
+                context.push('/buy-coins');
+              } else {
+                context.push('/subscribe');
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 1),
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
                   return CoinDisplay(coins: userService.credits);

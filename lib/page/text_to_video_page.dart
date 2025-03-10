@@ -61,7 +61,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
           ),
           title: const Text(
             'Text to Video',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
         body: Column(
@@ -119,7 +119,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
                         'Video Length',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
