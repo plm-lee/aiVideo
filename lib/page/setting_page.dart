@@ -109,20 +109,26 @@ class _SettingPageState extends State<SettingPage> {
                     children: [
                       Image.asset('assets/images/diamond.png', width: 40),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Get MagaVideo Pro',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 2),
-                              blurRadius: 4,
+                      Consumer<UserService>(
+                        builder: (context, userService, child) {
+                          return Text(
+                            userService.isSubscribed
+                                ? 'MagaVideo Pro Member'
+                                : 'Get MagaVideo Pro',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
