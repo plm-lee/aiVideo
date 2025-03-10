@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:ai_video/api/pay_api.dart';
 import 'package:ai_video/models/system.dart';
 import 'package:ai_video/service/auth_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApplePaymentService {
@@ -18,6 +18,7 @@ class ApplePaymentService {
   SharedPreferences? _prefs;
 
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
@@ -66,12 +67,6 @@ class ApplePaymentService {
   Future<String?> _getPrepayOrder(String productId) async {
     await _initPrefs();
     return _prefs?.getString('$_prepayOrderPrefix$productId');
-  }
-
-  // 删除预支付订单号
-  Future<void> _removePrepayOrder(String productId) async {
-    await _initPrefs();
-    await _prefs?.remove('$_prepayOrderPrefix$productId');
   }
 
   // 初始化所有商品
@@ -295,7 +290,8 @@ class ApplePaymentService {
 
   Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
     try {
-      // TODO: 实现商品交付逻辑
+      // 更新金币数量及订阅状态
+      _userService.loadCredits();
     } catch (e) {
       debugPrint('Error delivering product: $e');
     }

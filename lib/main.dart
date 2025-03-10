@@ -22,6 +22,7 @@ import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:ai_video/page/theme_detail_page.dart';
 import 'package:ai_video/page/make_collage_page.dart';
 import 'package:video_player/video_player.dart';
+import 'package:ai_video/page/buy_coins_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +37,7 @@ void main() async {
   await AuthService().checkAuth();
 
   // 加载用户金币
-  await UserService().loadCredits();
+  await UserService().initUser();
 
   // 加载语言设置
   await LocaleService().loadLocale();
@@ -98,6 +99,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/subscribe',
       builder: (context, state) => const SubscribePage(),
+    ),
+    GoRoute(
+      path: '/buy-coins',
+      builder: (context, state) => const BuyCoinsPage(),
     ),
     GoRoute(
       path: '/img-to-video',

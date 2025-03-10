@@ -26,6 +26,9 @@ class UserService extends ChangeNotifier {
 
   int _credits = 0;
   String? _uuid;
+  // 是否订阅用户
+  bool _isSubscribed = false;
+
   final DatabaseService _databaseService;
   final UserApi _userApi;
 
@@ -39,6 +42,38 @@ class UserService extends ChangeNotifier {
   void setUuid(String uuid) {
     _uuid = uuid;
     loadCredits(); // 设置 UUID 后自动加载金币数量
+  }
+
+  bool get isSubscribed => _isSubscribed;
+
+  // 初始化用户
+  Future<void> initUser() async {
+    await loadIsSubscribe();
+    await loadCredits();
+  }
+
+  void setIsSubscribe(bool value) {
+    debugPrint('设置是否订阅用户: $value');
+    if (_isSubscribed != value) {
+      _isSubscribed = value;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadIsSubscribe() async {
+    if (_uuid == null) {
+      debugPrint('UUID 未设置，无法加载是否订阅');
+      return;
+    }
+
+    try {
+      final isSubscribe = await _userApi.isSubscribe(uuid: _uuid!);
+      debugPrint('是否订阅用户: $isSubscribe');
+      setIsSubscribe(isSubscribe);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('加载是否订阅失败: $e');
+    }
   }
 
   Future<void> loadCredits() async {
@@ -70,29 +105,6 @@ class UserService extends ChangeNotifier {
         _credits = int.parse(config.value);
         notifyListeners();
       }
-    }
-  }
-
-  Future<void> refreshCredits() async {
-    if (_uuid == null) {
-      debugPrint('UUID 未设置，无法刷新金币');
-      return;
-    }
-
-    try {
-      final coins = await _userApi.getCoins(uuid: _uuid!);
-      _credits = coins;
-      notifyListeners();
-
-      // 更新本地缓存
-      await _databaseService.saveConfig(
-        UserConfig(
-          key: 'user_credits',
-          value: _credits.toString(),
-        ),
-      );
-    } catch (e) {
-      debugPrint('刷新金币失败: $e');
     }
   }
 

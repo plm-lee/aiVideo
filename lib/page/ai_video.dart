@@ -456,7 +456,15 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: GestureDetector(
-              onTap: () => context.push('/subscribe'),
+              onTap: () {
+                final userService =
+                    Provider.of<UserService>(context, listen: false);
+                if (userService.isSubscribed) {
+                  context.push('/buy-coins');
+                } else {
+                  context.push('/subscribe');
+                }
+              },
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
                   return Container(
