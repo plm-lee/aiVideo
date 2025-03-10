@@ -252,7 +252,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   }
 
   Widget _buildCategorySection(VideoSample category) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final gradient =
         _gradients[_categories.indexOf(category) % _gradients.length];
 
@@ -420,7 +419,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   }
 
   Widget _buildCategoryCard(VideoSampleItem item) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = true;
 
     return GestureDetector(
       onTap: () => _navigateToThemeDetail(item),
