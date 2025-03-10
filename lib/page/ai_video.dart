@@ -20,9 +20,30 @@ class AIVideo extends StatefulWidget {
 }
 
 class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
-  static const double _cardHeight = 130.0;
-  static const double _spacing = 16.0;
-  static const double _borderRadius = 16.0;
+  // 布局常量
+  static const double _cardHeight = 100.0; // 顶部两个按钮的高度
+
+  // 样例卡片
+  static const double _spacing = 16.0; // 卡片间距
+  static const double _borderRadius = 16.0; // 卡片圆角
+  static const double _cardWidth = 130.0; // 卡片宽度
+  static const double _categoryHeight = 190.0; // 样例列表高度
+
+  // 字体大小
+
+  static const double _subtitleFontSize = 16.0; // 卡片中字体大小
+  static const double _iconFontSize = 16.0; // 图标中字体大小
+  static const double _smallIconSize = 16.0;
+
+  // 内边距
+  static const EdgeInsets _buttonPadding =
+      EdgeInsets.symmetric(horizontal: 10, vertical: 4);
+  static const EdgeInsets _contentPadding = EdgeInsets.all(_spacing);
+
+  // 图标尺寸
+  static const double _titleFontSize = 18.0; // 样例标题字体大小
+  static const double _categoryIconSize = 30.0; // 样例图标尺寸
+  static const double _categoryIconRadius = 8.0; // 样例图标圆角
 
   final VideoService _videoService = VideoService();
   final VideoCache _videoCache = VideoCache();
@@ -181,7 +202,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
             onTap: onTap,
             borderRadius: BorderRadius.circular(_borderRadius),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +218,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                     ),
                     child: Icon(icon, color: AppTheme.primaryColor, size: 20),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Text(
                     title,
                     style: AppTheme.getTitleStyle(isDark),
@@ -220,30 +241,30 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(_spacing),
+          padding: _contentPadding,
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(_categoryIconRadius),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: _categoryIconSize,
+                    height: _categoryIconSize,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(_categoryIconRadius),
                     ),
                     child: Center(
                       child: Text(
                         category.icon,
-                        style: const TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: _iconFontSize),
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
                   colors: gradient,
@@ -252,8 +273,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 ).createShader(bounds),
                 child: Text(
                   category.title,
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: _titleFontSize,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -265,10 +286,10 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           ),
         ),
         SizedBox(
-          height: 170,
+          height: _categoryHeight,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: _spacing),
+            padding: EdgeInsets.symmetric(horizontal: _spacing),
             itemCount: category.items.length,
             itemBuilder: (context, index) {
               final item = category.items[index];
@@ -288,7 +309,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
         onTap: () => debugPrint('查看全部 $category'),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: _buttonPadding,
           decoration: BoxDecoration(
             color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
             borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
@@ -298,13 +319,18 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
             children: [
               Text(
                 'All',
-                style: AppTheme.getTitleStyle(isDark),
+                style: TextStyle(
+                  fontSize: _subtitleFontSize,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
               ),
-              Icon(Icons.chevron_right,
-                  color: isDark
-                      ? AppTheme.darkSecondaryTextColor
-                      : AppTheme.lightSecondaryTextColor,
-                  size: 20),
+              Icon(
+                Icons.chevron_right,
+                color: isDark
+                    ? AppTheme.darkSecondaryTextColor
+                    : AppTheme.lightSecondaryTextColor,
+                size: _smallIconSize,
+              ),
             ],
           ),
         ),
@@ -380,8 +406,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     return GestureDetector(
       onTap: () => _navigateToThemeDetail(item),
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: _spacing),
+        width: _cardWidth,
+        margin: EdgeInsets.only(right: _spacing),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_borderRadius),
           color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
@@ -399,11 +425,11 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 child: Text(
                   item.title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: _subtitleFontSize,
                     fontWeight: FontWeight.bold,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                         offset: Offset(1, 1),
                         blurRadius: 3,
@@ -469,20 +495,17 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
+                    padding: _buttonPadding,
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey[850] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.monetization_on,
                           color: Colors.amber,
-                          size: 16,
+                          size: _smallIconSize,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -491,7 +514,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                             color: isDark
                                 ? AppTheme.darkTextColor
                                 : AppTheme.lightTextColor,
-                            fontSize: 14,
+                            fontSize: _subtitleFontSize,
                           ),
                         ),
                       ],
