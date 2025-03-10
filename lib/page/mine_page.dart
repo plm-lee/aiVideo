@@ -262,11 +262,11 @@ class _MinePageState extends State<MinePage> {
         elevation: 0,
         title: const Text(
           'Mine',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16),
+            margin: const EdgeInsets.only(right: 0),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
                 return CoinDisplay(coins: userService.credits);

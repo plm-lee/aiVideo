@@ -42,13 +42,13 @@ class _SettingPageState extends State<SettingPage> {
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Settings',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 0),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
                 return CoinDisplay(coins: userService.credits);

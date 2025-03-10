@@ -502,8 +502,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
               },
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
-                  margin:
-                  const EdgeInsets.only(right: 16);
                   return CoinDisplay(coins: userService.credits);
                 },
               ),
