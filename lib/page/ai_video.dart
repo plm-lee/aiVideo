@@ -70,6 +70,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   void _updateCredits() {
     final userService = Provider.of<UserService>(context, listen: false);
     userService.loadCredits();
+    userService.loadIsSubscribe();
   }
 
   Future<void> _loadCategories() async {
