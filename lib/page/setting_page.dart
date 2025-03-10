@@ -181,9 +181,7 @@ class _SettingPageState extends State<SettingPage> {
                 title: 'Logout',
                 onTap: () {
                   AuthService().logout();
-                  if (context.mounted) {
-                    context.go('/login');
-                  }
+                  context.go('/login');
                 },
               ),
             ]),
