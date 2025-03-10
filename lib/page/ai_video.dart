@@ -11,6 +11,7 @@ import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/video_cache.dart';
 import 'package:flutter/rendering.dart';
+import 'package:ai_video/widgets/coin_display.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -486,8 +487,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           onPressed: () => context.push('/settings'),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
+          Positioned(
+            top: 50,
+            right: 16,
             child: GestureDetector(
               onTap: () {
                 final userService =
@@ -500,31 +502,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
               },
               child: Consumer<UserService>(
                 builder: (context, userService, child) {
-                  return Row(
-                    children: [
-                      Icon(
-                        Icons.monetization_on,
-                        color: Colors.amber, // 金色
-                        size: _smallIconSize,
-                      ),
-                      const SizedBox(width: 4),
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: _coinGradient,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ).createShader(bounds),
-                        child: Text(
-                          '${userService.credits} Coins',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
+                  margin:
+                  const EdgeInsets.only(right: 16);
+                  return CoinDisplay(coins: userService.credits);
                 },
               ),
             ),

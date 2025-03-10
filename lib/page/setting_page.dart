@@ -7,6 +7,7 @@ import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/service/user_service.dart';
+import 'package:ai_video/widgets/coin_display.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -50,16 +51,7 @@ class _SettingPageState extends State<SettingPage> {
             padding: const EdgeInsets.only(right: 16),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
-                return Row(
-                  children: [
-                    const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
-                    const SizedBox(width: 4),
-                    Text(
-                      userService.credits.toString(),
-                      style: const TextStyle(color: Color(0xFFFF69B4)),
-                    ),
-                  ],
-                );
+                return CoinDisplay(coins: userService.credits);
               },
             ),
           ),

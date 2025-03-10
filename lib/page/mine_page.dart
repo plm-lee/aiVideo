@@ -8,6 +8,7 @@ import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/video_task.dart';
 import 'dart:convert';
 import 'package:ai_video/page/task_detail_page.dart';
+import 'package:ai_video/widgets/coin_display.dart';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -268,23 +269,7 @@ class _MinePageState extends State<MinePage> {
             margin: const EdgeInsets.only(right: 16),
             child: Consumer<UserService>(
               builder: (context, userService, child) {
-                return Row(
-                  children: [
-                    const Icon(
-                      Icons.monetization_on,
-                      color: Colors.amber,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${userService.credits} Coins',
-                      style: const TextStyle(
-                        color: Color(0xFFFF6B6B),
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                );
+                return CoinDisplay(coins: userService.credits);
               },
             ),
           ),
