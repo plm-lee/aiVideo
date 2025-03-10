@@ -127,15 +127,6 @@ class _MinePageState extends State<MinePage> {
   }
 
   Widget _buildTaskCard(VideoTask task) {
-    String getDecodedPrompt(String prompt) {
-      try {
-        return utf8.decode(prompt.runes.toList());
-      } catch (e) {
-        debugPrint('解码提示词失败: $e');
-        return prompt;
-      }
-    }
-
     final bool isImageTask =
         task.originImg != null && task.originImg!.isNotEmpty;
 
@@ -339,7 +330,7 @@ class _MinePageState extends State<MinePage> {
         return 'Processing';
       case 1:
         return 'Completed';
-      case 2:
+      case -1:
         return 'Failed';
       default:
         return 'Unknown';
@@ -352,7 +343,7 @@ class _MinePageState extends State<MinePage> {
         return Colors.blue;
       case 1:
         return Colors.green;
-      case 2:
+      case -1:
         return Colors.red;
       default:
         return Colors.grey;

@@ -161,7 +161,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         return 'Processing';
       case 1:
         return 'Completed';
-      case 2:
+      case -1:
         return 'Failed';
       default:
         return 'Unknown';
@@ -174,7 +174,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         return Colors.blue;
       case 1:
         return Colors.green;
-      case 2:
+      case -1:
         return Colors.red;
       default:
         return Colors.grey;
