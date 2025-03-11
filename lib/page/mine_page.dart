@@ -25,6 +25,7 @@ class _MinePageState extends State<MinePage> {
   final _databaseService = DatabaseService();
   final _imageCacheService = ImageCacheService();
   bool _isLoading = true;
+  bool _showRefreshHint = true;
   List<VideoTask> _tasks = [];
   late Future<List<VideoTask>> _videoTasksFuture;
 
@@ -61,6 +62,9 @@ class _MinePageState extends State<MinePage> {
       }
 
       if (mounted) {
+        setState(() {
+          _showRefreshHint = false;
+        });
         await _loadLocalTasks();
       }
     } catch (e) {
@@ -96,7 +100,15 @@ class _MinePageState extends State<MinePage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 8),
+            const Text(
+              'Pull down to refresh tasks',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 10),
             _buildButton(
               'Explore more AI effects',
               onTap: () => context.go('/home'),
@@ -116,9 +128,55 @@ class _MinePageState extends State<MinePage> {
         constraints: const BoxConstraints(maxWidth: 600),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: _tasks.length,
+          itemCount: _showRefreshHint ? _tasks.length + 1 : _tasks.length,
           itemBuilder: (context, index) {
-            final task = _tasks[index];
+            if (_showRefreshHint && index == 0) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Pull down to refresh tasks',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon:
+                          const Icon(Icons.close, color: Colors.grey, size: 14),
+                      onPressed: () => setState(() => _showRefreshHint = false),
+                    ),
+                  ],
+                ),
+              );
+            }
+            final task = _tasks[_showRefreshHint ? index - 1 : index];
             return _buildTaskCard(task);
           },
         ),
