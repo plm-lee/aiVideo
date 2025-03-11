@@ -133,11 +133,7 @@ class _MinePageState extends State<MinePage> {
             if (_showRefreshHint && index == 0) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Row(
                   children: [
                     ShaderMask(
