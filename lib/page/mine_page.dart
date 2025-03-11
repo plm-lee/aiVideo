@@ -33,7 +33,6 @@ class _MinePageState extends State<MinePage> {
     super.initState();
     _videoTasksFuture = _databaseService.getVideoTasks();
     _loadLocalTasks();
-    _fetchRemoteTasks();
   }
 
   Future<void> _loadLocalTasks() async {
@@ -53,7 +52,7 @@ class _MinePageState extends State<MinePage> {
     }
   }
 
-  Future<void> _fetchRemoteTasks() async {
+  Future<void> _onRefresh() async {
     try {
       final (success, message) = await _videoService.getUserTasks();
       if (!success) {
@@ -67,10 +66,6 @@ class _MinePageState extends State<MinePage> {
     } catch (e) {
       debugPrint('获取远程任务出错: $e');
     }
-  }
-
-  Future<void> _onRefresh() async {
-    await _fetchRemoteTasks();
   }
 
   Widget _buildContent() {

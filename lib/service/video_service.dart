@@ -95,6 +95,7 @@ class VideoService extends ChangeNotifier {
   }
 
   Future<(bool, String)> getUserTasks() async {
+    debugPrint('刷新任务列表----');
     try {
       final (success, message, user) = await _authService.getCurrentUser();
       if (!success || user == null) {
