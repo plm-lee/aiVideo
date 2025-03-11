@@ -217,7 +217,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -225,9 +225,19 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save_alt),
-            onPressed: _saveVideoToGallery,
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              icon: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(bounds),
+                child: const Icon(Icons.save_alt, color: Colors.white),
+              ),
+              onPressed: _saveVideoToGallery,
+            ),
           ),
         ],
       ),
@@ -235,85 +245,217 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 视频预览框
             Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF1E1E1E),
+                    const Color(0xFF2A2A2A).withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFD7905F).withOpacity(0.1),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: Stack(
                   children: [
                     _buildVideoPreview(),
                     if (_videoController?.value.isInitialized ?? false)
                       Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.fullscreen,
-                            color: Colors.white,
+                        bottom: 12,
+                        right: 12,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          onPressed: _toggleFullScreen,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.fullscreen,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: _toggleFullScreen,
+                          ),
                         ),
                       ),
                   ],
                 ),
               ),
             ),
-
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _getStatusColor(widget.task.state),
+                              _getStatusColor(widget.task.state)
+                                  .withOpacity(0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _getStatusColor(widget.task.state)
+                                  .withOpacity(0.2),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              widget.task.state == 1
+                                  ? Icons.check_circle
+                                  : widget.task.state == 0
+                                      ? Icons.hourglass_empty
+                                      : Icons.error,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _getStatusText(widget.task.state),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(widget.task.state),
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: Text(
-                          _getStatusText(widget.task.state),
+                          '5s',
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
+                            color: Colors.grey,
+                            fontSize: 12,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Prompt',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
+                  const SizedBox(height: 24),
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Prompt',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF1E1E1E),
+                          const Color(0xFF2A2A2A).withOpacity(0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
                     child: Text(
                       decodedPrompt,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 15,
+                        height: 1.5,
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Created',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.task.createdAt.toString().split('.')[0],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -325,19 +467,31 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   Widget _buildVideoPreview() {
     if (_isDownloading) {
-      return const AspectRatio(
+      return AspectRatio(
         aspectRatio: 16 / 9,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 8),
-              Text(
-                'Downloading video...',
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                  strokeWidth: 2,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Downloading video...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -350,14 +504,32 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         child: AspectRatio(
           aspectRatio: _videoController!.value.aspectRatio,
           child: Stack(
+            alignment: Alignment.center,
             children: [
               VideoPlayer(_videoController!),
               if (!_isPlaying)
-                Center(
-                  child: Icon(
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD7905F), Color(0xFFC060C3)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFD7905F).withOpacity(0.3),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
                     Icons.play_arrow,
                     color: Colors.white,
-                    size: 48,
+                    size: 32,
                   ),
                 ),
             ],
@@ -365,51 +537,69 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         ),
       );
     } else if (widget.task.state == 0) {
-      return const AspectRatio(
+      return AspectRatio(
         aspectRatio: 16 / 9,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.hourglass_empty,
-                color: Colors.white,
-                size: 36,
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Processing...',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                    strokeWidth: 2,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 16),
+                Text(
+                  'Processing...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    return const AspectRatio(
+    return AspectRatio(
       aspectRatio: 16 / 9,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.white,
-              size: 36,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Video not ready',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.grey,
+                size: 40,
               ),
-            ),
-          ],
+              SizedBox(height: 12),
+              Text(
+                'Video not ready',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
