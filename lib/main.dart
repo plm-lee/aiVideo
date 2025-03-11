@@ -24,6 +24,7 @@ import 'package:ai_video/page/make_collage_page.dart';
 import 'package:video_player/video_player.dart';
 import 'package:ai_video/page/buy_coins_page.dart';
 import 'package:ai_video/page/splash_screen.dart';
+import 'package:ai_video/page/video_processing_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -164,6 +165,10 @@ final _router = GoRouter(
           prompt: (state.extra as Map<String, dynamic>)['prompt'] ?? '',
         ),
       ),
+    ),
+    GoRoute(
+      path: '/processing',
+      builder: (context, state) => const VideoProcessingPage(),
     ),
   ],
 );

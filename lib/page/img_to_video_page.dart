@@ -9,6 +9,7 @@ import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/utils/dialog_utils.dart';
+import 'package:go_router/go_router.dart';
 
 class ImgToVideoPage extends StatefulWidget {
   const ImgToVideoPage({super.key});
@@ -346,7 +347,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
     DialogUtils.showSuccess(
       context: context,
       content: message,
-      autoDismiss: true, // 2秒后自动关闭
+      autoDismiss: true,
       onDismissed: () {
         // 先移除焦点，避免自动打开键盘
         FocusScope.of(context).unfocus();
@@ -355,6 +356,9 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
           _selectedImage = null;
           _promptController.clear();
         });
+
+        // 跳转到进度页面
+        context.go('/processing');
       },
     );
   }
