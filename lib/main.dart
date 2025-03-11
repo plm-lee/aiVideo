@@ -23,6 +23,7 @@ import 'package:ai_video/page/theme_detail_page.dart';
 import 'package:ai_video/page/make_collage_page.dart';
 import 'package:video_player/video_player.dart';
 import 'package:ai_video/page/buy_coins_page.dart';
+import 'package:ai_video/page/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,8 +60,12 @@ void main() async {
 }
 
 final _router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/',
   redirect: (context, state) {
+    if (state.uri.path == '/') {
+      return null;
+    }
+
     final auth = context.read<AuthService>();
     final isLoggedIn = auth.currentUser != null;
 
@@ -78,6 +83,10 @@ final _router = GoRouter(
     return null;
   },
   routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginPage(),
