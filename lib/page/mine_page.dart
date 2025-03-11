@@ -9,6 +9,9 @@ import 'package:ai_video/models/video_task.dart';
 import 'dart:convert';
 import 'package:ai_video/page/task_detail_page.dart';
 import 'package:ai_video/widgets/coin_display.dart';
+import 'package:ai_video/service/image_cache_service.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -20,6 +23,7 @@ class MinePage extends StatefulWidget {
 class _MinePageState extends State<MinePage> {
   final _videoService = VideoService();
   final _databaseService = DatabaseService();
+  final _imageCacheService = ImageCacheService();
   bool _isLoading = true;
   List<VideoTask> _tasks = [];
   late Future<List<VideoTask>> _videoTasksFuture;
@@ -127,6 +131,51 @@ class _MinePageState extends State<MinePage> {
     );
   }
 
+  Widget _buildMediaContent(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return _buildErrorWidget();
+    }
+
+    return FutureBuilder<String?>(
+      future: _loadImage(imagePath),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: Colors.grey[900],
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return _buildErrorWidget();
+        }
+
+        return Image.file(
+          File(snapshot.data!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+        );
+      },
+    );
+  }
+
+  Future<String?> _loadImage(String imagePath) async {
+    // 1. 先检查本地缓存
+    String? cachedPath = await _imageCacheService.getCachedImagePath(imagePath);
+
+    // 2. 如果本地没有缓存，则下载并缓存
+    if (cachedPath == null) {
+      cachedPath = await _imageCacheService.downloadAndCacheImage(imagePath);
+    }
+
+    return cachedPath;
+  }
+
   Widget _buildTaskCard(VideoTask task) {
     final bool isImageTask =
         task.originImg != null && task.originImg!.isNotEmpty;
@@ -155,20 +204,7 @@ class _MinePageState extends State<MinePage> {
                     const BorderRadius.vertical(top: Radius.circular(16)),
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.network(
-                    task.originImg!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: const Color(0xFF2E2E2E),
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      );
-                    },
-                  ),
+                  child: _buildMediaContent(task.originImg),
                 ),
               ),
             Padding(
@@ -333,5 +369,18 @@ class _MinePageState extends State<MinePage> {
       default:
         return Colors.grey;
     }
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      color: Colors.grey[900],
+      child: const Center(
+        child: Icon(
+          Icons.error,
+          color: Colors.white,
+          size: 40,
+        ),
+      ),
+    );
   }
 }
