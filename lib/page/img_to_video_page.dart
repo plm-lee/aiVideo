@@ -344,22 +344,14 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   void _showSuccessMessage(String message) {
-    DialogUtils.showSuccess(
-      context: context,
-      content: message,
-      autoDismiss: true,
-      onDismissed: () {
-        // 先移除焦点，避免自动打开键盘
-        FocusScope.of(context).unfocus();
+    // 先移除焦点，避免自动打开键盘
+    FocusScope.of(context).unfocus();
 
-        setState(() {
-          _selectedImage = null;
-          _promptController.clear();
-        });
-
-        // 跳转到进度页面
-        context.go('/processing');
-      },
-    );
+    setState(() {
+      _selectedImage = null;
+      _promptController.clear();
+    });
+    // 跳转到进度页面
+    context.go('/processing');
   }
 }

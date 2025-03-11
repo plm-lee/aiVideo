@@ -252,18 +252,13 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   }
 
   void _showSuccessMessage(String message) {
-    DialogUtils.showSuccess(
-      context: context,
-      content: message,
-      autoDismiss: true, // 2秒后自动关闭
-      onDismissed: () {
-        // 清空选择的图片
-        setState(() {
-          _leftImage = null;
-          _rightImage = null;
-        });
-      },
-    );
+    // 清空选择的图片
+    setState(() {
+      _leftImage = null;
+      _rightImage = null;
+    });
+    // 跳转到等待页面
+    context.go('/processing');
   }
 
   @override

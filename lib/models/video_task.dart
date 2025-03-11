@@ -5,6 +5,7 @@ class VideoTask {
   final String prompt;
   final String? originImg;
   final String? videoUrl;
+  final String? remark;
 
   VideoTask({
     required this.businessId,
@@ -13,6 +14,7 @@ class VideoTask {
     required this.prompt,
     this.originImg,
     this.videoUrl,
+    this.remark,
   });
 
   factory VideoTask.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class VideoTask {
       prompt: json['prompt'],
       originImg: json['origin_img'],
       videoUrl: json['video_url'],
+      remark: json['remark'],
     );
   }
 
@@ -34,6 +37,7 @@ class VideoTask {
       prompt: map['prompt'],
       originImg: map['origin_img'],
       videoUrl: map['video_url'],
+      remark: map['remark'],
     );
   }
 
@@ -45,6 +49,7 @@ class VideoTask {
       'prompt': prompt,
       'origin_img': originImg,
       'video_url': videoUrl,
+      'remark': remark,
     };
   }
 }
