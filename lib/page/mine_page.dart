@@ -128,12 +128,21 @@ class _MinePageState extends State<MinePage> {
         constraints: const BoxConstraints(maxWidth: 600),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: _showRefreshHint ? _tasks.length + 1 : _tasks.length,
+          itemCount: _tasks.length + 1,
           itemBuilder: (context, index) {
-            if (_showRefreshHint && index == 0) {
+            if (index == 0) {
               return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                margin: const EdgeInsets.only(bottom: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.05),
+                    width: 1,
+                  ),
+                ),
                 child: Row(
                   children: [
                     ShaderMask(
@@ -145,34 +154,27 @@ class _MinePageState extends State<MinePage> {
                       child: Row(
                         children: const [
                           Icon(
-                            Icons.info_outline,
+                            Icons.refresh_rounded,
                             color: Colors.white,
-                            size: 14,
+                            size: 16,
                           ),
-                          SizedBox(width: 4),
+                          SizedBox(width: 6),
                           Text(
                             'Pull down to refresh tasks',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon:
-                          const Icon(Icons.close, color: Colors.grey, size: 14),
-                      onPressed: () => setState(() => _showRefreshHint = false),
-                    ),
                   ],
                 ),
               );
             }
-            final task = _tasks[_showRefreshHint ? index - 1 : index];
+            final task = _tasks[index - 1];
             return _buildTaskCard(task);
           },
         ),
@@ -189,11 +191,14 @@ class _MinePageState extends State<MinePage> {
       future: _loadImage(imagePath),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            color: Colors.grey[900],
-            child: const Center(
+          return Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  const Color(0xFFD7905F).withOpacity(0.8),
+                ),
                 strokeWidth: 2,
               ),
             ),
@@ -229,96 +234,180 @@ class _MinePageState extends State<MinePage> {
     final bool isImageTask =
         task.originImg != null && task.originImg!.isNotEmpty;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TaskDetailPage(task: task),
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
-          borderRadius: BorderRadius.circular(16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.05),
+          width: 1,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isImageTask)
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: _buildMediaContent(task.originImg),
-                ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TaskDetailPage(task: task),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        isImageTask ? Icons.image : Icons.text_fields,
-                        color: Colors.grey,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        isImageTask ? 'Image to Video' : 'Text to Video',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
+            );
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isImageTask)
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    task.prompt,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  child: Container(
+                    width: 100,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                      ),
+                    ),
+                    child: _buildMediaContent(task.originImg),
+                  ),
+                )
+              else
+                Container(
+                  width: 100,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF1E1E1E), Color(0xFF2A2A2A)],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
+                  child: const Center(
+                    child: Icon(
+                      Icons.text_fields,
+                      color: Colors.white38,
+                      size: 32,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Container(
+                  height: 140,
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        task.createdAt.toString().split('.')[0],
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                      // 类型标签和状态
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isImageTask ? Icons.image : Icons.text_fields,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isImageTask
+                                      ? 'Image to Video'
+                                      : 'Text to Video',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  _getStatusColor(task.state).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _getStatusColor(task.state)
+                                    .withOpacity(0.5),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              _getStatusText(task.state),
+                              style: TextStyle(
+                                color: _getStatusColor(task.state),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(task.state),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                      const SizedBox(height: 8),
+                      // Prompt文本
+                      Expanded(
                         child: Text(
-                          _getStatusText(task.state),
+                          task.prompt,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 14,
+                            height: 1.4,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      // 时间
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 12,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            task.createdAt.toString().split('.')[0],
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -425,9 +514,9 @@ class _MinePageState extends State<MinePage> {
       color: Colors.grey[900],
       child: const Center(
         child: Icon(
-          Icons.error,
-          color: Colors.white,
-          size: 40,
+          Icons.error_outline,
+          color: Colors.white38,
+          size: 24,
         ),
       ),
     );
