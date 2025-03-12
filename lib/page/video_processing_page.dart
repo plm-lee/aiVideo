@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_video/service/video_service.dart';
 
 class VideoProcessingPage extends StatefulWidget {
   const VideoProcessingPage({super.key});
@@ -52,9 +53,17 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
     // 3分钟后自动跳转到任务列表页面
     Future.delayed(const Duration(minutes: 3), () {
       if (mounted) {
-        context.go('/mine');
+        _refreshAndNavigate();
       }
     });
+  }
+
+  Future<void> _refreshAndNavigate() async {
+    final videoService = VideoService();
+    await videoService.getUserTasks();
+    if (mounted) {
+      context.go('/mine');
+    }
   }
 
   @override
@@ -72,7 +81,7 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => context.go('/mine'),
+          onPressed: () => _refreshAndNavigate(),
         ),
       ),
       body: AnimatedBuilder(
