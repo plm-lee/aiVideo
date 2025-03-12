@@ -109,25 +109,21 @@ class _SplashScreenState extends State<SplashScreen>
                         scale: _scaleAnimation,
                         child: Stack(
                           children: [
-                            // 主字母 M
+                            // Logo图片
                             ShaderMask(
-                              shaderCallback: (bounds) => LinearGradient(
-                                colors: const [
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [
                                   Color(0xFFD7905F),
                                   Color(0xFFC060C3),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ).createShader(bounds),
-                              child: const Text(
-                                'M',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 120,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
-                                  height: 1,
-                                ),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                width: 160,
+                                height: 160,
+                                fit: BoxFit.contain,
                               ),
                             ),
                             // 闪亮点效果
@@ -141,8 +137,8 @@ class _SplashScreenState extends State<SplashScreen>
                                           MediaQuery.of(context).size.width *
                                           0.6),
                                   child: Container(
-                                    width: 100,
-                                    height: 120,
+                                    width: 160,
+                                    height: 160,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
@@ -151,7 +147,6 @@ class _SplashScreenState extends State<SplashScreen>
                                           Colors.white.withOpacity(0),
                                         ],
                                       ),
-                                      borderRadius: BorderRadius.circular(50),
                                     ),
                                   ),
                                 );
@@ -161,7 +156,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     // MagaVideo 文字
                     FadeTransition(
                       opacity: _textFadeAnimation,
@@ -180,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen>
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 4,
+                            letterSpacing: 2,
                           ),
                         ),
                       ),
