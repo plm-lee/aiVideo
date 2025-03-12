@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ai_video/service/video_service.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final VideoTask task;
@@ -26,6 +28,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   bool _isPlaying = false;
   bool _isFullScreen = false;
   bool _isDownloading = false;
+  bool _hasCopied = false;
 
   @override
   void initState() {
@@ -137,6 +140,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     setState(() {
       _isFullScreen = !_isFullScreen;
     });
+  }
+
+  void _copyPrompt(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    setState(() => _hasCopied = true);
   }
 
   @override
@@ -417,13 +425,54 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         ),
                       ],
                     ),
-                    child: Text(
-                      decodedPrompt,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        height: 1.5,
-                      ),
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            right: 40,
+                            bottom: 8,
+                          ),
+                          child: Text(
+                            decodedPrompt,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: -8,
+                          right: -8,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E1E),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: IconButton(
+                              icon: ShaderMask(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                  colors: [
+                                    Color(0xFFD7905F),
+                                    Color(0xFFC060C3)
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ).createShader(bounds),
+                                child: Icon(
+                                  _hasCopied
+                                      ? Icons.check_rounded
+                                      : Icons.copy_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                              onPressed: () => _copyPrompt(decodedPrompt),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
