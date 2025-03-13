@@ -5,9 +5,10 @@ import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/models/user.dart';
 import 'package:ai_video/models/purchase_record.dart';
 import 'package:ai_video/models/video_task.dart';
+import 'package:flutter/foundation.dart';
 
 class DatabaseService {
-  static final int _dbVersion = 7;
+  static final int _dbVersion = 8;
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -121,7 +122,8 @@ class DatabaseService {
         state INTEGER NOT NULL,
         prompt TEXT NOT NULL,
         origin_img TEXT,
-        video_url TEXT
+        video_url TEXT,
+        duration INTEGER
       )
     ''');
   }
@@ -183,22 +185,21 @@ class DatabaseService {
     }
 
     if (oldVersion < 6) {
-      await db.execute('''
-        CREATE TABLE video_tasks(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          business_id TEXT NOT NULL,
-          created_at TEXT NOT NULL,
-          state INTEGER NOT NULL,
-          prompt TEXT NOT NULL,
-          origin_img TEXT,
-          userId INTEGER,
-          FOREIGN KEY (userId) REFERENCES users(id)
-        )
-      ''');
+      // Add duration column if it doesn't exist
+      try {
+        await db.execute('ALTER TABLE video_tasks ADD COLUMN duration INTEGER');
+      } catch (e) {
+        debugPrint('Duration column might already exist: $e');
+      }
     }
 
     if (oldVersion < 7) {
-      await db.execute('ALTER TABLE video_tasks ADD COLUMN video_url TEXT');
+      // Add video_url column if it doesn't exist
+      try {
+        await db.execute('ALTER TABLE video_tasks ADD COLUMN video_url TEXT');
+      } catch (e) {
+        debugPrint('Video URL column might already exist: $e');
+      }
     }
   }
 
@@ -385,6 +386,7 @@ class DatabaseService {
               'prompt': task.prompt,
               'origin_img': task.originImg,
               'video_url': task.videoUrl,
+              'duration': task.duration,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -396,6 +398,7 @@ class DatabaseService {
               'state': task.state,
               'video_url': task.videoUrl,
               'origin_img': task.originImg,
+              'duration': task.duration,
             },
             where: 'business_id = ?',
             whereArgs: [task.businessId],

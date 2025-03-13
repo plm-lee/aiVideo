@@ -25,14 +25,11 @@ class _MinePageState extends State<MinePage> {
   final _databaseService = DatabaseService();
   final _imageCacheService = ImageCacheService();
   bool _isLoading = true;
-  bool _showRefreshHint = true;
   List<VideoTask> _tasks = [];
-  late Future<List<VideoTask>> _videoTasksFuture;
 
   @override
   void initState() {
     super.initState();
-    _videoTasksFuture = _databaseService.getVideoTasks();
     _loadLocalTasks();
   }
 
@@ -57,18 +54,15 @@ class _MinePageState extends State<MinePage> {
     try {
       final (success, message) = await _videoService.getUserTasks();
       if (!success) {
-        debugPrint('获取远程任务失败: $message');
+        debugPrint('任务刷新失败: $message');
         return;
       }
 
       if (mounted) {
-        setState(() {
-          _showRefreshHint = false;
-        });
         await _loadLocalTasks();
       }
     } catch (e) {
-      debugPrint('获取远程任务出错: $e');
+      debugPrint('任务刷新失败: $e');
     }
   }
 

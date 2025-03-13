@@ -368,7 +368,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Text(
-                          '5s',
+                          widget.task.duration != null &&
+                                  widget.task.duration! > 0
+                              ? '${widget.task.duration}s'
+                              : '',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 12,
