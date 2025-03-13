@@ -28,6 +28,10 @@ class VideoCache {
 
   /// 检查是否需要更新缓存
   Future<bool> shouldUpdateCache() async {
+    // 如果缓存为空，则更新
+    final cachedCategories = await loadCachedCategories();
+    if (cachedCategories.isEmpty) return true;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? lastUpdateStr = prefs.getString(_cacheDateKey);
@@ -38,7 +42,7 @@ class VideoCache {
       final DateTime now = DateTime.now();
 
       // 如果缓存时间超过24小时，则更新
-      return now.difference(lastUpdate).inHours >= 24;
+      return now.difference(lastUpdate).inMinutes >= 5;
     } catch (e) {
       debugPrint('Error checking cache update time: $e');
       return true;
