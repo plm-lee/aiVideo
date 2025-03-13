@@ -32,11 +32,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
-      debugPrint('打开链接错误: $e');
+      debugPrint('Error opening link: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('打开链接时发生错误'),
+            content: Text('Error opening link'),
             backgroundColor: Colors.red,
           ),
         );
@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   void _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
-        _errorMessage = '邮箱和密码不能为空';
+        _errorMessage = 'Email and password are required';
       });
       return;
     }
@@ -69,12 +69,13 @@ class _LoginPageState extends State<LoginPage> {
         context.go('/home');
       } else {
         setState(() {
-          _errorMessage = errorMessage ?? '登录失败，请稍后重试';
+          _errorMessage =
+              errorMessage ?? 'Login failed, please try again later';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '登录失败: $e';
+        _errorMessage = 'Login failed: $e';
       });
     }
   }

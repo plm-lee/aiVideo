@@ -240,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() {
       _isSendingCode = true;
-      _emailError = null; // 清除之前的错误信息
+      _emailError = null; // Clear previous error message
     });
 
     try {
@@ -249,7 +249,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (mounted) {
         if (result) {
-          // 发送成功，开始倒计时
+          // Start countdown if code sent successfully
           _startCountDown();
         } else {
           setState(() {
@@ -285,11 +285,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } catch (e) {
-      debugPrint('打开链接错误: $e');
+      debugPrint('Error opening link: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('打开链接时发生错误'),
+            content: Text('Error opening link'),
             backgroundColor: Colors.red,
           ),
         );

@@ -74,51 +74,46 @@ class _MinePageState extends State<MinePage> {
 
   Widget _buildContent() {
     if (_tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(20),
+      return RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.folder_outlined,
+                  size: 50,
+                  color: Colors.white,
+                ),
               ),
-              child: const Icon(
-                Icons.folder_outlined,
-                size: 50,
-                color: Colors.white,
+              const SizedBox(height: 16),
+              const Text(
+                'No Results',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'No Results',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              _buildButton(
+                'Explore more AI effects',
+                onTap: () => context.go('/home'),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Pull down to refresh tasks',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
+              const SizedBox(height: 16),
+              _buildButton(
+                'Restore',
+                onTap: _handleRestore,
               ),
-            ),
-            const SizedBox(height: 10),
-            _buildButton(
-              'Explore more AI effects',
-              onTap: () => context.go('/home'),
-            ),
-            const SizedBox(height: 16),
-            _buildButton(
-              'Restore',
-              onTap: _handleRestore,
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -461,10 +456,7 @@ class _MinePageState extends State<MinePage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: _buildContent(),
-            ),
+          : _buildContent(),
       bottomNavigationBar: const BottomNavBar(currentPath: '/mine'),
     );
   }
