@@ -197,4 +197,40 @@ class VideoService extends ChangeNotifier {
       return [];
     }
   }
+
+  // 获取最新一条任务
+  Future<VideoTask?> getLatestTask() async {
+    // 先刷新一次
+    final (success, message) = await getUserTasks();
+    if (!success) {
+      return null;
+    }
+    final videoTasks = await _databaseService.getVideoTasks();
+    if (videoTasks.isNotEmpty) {
+      return videoTasks.first;
+    }
+    return null;
+  }
+
+  // 查询任务进度
+  Future<bool> getTaskDetail(String businessId) async {
+    final (success, message, user) = await _authService.getCurrentUser();
+    if (!success || user == null) {
+      return false;
+    }
+    final response = await _videoApi.getTaskDetail(
+      uuid: user.uuid,
+      business_id: businessId,
+    );
+    if (response['response']['success'] != '1') {
+      return false;
+    }
+
+    debugPrint('getTaskDetail: ${response}');
+
+    if (response['video_task']['state'] == 1) {
+      return true;
+    }
+    return false;
+  }
 }

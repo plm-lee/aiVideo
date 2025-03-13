@@ -179,9 +179,11 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.logout,
                 title: 'Logout',
-                onTap: () {
-                  AuthService().logout();
-                  context.go('/login');
+                onTap: () async {
+                  await AuthService().logout();
+                  if (mounted) {
+                    context.go('/login');
+                  }
                 },
               ),
             ]),

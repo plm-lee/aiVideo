@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/video_service.dart';
+import 'dart:async';
 
 class VideoProcessingPage extends StatefulWidget {
   const VideoProcessingPage({super.key});
@@ -15,6 +16,8 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
   late Animation<double> _progressAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  String business_id = ''; // 用来查询任务进度
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -50,6 +53,11 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
 
     _controller.forward();
 
+    // 每10秒查询一次任务进度
+    _progressTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _queryTaskProgress();
+    });
+
     // 3分钟后自动跳转到任务列表页面
     Future.delayed(const Duration(minutes: 3), () {
       if (mounted) {
@@ -66,9 +74,34 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
     }
   }
 
+  // 查询任务进度
+  Future<void> _queryTaskProgress() async {
+    final videoService = VideoService();
+    // 如果business_id为空，则获取当前任务
+    if (business_id.isEmpty) {
+      // 最新一条任务ID
+      final task = await videoService.getLatestTask();
+      if (task != null) {
+        business_id = task.businessId;
+        debugPrint('on progress task: $business_id');
+      }
+    }
+
+    final ok = await videoService.getTaskDetail(business_id);
+    if (ok) {
+      // 进度条走完
+      _controller.value = 1.0;
+      await videoService.getUserTasks();
+      if (mounted) {
+        context.go('/mine');
+      }
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _progressTimer?.cancel();
     super.dispose();
   }
 

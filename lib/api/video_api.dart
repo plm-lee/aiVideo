@@ -28,6 +28,16 @@ class VideoApi {
     );
   }
 
+  // 查询任务进度
+  Future<Map<String, dynamic>> getTaskDetail({
+    required String uuid,
+    required String business_id,
+  }) async {
+    return await _apiClient.get(
+      '/api/ai_video/task_detail?uuid=$uuid&business_id=$business_id',
+    );
+  }
+
   // 获取用户所有任务
   Future<Map<String, dynamic>> getUserTasks({
     required String uuid,
