@@ -538,8 +538,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _isPasswordVisible
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                               color: Colors.grey,
                             ),
                             onPressed: () {
