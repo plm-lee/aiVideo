@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'dart:math';
 import 'dart:async';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -22,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   int _countDown = 60;
   bool _isCountingDown = false;
   bool _isSendingCode = false;
+  bool _isAgreeToTerms = false;
   Timer? _timer;
 
   // 移除实时验证相关变量
@@ -185,6 +188,11 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         _passwordError = null;
       }
+
+      // 验证用户协议
+      if (!_isAgreeToTerms) {
+        isValid = false;
+      }
     });
     return isValid;
   }
@@ -260,6 +268,30 @@ class _RegisterPageState extends State<RegisterPage> {
         setState(() {
           _isSendingCode = false;
         });
+      }
+    }
+  }
+
+  Future<void> _launchURL(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.inAppWebView,
+        webViewConfiguration: const WebViewConfiguration(
+          enableJavaScript: true,
+          enableDomStorage: true,
+        ),
+      );
+    } catch (e) {
+      debugPrint('打开链接错误: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('打开链接时发生错误'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -541,6 +573,76 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 32),
+                      // 添加用户协议勾选
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isAgreeToTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                _isAgreeToTerms = value ?? false;
+                              });
+                            },
+                            activeColor: const Color(0xFFFF69B4),
+                          ),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                                children: [
+                                  const TextSpan(
+                                      text: 'I have read and agree to '),
+                                  TextSpan(
+                                    text: 'Terms of Service',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/terms_services',
+                                        );
+                                      },
+                                  ),
+                                  const TextSpan(text: ', '),
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/privacy_policies',
+                                        );
+                                      },
+                                  ),
+                                  const TextSpan(text: ' and '),
+                                  TextSpan(
+                                    text: 'Licenses',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/licenses',
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
                       // 注册按钮
                       Container(
                         width: double.infinity,
@@ -555,7 +657,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: ElevatedButton(
-                          onPressed: _handleRegister,
+                          onPressed: _isAgreeToTerms ? _handleRegister : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,

@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'dart:math';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,6 +18,31 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   String? _errorMessage;
+  bool _isAgreeToTerms = false;
+
+  Future<void> _launchURL(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.inAppWebView,
+        webViewConfiguration: const WebViewConfiguration(
+          enableJavaScript: true,
+          enableDomStorage: true,
+        ),
+      );
+    } catch (e) {
+      debugPrint('打开链接错误: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('打开链接时发生错误'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -179,6 +206,76 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 24),
                     _buildSignInButton(),
+                    const SizedBox(height: 16),
+                    // 添加用户协议
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _isAgreeToTerms,
+                          onChanged: (value) {
+                            setState(() {
+                              _isAgreeToTerms = value ?? false;
+                            });
+                          },
+                          activeColor: const Color(0xFFFF69B4),
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                              children: [
+                                const TextSpan(
+                                    text: 'I have read and agree to '),
+                                TextSpan(
+                                  text: 'Terms of Service',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF69B4),
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      _launchURL(
+                                        'https://chat.bigchallenger.com/terms_services',
+                                      );
+                                    },
+                                ),
+                                const TextSpan(text: ', '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF69B4),
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      _launchURL(
+                                        'https://chat.bigchallenger.com/privacy_policies',
+                                      );
+                                    },
+                                ),
+                                const TextSpan(text: ' and '),
+                                TextSpan(
+                                  text: 'Licenses',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF69B4),
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      _launchURL(
+                                        'https://chat.bigchallenger.com/licenses',
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 24),
                     _buildCreateAccountLink(),
                   ],
@@ -263,7 +360,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(24),
       ),
       child: ElevatedButton(
-        onPressed: _handleLogin,
+        onPressed: _isAgreeToTerms ? _handleLogin : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
