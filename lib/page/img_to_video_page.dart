@@ -24,6 +24,23 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   final _picker = ImagePicker();
   int _selectedLength = 5; // 默认5秒
   bool _isLoading = false; // 添加加载状态
+  bool _hasPromptInput = false; // 添加提示词输入状态
+
+  @override
+  void initState() {
+    super.initState();
+    _promptController.addListener(() {
+      setState(() {
+        _hasPromptInput = _promptController.text.trim().isNotEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _promptController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +218,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildBottomButton() {
-    final bool canGenerate =
-        _selectedImage != null && _promptController.text.trim().isNotEmpty;
+    final bool canGenerate = _selectedImage != null && _hasPromptInput;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -241,8 +257,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Widget _buildGenerateButton() {
-    final bool canGenerate =
-        _selectedImage != null && _promptController.text.trim().isNotEmpty;
+    final bool canGenerate = _selectedImage != null && _hasPromptInput;
 
     return Container(
       decoration: BoxDecoration(
