@@ -88,18 +88,37 @@ class _LoginPageState extends State<LoginPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1A1A1A), // 深色背景
-              Color(0xFF2D1F3D), // 带紫色的深色
+              Color(0xFF1A1A1A),
+              Color(0xFF2D1F3D),
             ],
             stops: [0.0, 1.0],
           ),
         ),
         child: Stack(
           children: [
-            // 添加星星背景效果
+            // 优化星星背景效果
             Positioned.fill(
               child: CustomPaint(
                 painter: StarFieldPainter(),
+              ),
+            ),
+            // 添加光晕效果
+            Positioned(
+              top: -100,
+              right: -100,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFF69B4).withOpacity(0.2),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
               ),
             ),
             // 顶部导航栏
@@ -113,10 +132,17 @@ class _LoginPageState extends State<LoginPage> {
                 child: SafeArea(
                   child: Row(
                     children: [
-                      Image.asset(
-                        'assets/images/logo.png',
-                        height: 36,
-                        width: 36,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 32,
+                          width: 32,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -125,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
@@ -134,168 +161,180 @@ class _LoginPageState extends State<LoginPage> {
             ),
             // 登录表单
             Center(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
-                    width: 1,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  margin: const EdgeInsets.only(top: 80),
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.1),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 16,
-                      spreadRadius: 4,
-                    ),
-                  ],
-                ),
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Sign In',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildTextField(
-                      controller: _emailController,
-                      hintText: 'Email address',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _passwordController,
-                      hintText: 'Password',
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 16),
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFFFF4444),
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    TextButton(
-                      onPressed: () {
-                        // TODO: 实现忘记密码功能
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: const Text(
-                        'Forgot Password?',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Welcome Back',
                         style: TextStyle(
-                          color: Color(0xFFFF69B4),
-                          fontSize: 14,
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSignInButton(),
-                    const SizedBox(height: 16),
-                    // 添加用户协议
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _isAgreeToTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              _isAgreeToTerms = value ?? false;
-                            });
-                          },
-                          activeColor: const Color(0xFFFF69B4),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Sign in to continue',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                          letterSpacing: 0.3,
                         ),
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                              children: [
-                                const TextSpan(
-                                    text: 'I have read and agree to '),
-                                TextSpan(
-                                  text: 'Terms of Service',
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF69B4),
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      _launchURL(
-                                        'https://chat.bigchallenger.com/terms_services',
-                                      );
-                                    },
-                                ),
-                                const TextSpan(text: ', '),
-                                TextSpan(
-                                  text: 'Privacy Policy',
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF69B4),
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      _launchURL(
-                                        'https://chat.bigchallenger.com/privacy_policies',
-                                      );
-                                    },
-                                ),
-                                const TextSpan(text: ' and '),
-                                TextSpan(
-                                  text: 'Licenses',
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF69B4),
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      _launchURL(
-                                        'https://chat.bigchallenger.com/licenses',
-                                      );
-                                    },
-                                ),
-                              ],
+                      ),
+                      const SizedBox(height: 32),
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: 'Email address',
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _passwordController,
+                        hintText: 'Password',
+                        isPassword: true,
+                      ),
+                      const SizedBox(height: 8),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Color(0xFFFF4444),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            // TODO: 实现忘记密码功能
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: Color(0xFFFF69B4),
+                              fontSize: 14,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildCreateAccountLink(),
-                  ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSignInButton(),
+                      const SizedBox(height: 16),
+                      // 用户协议
+                      Row(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.all(4),
+                            child: Transform.scale(
+                              scale: 1.2,
+                              child: CupertinoCheckbox(
+                                value: _isAgreeToTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isAgreeToTerms = value ?? false;
+                                  });
+                                },
+                                activeColor: const Color(0xFFFF69B4),
+                                checkColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                  height: 1.5,
+                                ),
+                                children: [
+                                  const TextSpan(
+                                      text: 'I have read and agree to '),
+                                  TextSpan(
+                                    text: 'Terms of Service',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/terms_services',
+                                        );
+                                      },
+                                  ),
+                                  const TextSpan(text: ', '),
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/privacy_policies',
+                                        );
+                                      },
+                                  ),
+                                  const TextSpan(text: ' and '),
+                                  TextSpan(
+                                    text: 'Licenses',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF69B4),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        _launchURL(
+                                          'https://chat.bigchallenger.com/licenses',
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildCreateAccountLink(),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(String text) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.grey,
-        fontSize: 14,
-        height: 1.2,
       ),
     );
   }
@@ -307,16 +346,20 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.3),
+          color: Colors.white.withOpacity(0.1),
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword && !_isPasswordVisible,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(
@@ -325,13 +368,18 @@ class _LoginPageState extends State<LoginPage> {
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
+          prefixIcon: Icon(
+            isPassword ? Icons.lock_outline : Icons.email_outlined,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     _isPasswordVisible
                         ? Icons.visibility_off
                         : Icons.visibility,
-                    color: Colors.grey,
+                    color: Colors.grey.shade600,
                     size: 20,
                   ),
                   onPressed: () {
@@ -358,6 +406,13 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
         borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF69B4).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ElevatedButton(
         onPressed: _isAgreeToTerms ? _handleLogin : null,
@@ -367,6 +422,7 @@ class _LoginPageState extends State<LoginPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
+          disabledBackgroundColor: Colors.grey.withOpacity(0.3),
         ),
         child: const Text(
           'Sign In',
@@ -374,6 +430,7 @@ class _LoginPageState extends State<LoginPage> {
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'dart:math';
@@ -573,24 +574,66 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      // 添加用户协议勾选
+                      // 注册按钮
+                      Container(
+                        width: double.infinity,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFFFF8C8C),
+                              Color(0xFFFF69B4),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _isAgreeToTerms ? _handleRegister : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // 用户协议
                       Row(
                         children: [
-                          Checkbox(
-                            value: _isAgreeToTerms,
-                            onChanged: (value) {
-                              setState(() {
-                                _isAgreeToTerms = value ?? false;
-                              });
-                            },
-                            activeColor: const Color(0xFFFF69B4),
+                          Container(
+                            margin: const EdgeInsets.all(4),
+                            child: Transform.scale(
+                              scale: 1.2,
+                              child: CupertinoCheckbox(
+                                value: _isAgreeToTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isAgreeToTerms = value ?? false;
+                                  });
+                                },
+                                activeColor: const Color(0xFFFF69B4),
+                                checkColor: Colors.white,
+                              ),
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: RichText(
                               text: TextSpan(
                                 style: const TextStyle(
                                   color: Colors.grey,
                                   fontSize: 12,
+                                  height: 1.5,
                                 ),
                                 children: [
                                   const TextSpan(
@@ -641,39 +684,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 24),
-                      // 注册按钮
-                      Container(
-                        width: double.infinity,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFFF8C8C),
-                              Color(0xFFFF69B4),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: _isAgreeToTerms ? _handleRegister : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 24),
                       // 底部登录链接
