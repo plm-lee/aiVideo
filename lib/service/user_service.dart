@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/user_config.dart';
 import 'package:ai_video/models/purchase_record.dart';
+import 'package:ai_video/models/user.dart';
 import 'package:ai_video/api/user_api.dart';
+import 'package:ai_video/api/pay_api.dart';
 
 class UserService extends ChangeNotifier {
   static final UserService _instance = UserService._internal();
@@ -12,17 +14,21 @@ class UserService extends ChangeNotifier {
   factory UserService.test({
     DatabaseService? databaseService,
     UserApi? userApi,
+    PayApi? payApi,
   }) =>
       UserService._internal(
         databaseService: databaseService,
         userApi: userApi,
+        payApi: payApi,
       );
 
   UserService._internal({
     DatabaseService? databaseService,
     UserApi? userApi,
+    PayApi? payApi,
   })  : _databaseService = databaseService ?? DatabaseService(),
-        _userApi = userApi ?? UserApi();
+        _userApi = userApi ?? UserApi(),
+        _payApi = payApi ?? PayApi();
 
   int _credits = 0;
   String? _uuid;
@@ -31,6 +37,7 @@ class UserService extends ChangeNotifier {
 
   final DatabaseService _databaseService;
   final UserApi _userApi;
+  final PayApi _payApi;
 
   @visibleForTesting
   set credits(int value) {
@@ -50,6 +57,23 @@ class UserService extends ChangeNotifier {
   Future<void> initUser() async {
     await loadIsSubscribe();
     await loadCredits();
+  }
+
+  // 查询消费记录
+  Future<List<CoinLog>> loadCoinLogs() async {
+    try {
+      final response = await _payApi.getCoinLogs(uuid: _uuid!);
+
+      final List<CoinLog> coinLogs =
+          (response['coin_flows'] as List).map((task) {
+        return CoinLog.fromMap(task as Map<String, dynamic>);
+      }).toList();
+
+      return coinLogs;
+    } catch (e) {
+      debugPrint('消费记录加载失败: $e');
+      return [];
+    }
   }
 
   void setIsSubscribe(bool value) {

@@ -159,7 +159,9 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.monetization_on,
                 title: 'Coins Details',
-                onTap: () {},
+                onTap: () {
+                  context.push('/coin-logs');
+                },
               ),
               _buildMenuItem(
                 icon: Icons.restore,

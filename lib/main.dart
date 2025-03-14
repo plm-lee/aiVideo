@@ -7,15 +7,13 @@ import 'package:ai_video/page/setting_page.dart';
 import 'package:ai_video/page/subscribe_page.dart';
 import 'package:ai_video/page/img_to_video_page.dart';
 import 'package:ai_video/page/text_to_video_page.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:ai_video/constants/theme.dart';
 import 'package:ai_video/providers/theme_provider.dart';
-import 'package:ai_video/page/video_history_page.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/user_service.dart';
-import 'package:ai_video/page/histories_page.dart';
-import 'package:ai_video/page/purchase_history_page.dart';
+import 'package:ai_video/page/coin_logs.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/page/mine_page.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
@@ -25,6 +23,8 @@ import 'package:video_player/video_player.dart';
 import 'package:ai_video/page/buy_coins_page.dart';
 import 'package:ai_video/page/splash_screen.dart';
 import 'package:ai_video/page/video_processing_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,14 +48,16 @@ void main() async {
   ApplePaymentService().initialize();
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => UserService()),
-        ChangeNotifierProvider(create: (_) => LocaleService()),
-      ],
-      child: const MyApp(),
+    ProviderScope(
+      child: provider.MultiProvider(
+        providers: [
+          provider.ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          provider.ChangeNotifierProvider(create: (_) => AuthService()),
+          provider.ChangeNotifierProvider(create: (_) => UserService()),
+          provider.ChangeNotifierProvider(create: (_) => LocaleService()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }
@@ -123,16 +125,8 @@ final _router = GoRouter(
       builder: (context, state) => const TextToVideoPage(),
     ),
     GoRoute(
-      path: '/video-history',
-      builder: (context, state) => const VideoHistoryPage(),
-    ),
-    GoRoute(
-      path: '/histories',
-      builder: (context, state) => const HistoriesPage(),
-    ),
-    GoRoute(
-      path: '/purchase-history',
-      builder: (context, state) => const PurchaseHistoryPage(),
+      path: '/coin-logs',
+      builder: (context, state) => const CoinLogsPage(),
     ),
     GoRoute(
       path: '/mine',
@@ -178,7 +172,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
+    return provider.Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,

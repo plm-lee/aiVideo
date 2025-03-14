@@ -78,4 +78,27 @@ class PayApi {
       return false;
     }
   }
+
+  // 查询消费记录
+  Future<Map<String, dynamic>> getCoinLogs({
+    required String uuid,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        '/api/customer/coin_logs',
+        queryParameters: {'uuid': uuid},
+      );
+
+      debugPrint('getCoinLogs response: $response');
+      if (response['response']['success'] == '1') {
+        return response;
+      } else {
+        throw Exception(
+          'Failed to get coin logs: ${response['response']['description']}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error getting coin logs: $e');
+    }
+  }
 }

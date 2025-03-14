@@ -33,3 +33,21 @@ class User {
     );
   }
 }
+
+// 金币记录
+class CoinLog {
+  final int cnt;
+  final String createdAt;
+
+  CoinLog({
+    required this.cnt,
+    required this.createdAt,
+  });
+
+  factory CoinLog.fromMap(Map<String, dynamic> map) {
+    return CoinLog(
+      cnt: map['cnt'] ?? 0,
+      createdAt: map['created_at'] ?? '',
+    );
+  }
+}
