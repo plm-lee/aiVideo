@@ -6,12 +6,10 @@ import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/models/video_task.dart';
-import 'dart:convert';
 import 'package:ai_video/page/task_detail_page.dart';
 import 'package:ai_video/widgets/coin_display.dart';
 import 'package:ai_video/service/image_cache_service.dart';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:async';
 import 'package:video_player/video_player.dart';
 
@@ -31,6 +29,9 @@ class _MinePageState extends State<MinePage> {
   Timer? _progressTimer;
   String business_id = '';
   Map<String, VideoPlayerController> _videoControllers = {};
+  final Map<String, bool> _videoInitializing = {};
+  final Map<String, Future<String?>> _imageLoadingFutures = {};
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -54,19 +55,22 @@ class _MinePageState extends State<MinePage> {
       controller.dispose();
     }
     _videoControllers.clear();
+    _videoInitializing.clear();
+    _imageLoadingFutures.clear();
     super.dispose();
   }
 
   Future<void> _loadLocalTasks() async {
     try {
       final tasks = await _databaseService.getVideoTasks();
-      if (mounted) {
-        setState(() {
-          _tasks = tasks;
-          _isLoading = false;
+      if (!mounted) return;
+      setState(() {
+        _tasks = tasks;
+        _isLoading = false;
+        if (tasks.isNotEmpty) {
           business_id = tasks.first.businessId;
-        });
-      }
+        }
+      });
     } catch (e) {
       debugPrint('加载本地任务失败: $e');
       if (mounted) {
@@ -77,10 +81,10 @@ class _MinePageState extends State<MinePage> {
 
   // 查询任务进度
   Future<void> _queryTaskProgress() async {
+    if (_isRefreshing) return;
+
     final videoService = VideoService();
-    // 如果business_id为空，则获取当前任务
     if (business_id.isEmpty) {
-      // 最新一条任务ID
       final task = await videoService.getLatestTask();
       if (task != null) {
         business_id = task.businessId;
@@ -89,25 +93,20 @@ class _MinePageState extends State<MinePage> {
     }
 
     final state = await videoService.getTaskDetail(business_id);
-    if (state == 1) {
-      // mounted 表示当前 State 对象是否在 widget 树中
-      // 在调用 setState 之前检查 mounted 可以避免在 widget 被销毁后更新状态导致的错误
-      if (mounted) {
-        debugPrint('on progress task finished: $business_id');
-
-        await videoService.getUserTasks();
-        await _loadLocalTasks();
-
-        // 取消定时器
-        if (_progressTimer != null) {
-          _progressTimer?.cancel();
-        }
-      }
+    // 视频生成中
+    if (state == 1 && mounted) {
+      debugPrint('on progress task finished: $business_id');
+      await _onRefresh();
+      // 停止定时器
+      _progressTimer?.cancel();
     }
   }
 
   Future<void> _onRefresh() async {
+    if (_isRefreshing) return;
+
     try {
+      _isRefreshing = true;
       final (success, message) = await _videoService.getUserTasks();
       if (!success) {
         debugPrint('任务刷新失败: $message');
@@ -119,6 +118,10 @@ class _MinePageState extends State<MinePage> {
       }
     } catch (e) {
       debugPrint('任务刷新失败: $e');
+    } finally {
+      if (mounted) {
+        _isRefreshing = false;
+      }
     }
   }
 
@@ -238,44 +241,30 @@ class _MinePageState extends State<MinePage> {
   Future<void> _initializeVideoController(VideoTask task) async {
     if (task.state != 1 || task.videoUrl == null) return;
 
-    if (_videoControllers.containsKey(task.businessId)) return;
+    // 如果已经在初始化中或已经初始化完成，直接返回
+    if (_videoInitializing[task.businessId] == true ||
+        _videoControllers.containsKey(task.businessId)) return;
 
     try {
-      // 先检查本地缓存
-      String? cachedVideoPath =
-          await _imageCacheService.getCachedImagePath(task.videoUrl!);
+      _videoInitializing[task.businessId] = true;
 
-      VideoPlayerController controller;
-      if (cachedVideoPath != null) {
-        // 使用本地缓存的视频
-        controller = VideoPlayerController.file(File(cachedVideoPath));
-      } else {
-        // 下载并缓存视频
-        cachedVideoPath =
-            await _imageCacheService.downloadAndCacheImage(task.videoUrl!);
-        if (cachedVideoPath != null) {
-          controller = VideoPlayerController.file(File(cachedVideoPath));
-        } else {
-          // 如果缓存失败，使用网络视频
-          controller = VideoPlayerController.networkUrl(
-            Uri.parse(task.videoUrl!),
-            videoPlayerOptions: VideoPlayerOptions(
-              mixWithOthers: true,
-              allowBackgroundPlayback: false,
-            ),
-          );
-        }
+      // 先检查本地缓存
+      String? localPath = await _videoService.getLocalVideoPath(
+        task.businessId,
+      );
+
+      // 如果没有本地缓存，直接返回，不初始化视频控制器
+      if (localPath == null) {
+        return;
       }
 
-      // 添加错误监听
-      controller.addListener(() {
-        if (controller.value.hasError) {
-          debugPrint('视频播放错误: ${controller.value.errorDescription}');
-          // 如果视频播放出错，释放控制器
-          controller.dispose();
-          _videoControllers.remove(task.businessId);
-        }
-      });
+      VideoPlayerController controller =
+          VideoPlayerController.file(File(localPath));
+
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
 
       await controller.initialize().timeout(
         const Duration(seconds: 5),
@@ -285,46 +274,58 @@ class _MinePageState extends State<MinePage> {
         },
       );
 
-      if (mounted) {
-        controller.setLooping(true);
-        controller.setVolume(0.0);
-        controller.play();
-        setState(() {
-          _videoControllers[task.businessId] = controller;
-        });
+      if (!mounted) {
+        controller.dispose();
+        return;
       }
+
+      controller.setLooping(true);
+      controller.setVolume(0.0);
+      controller.play();
+
+      setState(() {
+        _videoControllers[task.businessId] = controller;
+      });
     } catch (e) {
       debugPrint('视频初始化失败: $e');
-      // 如果初始化失败，尝试使用备用视频格式
-      try {
-        final controller = VideoPlayerController.networkUrl(
-          Uri.parse(task.videoUrl!),
-          videoPlayerOptions: VideoPlayerOptions(
-            mixWithOthers: true,
-            allowBackgroundPlayback: false,
-          ),
-        );
-
-        await controller.initialize().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            debugPrint('备用视频初始化超时: ${task.videoUrl}');
-            throw TimeoutException('备用视频初始化超时');
-          },
-        );
-
-        if (mounted) {
-          controller.setLooping(true);
-          controller.setVolume(0.0);
-          controller.play();
-          setState(() {
-            _videoControllers[task.businessId] = controller;
-          });
-        }
-      } catch (e) {
-        debugPrint('备用视频初始化也失败: $e');
+      if (_videoControllers.containsKey(task.businessId)) {
+        _videoControllers[task.businessId]?.dispose();
+        _videoControllers.remove(task.businessId);
       }
+    } finally {
+      _videoInitializing[task.businessId] = false;
     }
+  }
+
+  Future<String?> _loadImage(String imagePath) async {
+    // 如果已经在加载中，返回现有的 Future
+    if (_imageLoadingFutures.containsKey(imagePath)) {
+      return _imageLoadingFutures[imagePath];
+    }
+
+    // 创建新的加载任务
+    final future = _loadImageInternal(imagePath);
+    _imageLoadingFutures[imagePath] = future;
+
+    try {
+      final result = await future;
+      return result;
+    } finally {
+      // 加载完成后移除 Future
+      _imageLoadingFutures.remove(imagePath);
+    }
+  }
+
+  Future<String?> _loadImageInternal(String imagePath) async {
+    // 1. 先检查本地缓存
+    String? cachedPath = await _imageCacheService.getCachedImagePath(imagePath);
+
+    // 2. 如果本地没有缓存，则下载并缓存
+    if (cachedPath == null) {
+      cachedPath = await _imageCacheService.downloadAndCacheImage(imagePath);
+    }
+
+    return cachedPath;
   }
 
   Widget _buildMediaContent(VideoTask task) {
@@ -382,35 +383,30 @@ class _MinePageState extends State<MinePage> {
           ),
         );
       } else {
-        // 视频未加载完成，显示图片
+        // 视频未加载完成或未下载到本地，显示图片
         _initializeVideoController(task);
-        return FutureBuilder<String?>(
-          future: _loadImage(task.originImg!),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return placeholder;
-            }
-
-            if (snapshot.hasError || !snapshot.hasData) {
-              return _buildErrorWidget();
-            }
-
-            return Image.file(
-              File(snapshot.data!),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
-            );
-          },
-        );
+        return _buildImageWidget(task.originImg!);
       }
     }
 
     // 显示图片
+    return _buildImageWidget(task.originImg!);
+  }
+
+  Widget _buildImageWidget(String imagePath) {
     return FutureBuilder<String?>(
-      future: _loadImage(task.originImg!),
+      future: _loadImage(imagePath),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return placeholder;
+          return Container(
+            color: Colors.grey[900],
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+                strokeWidth: 2,
+              ),
+            ),
+          );
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -424,18 +420,6 @@ class _MinePageState extends State<MinePage> {
         );
       },
     );
-  }
-
-  Future<String?> _loadImage(String imagePath) async {
-    // 1. 先检查本地缓存
-    String? cachedPath = await _imageCacheService.getCachedImagePath(imagePath);
-
-    // 2. 如果本地没有缓存，则下载并缓存
-    if (cachedPath == null) {
-      cachedPath = await _imageCacheService.downloadAndCacheImage(imagePath);
-    }
-
-    return cachedPath;
   }
 
   Widget _buildTaskCard(VideoTask task) {
