@@ -105,8 +105,8 @@ class _SettingPageState extends State<SettingPage> {
                         builder: (context, userService, child) {
                           return Text(
                             userService.isSubscribed
-                                ? 'MagaVideo Pro Member'
-                                : 'Get MagaVideo Pro',
+                                ? 'VideoMaga Pro Member'
+                                : 'Get VideoMaga Pro',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -175,7 +175,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
               _buildMenuItem(
                 icon: Icons.share,
-                title: 'Share VideoMax',
+                title: 'Share VideoMaga',
                 onTap: () {},
               ),
               _buildMenuItem(

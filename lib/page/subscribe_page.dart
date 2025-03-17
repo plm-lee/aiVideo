@@ -199,7 +199,7 @@ class _SubscribePageState extends State<SubscribePage> {
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Get MagaVideo Pro',
+            'Get VideoMaga Pro',
             style: TextStyle(
               color: Colors.white,
               fontSize: 25,

@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'MagaVideo',
+                          'VideoMaga',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,

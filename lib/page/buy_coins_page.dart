@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import 'package:ai_video/service/apple_payment_service.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:ai_video/utils/dialog_utils.dart';
+import 'package:go_router/go_router.dart';
 
 class BuyCoinsPage extends StatefulWidget {
   const BuyCoinsPage({super.key});
@@ -112,7 +113,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
             ),
             child: GestureDetector(
               onTap: () {
-                // TODO: 显示金币详情
+                context.push("/coin-logs");
               },
               child: Row(
                 children: const [

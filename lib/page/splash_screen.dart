@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // MagaVideo 文字
+                    // VideoMaga 文字
                     FadeTransition(
                       opacity: _textFadeAnimation,
                       child: ShaderMask(
@@ -170,7 +170,7 @@ class _SplashScreenState extends State<SplashScreen>
                           end: Alignment.centerRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'MagaVideo',
+                          'VideoMaga',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,

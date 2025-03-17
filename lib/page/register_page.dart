@@ -338,7 +338,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'MagaVideo',
+                        'VideoMaga',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
