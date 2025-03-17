@@ -87,8 +87,8 @@ class _VideoProcessingPageState extends State<VideoProcessingPage>
       }
     }
 
-    final ok = await videoService.getTaskDetail(business_id);
-    if (ok) {
+    final state = await videoService.getTaskDetail(business_id);
+    if (state == 1) {
       // 进度条走完
       _controller.value = 1.0;
       await videoService.getUserTasks();

@@ -213,24 +213,21 @@ class VideoService extends ChangeNotifier {
   }
 
   // 查询任务进度
-  Future<bool> getTaskDetail(String businessId) async {
+  Future<int> getTaskDetail(String businessId) async {
     final (success, message, user) = await _authService.getCurrentUser();
     if (!success || user == null) {
-      return false;
+      return 0;
     }
     final response = await _videoApi.getTaskDetail(
       uuid: user.uuid,
       business_id: businessId,
     );
     if (response['response']['success'] != '1') {
-      return false;
+      return 0;
     }
 
     debugPrint('getTaskDetail: ${response}');
 
-    if (response['video_task']['state'] == 1) {
-      return true;
-    }
-    return false;
+    return response['video_task']['state'];
   }
 }

@@ -12,6 +12,7 @@ import 'package:ai_video/widgets/coin_display.dart';
 import 'package:ai_video/service/image_cache_service.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:async';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -26,11 +27,27 @@ class _MinePageState extends State<MinePage> {
   final _imageCacheService = ImageCacheService();
   bool _isLoading = true;
   List<VideoTask> _tasks = [];
+  Timer? _progressTimer;
+  String business_id = '';
 
   @override
   void initState() {
     super.initState();
     _loadLocalTasks();
+
+    // 每10秒查询一次任务进度
+    _progressTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _queryTaskProgress();
+    });
+  }
+
+  @override
+  void dispose() {
+    // 取消定时器
+    if (_progressTimer != null) {
+      _progressTimer?.cancel();
+    }
+    super.dispose();
   }
 
   Future<void> _loadLocalTasks() async {
@@ -40,12 +57,44 @@ class _MinePageState extends State<MinePage> {
         setState(() {
           _tasks = tasks;
           _isLoading = false;
+          business_id = tasks.first.businessId;
         });
       }
     } catch (e) {
       debugPrint('加载本地任务失败: $e');
       if (mounted) {
         setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // 查询任务进度
+  Future<void> _queryTaskProgress() async {
+    final videoService = VideoService();
+    // 如果business_id为空，则获取当前任务
+    if (business_id.isEmpty) {
+      // 最新一条任务ID
+      final task = await videoService.getLatestTask();
+      if (task != null) {
+        business_id = task.businessId;
+        debugPrint('on progress task: $business_id');
+      }
+    }
+
+    final state = await videoService.getTaskDetail(business_id);
+    if (state == 1) {
+      // mounted 表示当前 State 对象是否在 widget 树中
+      // 在调用 setState 之前检查 mounted 可以避免在 widget 被销毁后更新状态导致的错误
+      if (mounted) {
+        debugPrint('on progress task finished: $business_id');
+
+        await videoService.getUserTasks();
+        await _loadLocalTasks();
+
+        // 取消定时器
+        if (_progressTimer != null) {
+          _progressTimer?.cancel();
+        }
       }
     }
   }
@@ -64,6 +113,11 @@ class _MinePageState extends State<MinePage> {
     } catch (e) {
       debugPrint('任务刷新失败: $e');
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   Widget _buildContent() {
