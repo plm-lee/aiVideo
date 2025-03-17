@@ -181,11 +181,60 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.logout,
                 title: 'Logout',
-                onTap: () async {
-                  await AuthService().logout();
-                  if (mounted) {
-                    context.go('/login');
-                  }
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: const Color(0xFF1E1E1E),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: const Text(
+                        'Confirm Logout',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: const Text(
+                        'Are you sure you want to logout?',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            await AuthService().logout();
+                            if (mounted) {
+                              context.go('/login');
+                            }
+                          },
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(
+                              color: Color(0xFFFF6B6B),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ]),
