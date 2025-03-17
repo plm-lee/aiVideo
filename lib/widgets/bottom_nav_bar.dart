@@ -48,17 +48,20 @@ class BottomNavBar extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
+        width: 120,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: const Color(0xFF2E2E2E),
-                borderRadius: BorderRadius.circular(20),
-              )
-            : null,
+        // decoration: isSelected
+        //     ? BoxDecoration(
+        //         color: const Color(0xFF2E2E2E),
+        //         borderRadius: BorderRadius.circular(20),
+        //       )
+        //     : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
