@@ -13,6 +13,7 @@ import 'package:ai_video/service/image_cache_service.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:async';
+import 'package:video_player/video_player.dart';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
@@ -29,6 +30,7 @@ class _MinePageState extends State<MinePage> {
   List<VideoTask> _tasks = [];
   Timer? _progressTimer;
   String business_id = '';
+  Map<String, VideoPlayerController> _videoControllers = {};
 
   @override
   void initState() {
@@ -47,6 +49,11 @@ class _MinePageState extends State<MinePage> {
     if (_progressTimer != null) {
       _progressTimer?.cancel();
     }
+    // 释放所有视频控制器
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
+    _videoControllers.clear();
     super.dispose();
   }
 
@@ -228,27 +235,182 @@ class _MinePageState extends State<MinePage> {
     );
   }
 
-  Widget _buildMediaContent(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) {
-      return _buildErrorWidget();
-    }
+  Future<void> _initializeVideoController(VideoTask task) async {
+    if (task.state != 1 || task.videoUrl == null) return;
 
-    return FutureBuilder<String?>(
-      future: _loadImage(imagePath),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  const Color(0xFFD7905F).withOpacity(0.8),
-                ),
-                strokeWidth: 2,
-              ),
+    if (_videoControllers.containsKey(task.businessId)) return;
+
+    try {
+      // 先检查本地缓存
+      String? cachedVideoPath =
+          await _imageCacheService.getCachedImagePath(task.videoUrl!);
+
+      VideoPlayerController controller;
+      if (cachedVideoPath != null) {
+        // 使用本地缓存的视频
+        controller = VideoPlayerController.file(File(cachedVideoPath));
+      } else {
+        // 下载并缓存视频
+        cachedVideoPath =
+            await _imageCacheService.downloadAndCacheImage(task.videoUrl!);
+        if (cachedVideoPath != null) {
+          controller = VideoPlayerController.file(File(cachedVideoPath));
+        } else {
+          // 如果缓存失败，使用网络视频
+          controller = VideoPlayerController.networkUrl(
+            Uri.parse(task.videoUrl!),
+            videoPlayerOptions: VideoPlayerOptions(
+              mixWithOthers: true,
+              allowBackgroundPlayback: false,
             ),
           );
+        }
+      }
+
+      // 添加错误监听
+      controller.addListener(() {
+        if (controller.value.hasError) {
+          debugPrint('视频播放错误: ${controller.value.errorDescription}');
+          // 如果视频播放出错，释放控制器
+          controller.dispose();
+          _videoControllers.remove(task.businessId);
+        }
+      });
+
+      await controller.initialize().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('视频初始化超时: ${task.videoUrl}');
+          throw TimeoutException('视频初始化超时');
+        },
+      );
+
+      if (mounted) {
+        controller.setLooping(true);
+        controller.setVolume(0.0);
+        controller.play();
+        setState(() {
+          _videoControllers[task.businessId] = controller;
+        });
+      }
+    } catch (e) {
+      debugPrint('视频初始化失败: $e');
+      // 如果初始化失败，尝试使用备用视频格式
+      try {
+        final controller = VideoPlayerController.networkUrl(
+          Uri.parse(task.videoUrl!),
+          videoPlayerOptions: VideoPlayerOptions(
+            mixWithOthers: true,
+            allowBackgroundPlayback: false,
+          ),
+        );
+
+        await controller.initialize().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            debugPrint('备用视频初始化超时: ${task.videoUrl}');
+            throw TimeoutException('备用视频初始化超时');
+          },
+        );
+
+        if (mounted) {
+          controller.setLooping(true);
+          controller.setVolume(0.0);
+          controller.play();
+          setState(() {
+            _videoControllers[task.businessId] = controller;
+          });
+        }
+      } catch (e) {
+        debugPrint('备用视频初始化也失败: $e');
+      }
+    }
+  }
+
+  Widget _buildMediaContent(VideoTask task) {
+    final bool isImageTask =
+        task.originImg != null && task.originImg!.isNotEmpty;
+    final bool isCompleted = task.state == 1;
+    final bool hasVideo = task.videoUrl != null;
+
+    if (!isImageTask) {
+      return Container(
+        width: 100,
+        height: 140,
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+          ),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1E1E1E), Color(0xFF2A2A2A)],
+          ),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.text_fields,
+            color: Colors.white38,
+            size: 32,
+          ),
+        ),
+      );
+    }
+
+    // 默认灰色背景
+    Widget placeholder = Container(
+      color: Colors.grey[900],
+      child: const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+          strokeWidth: 2,
+        ),
+      ),
+    );
+
+    if (isCompleted && hasVideo) {
+      final controller = _videoControllers[task.businessId];
+      if (controller?.value.isInitialized ?? false) {
+        return FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: controller!.value.size.width,
+            height: controller.value.size.height,
+            child: VideoPlayer(controller),
+          ),
+        );
+      } else {
+        // 视频未加载完成，显示图片
+        _initializeVideoController(task);
+        return FutureBuilder<String?>(
+          future: _loadImage(task.originImg!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return placeholder;
+            }
+
+            if (snapshot.hasError || !snapshot.hasData) {
+              return _buildErrorWidget();
+            }
+
+            return Image.file(
+              File(snapshot.data!),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+            );
+          },
+        );
+      }
+    }
+
+    // 显示图片
+    return FutureBuilder<String?>(
+      future: _loadImage(task.originImg!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return placeholder;
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -321,7 +483,7 @@ class _MinePageState extends State<MinePage> {
                         bottomLeft: Radius.circular(16),
                       ),
                     ),
-                    child: _buildMediaContent(task.originImg),
+                    child: _buildMediaContent(task),
                   ),
                 )
               else
