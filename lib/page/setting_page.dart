@@ -299,7 +299,7 @@ class _SettingPageState extends State<SettingPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: const Text(
-                '权限已开启',
+                'Permission Granted',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -307,7 +307,7 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ),
               content: const Text(
-                '相册权限已开启，您可以正常使用相关功能',
+                'Photo library access has been granted. You can now use related features.',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
@@ -317,7 +317,7 @@ class _SettingPageState extends State<SettingPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
-                    '确定',
+                    'OK',
                     style: TextStyle(
                       color: Color(0xFFD7905F),
                       fontSize: 16,
@@ -344,7 +344,7 @@ class _SettingPageState extends State<SettingPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: const Text(
-                '权限已开启',
+                'Permission Granted',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -352,7 +352,7 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ),
               content: const Text(
-                '相册权限已开启，您可以正常使用相关功能',
+                'Photo library access has been granted. You can now use related features.',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
@@ -362,7 +362,7 @@ class _SettingPageState extends State<SettingPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
-                    '确定',
+                    'OK',
                     style: TextStyle(
                       color: Color(0xFFD7905F),
                       fontSize: 16,
@@ -383,7 +383,7 @@ class _SettingPageState extends State<SettingPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: const Text(
-                '权限未开启',
+                'Permission Denied',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -391,7 +391,7 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ),
               content: const Text(
-                '请在系统设置中开启相册权限，以便使用相关功能',
+                'Please enable photo library access in system settings to use related features.',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
@@ -401,7 +401,7 @@ class _SettingPageState extends State<SettingPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
-                    '取消',
+                    'Cancel',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 16,
@@ -414,7 +414,7 @@ class _SettingPageState extends State<SettingPage> {
                     await openAppSettings();
                   },
                   child: const Text(
-                    '去设置',
+                    'Settings',
                     style: TextStyle(
                       color: Color(0xFFD7905F),
                       fontSize: 16,
@@ -438,7 +438,7 @@ class _SettingPageState extends State<SettingPage> {
               borderRadius: BorderRadius.circular(16),
             ),
             title: const Text(
-              '权限检查失败',
+              'Permission Check Failed',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -446,7 +446,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
             ),
             content: const Text(
-              '权限检查过程中出现错误，请稍后重试',
+              'An error occurred while checking permissions. Please try again later.',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
@@ -456,7 +456,7 @@ class _SettingPageState extends State<SettingPage> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text(
-                  '确定',
+                  'OK',
                   style: TextStyle(
                     color: Color(0xFFD7905F),
                     fontSize: 16,
