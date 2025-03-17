@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:ai_video/service/user_service.dart';
 
 class CoinDisplay extends StatelessWidget {
   final int coins;
@@ -22,31 +25,41 @@ class CoinDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.monetization_on,
-          color: Colors.amber,
-          size: iconSize,
-        ),
-        const SizedBox(width: 4),
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: _coinGradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: Text(
-            showCoinsText ? '$coins Coins' : coins.toString(),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () {
+        final userService = context.read<UserService>();
+        if (userService.isSubscribed) {
+          context.push('/buy-coins');
+        } else {
+          context.push('/subscribe');
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.monetization_on,
+            color: Colors.amber,
+            size: iconSize,
+          ),
+          const SizedBox(width: 4),
+          ShaderMask(
+            shaderCallback: (bounds) => LinearGradient(
+              colors: _coinGradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(bounds),
+            child: Text(
+              showCoinsText ? '$coins Coins' : coins.toString(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

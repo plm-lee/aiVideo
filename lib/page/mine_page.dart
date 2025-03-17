@@ -433,20 +433,10 @@ class _MinePageState extends State<MinePage> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 1),
-            child: GestureDetector(
-              onTap: () {
-                final userService = context.read<UserService>();
-                if (userService.isSubscribed) {
-                  context.push('/buy-coins');
-                } else {
-                  context.push('/subscribe');
-                }
+            child: Consumer<UserService>(
+              builder: (context, userService, child) {
+                return CoinDisplay(coins: userService.credits);
               },
-              child: Consumer<UserService>(
-                builder: (context, userService, child) {
-                  return CoinDisplay(coins: userService.credits);
-                },
-              ),
             ),
           ),
         ],
