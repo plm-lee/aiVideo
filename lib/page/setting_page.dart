@@ -8,6 +8,7 @@ import 'package:ai_video/service/auth_service.dart';
 import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/service/user_service.dart';
 import 'package:ai_video/widgets/coin_display.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -144,7 +145,7 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.photo_library,
                 title: 'Photo Permissions',
-                onTap: () {},
+                onTap: _checkPhotoPermission,
               ),
               _buildMenuItem(
                 icon: Icons.notifications,
@@ -162,16 +163,6 @@ class _SettingPageState extends State<SettingPage> {
                 onTap: () {
                   context.push('/coin-logs');
                 },
-              ),
-              _buildMenuItem(
-                icon: Icons.restore,
-                title: 'Restore Purchase',
-                onTap: () {},
-              ),
-              _buildMenuItem(
-                icon: Icons.star_border,
-                title: 'Rate Us',
-                onTap: () {},
               ),
               _buildMenuItem(
                 icon: Icons.share,
@@ -285,5 +276,198 @@ class _SettingPageState extends State<SettingPage> {
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
+  }
+
+  Future<void> _checkPhotoPermission() async {
+    try {
+      // 检查相册权限
+      final status = await Permission.photos.status;
+      debugPrint('当前相册权限状态: $status');
+
+      // 检查是否真的可以访问相册
+      final canAccess = await Permission.photos.isGranted;
+      debugPrint('是否可以访问相册: $canAccess');
+
+      if (canAccess) {
+        // 已授权，显示提示
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                '权限已开启',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: const Text(
+                '相册权限已开启，您可以正常使用相关功能',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    '确定',
+                    style: TextStyle(
+                      color: Color(0xFFD7905F),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // 未授权，请求权限
+        final result = await Permission.photos.request();
+        debugPrint('请求权限结果: $result');
+
+        if (result.isGranted && mounted) {
+          // 用户授予了权限
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                '权限已开启',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: const Text(
+                '相册权限已开启，您可以正常使用相关功能',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    '确定',
+                    style: TextStyle(
+                      color: Color(0xFFD7905F),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else if (mounted) {
+          // 用户拒绝了权限
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                '权限未开启',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: const Text(
+                '请在系统设置中开启相册权限，以便使用相关功能',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    '取消',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await openAppSettings();
+                  },
+                  child: const Text(
+                    '去设置',
+                    style: TextStyle(
+                      color: Color(0xFFD7905F),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('权限检查出错: $e');
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              '权限检查失败',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              '权限检查过程中出现错误，请稍后重试',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  '确定',
+                  style: TextStyle(
+                    color: Color(0xFFD7905F),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 }
