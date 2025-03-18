@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img; // 添加image包用于图片处理
 import 'package:ai_video/service/video_service.dart';
+import 'package:ai_video/service/user_service.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
+import 'package:ai_video/utils/coin_check_utils.dart';
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
@@ -203,6 +206,16 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   }
 
   Future<void> _generateVideo() async {
+    const requiredCoins = 150;
+
+    // 检查金币余额
+    final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(
+      context,
+      requiredCoins: requiredCoins,
+    );
+
+    if (!hasEnoughCoins) return;
+
     setState(() => _isLoading = true);
 
     try {

@@ -8,7 +8,9 @@ import 'package:ai_video/providers/theme_provider.dart';
 import 'package:ai_video/models/generated_video.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/service/video_service.dart';
+import 'package:ai_video/service/user_service.dart';
 import 'package:ai_video/utils/dialog_utils.dart';
+import 'package:ai_video/utils/coin_check_utils.dart';
 import 'package:go_router/go_router.dart';
 
 class ImgToVideoPage extends StatefulWidget {
@@ -327,6 +329,16 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Future<void> _generateVideo() async {
+    final requiredCoins = _selectedLength == 10 ? 300 : 150;
+
+    // 检查金币余额
+    final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(
+      context,
+      requiredCoins: requiredCoins,
+    );
+
+    if (!hasEnoughCoins) return;
+
     setState(() => _isLoading = true);
 
     try {
