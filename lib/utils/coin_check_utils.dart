@@ -19,7 +19,7 @@ class CoinCheckUtils {
 
     if (currentCoins < requiredCoins) {
       // 显示提示对话框
-      final result = await showDialog<bool>(
+      await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: const Color(0xFF1E1E1E),
@@ -43,7 +43,7 @@ class CoinCheckUtils {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(context),
               child: const Text(
                 'Cancel',
                 style: TextStyle(
@@ -54,7 +54,7 @@ class CoinCheckUtils {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context, true);
+                Navigator.pop(context);
                 context.push('/buy-coins');
               },
               child: const Text(
@@ -69,8 +69,8 @@ class CoinCheckUtils {
           ],
         ),
       );
-      return result ?? false;
+      return false; // 无论用户选择取消还是购买金币，都返回 false
     }
-    return true;
+    return true; // 只有当金币足够时才返回 true
   }
 }
