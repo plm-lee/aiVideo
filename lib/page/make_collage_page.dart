@@ -146,7 +146,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
         if (rightImg == null) return null;
 
         // 计算目标尺寸 (9:16 比例)
-        const targetAspectRatio = 9 / 16;
+        const targetAspectRatio = 3 / 4;
         final targetWidth = 720; // 设置合适的宽度
         final targetHeight = (targetWidth / targetAspectRatio).round();
 
