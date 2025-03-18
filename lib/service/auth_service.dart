@@ -41,10 +41,7 @@ class AuthService extends ChangeNotifier {
   Future<void> logout() async {
     try {
       if (_currentUser?.id != null) {
-        await _databaseService.clearUserData(_currentUser!.id!);
-        await _databaseService.clearUserConfigs();
-        // 删除保存db的视频
-        await _databaseService.deleteAllSavedVideos();
+        await _databaseService.clearDatabase();
       }
       _currentUser = null;
       notifyListeners();

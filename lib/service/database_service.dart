@@ -416,4 +416,14 @@ class DatabaseService {
     );
     return List.generate(maps.length, (i) => VideoTask.fromMap(maps[i]));
   }
+
+  // 清空数据库
+  Future<void> clearDatabase() async {
+    final db = await database;
+    await db.delete('generated_videos');
+    await db.delete('video_tasks');
+    await db.delete('users');
+    await db.delete('user_configs');
+    await db.delete('purchase_records');
+  }
 }
