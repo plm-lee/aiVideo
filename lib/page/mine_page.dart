@@ -243,7 +243,9 @@ class _MinePageState extends State<MinePage> {
 
     // 如果已经在初始化中或已经初始化完成，直接返回
     if (_videoInitializing[task.businessId] == true ||
-        _videoControllers.containsKey(task.businessId)) return;
+        _videoControllers.containsKey(task.businessId)) {
+      return;
+    }
 
     try {
       _videoInitializing[task.businessId] = true;
@@ -255,6 +257,7 @@ class _MinePageState extends State<MinePage> {
 
       // 如果没有本地缓存，直接返回，不初始化视频控制器
       if (localPath == null) {
+        debugPrint('未找到本地视频缓存: ${task.prompt}');
         return;
       }
 
@@ -286,6 +289,7 @@ class _MinePageState extends State<MinePage> {
       setState(() {
         _videoControllers[task.businessId] = controller;
       });
+      debugPrint('视频控制器初始化成功: ${task.businessId}');
     } catch (e) {
       debugPrint('视频初始化失败: $e');
       if (_videoControllers.containsKey(task.businessId)) {
@@ -334,42 +338,7 @@ class _MinePageState extends State<MinePage> {
     final bool isCompleted = task.state == 1;
     final bool hasVideo = task.videoUrl != null;
 
-    if (!isImageTask) {
-      return Container(
-        width: 100,
-        height: 140,
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
-          ),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1E1E1E), Color(0xFF2A2A2A)],
-          ),
-        ),
-        child: const Center(
-          child: Icon(
-            Icons.text_fields,
-            color: Colors.white38,
-            size: 32,
-          ),
-        ),
-      );
-    }
-
-    // 默认灰色背景
-    Widget placeholder = Container(
-      color: Colors.grey[900],
-      child: const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
-          strokeWidth: 2,
-        ),
-      ),
-    );
+    debugPrint('buildMediaContent: ${task.prompt}');
 
     if (isCompleted && hasVideo) {
       final controller = _videoControllers[task.businessId];
@@ -383,14 +352,40 @@ class _MinePageState extends State<MinePage> {
           ),
         );
       } else {
-        // 视频未加载完成或未下载到本地，显示图片
+        // 视频未加载完成或未下载到本地，显示图片或文本图标
         _initializeVideoController(task);
-        return _buildImageWidget(task.originImg!);
+        if (isImageTask) {
+          return _buildImageWidget(task.originImg!);
+        } else {
+          return Container(
+            color: Colors.grey[900],
+            child: const Center(
+              child: Icon(
+                Icons.text_fields,
+                color: Colors.white38,
+                size: 32,
+              ),
+            ),
+          );
+        }
       }
     }
 
-    // 显示图片
-    return _buildImageWidget(task.originImg!);
+    // 未完成或没有视频时，显示图片或文本图标
+    if (isImageTask) {
+      return _buildImageWidget(task.originImg!);
+    } else {
+      return Container(
+        color: Colors.grey[900],
+        child: const Center(
+          child: Icon(
+            Icons.text_fields,
+            color: Colors.white38,
+            size: 32,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildImageWidget(String imagePath) {
@@ -423,9 +418,6 @@ class _MinePageState extends State<MinePage> {
   }
 
   Widget _buildTaskCard(VideoTask task) {
-    final bool isImageTask =
-        task.originImg != null && task.originImg!.isNotEmpty;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -451,27 +443,12 @@ class _MinePageState extends State<MinePage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isImageTask)
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
-                  ),
-                  child: Container(
-                    width: 100,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        bottomLeft: Radius.circular(16),
-                      ),
-                    ),
-                    child: _buildMediaContent(task),
-                  ),
-                )
-              else
-                Container(
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
+                ),
+                child: Container(
                   width: 100,
                   height: 140,
                   decoration: BoxDecoration(
@@ -480,20 +457,10 @@ class _MinePageState extends State<MinePage> {
                       topLeft: Radius.circular(16),
                       bottomLeft: Radius.circular(16),
                     ),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF1E1E1E), Color(0xFF2A2A2A)],
-                    ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.text_fields,
-                      color: Colors.white38,
-                      size: 32,
-                    ),
-                  ),
+                  child: _buildMediaContent(task),
                 ),
+              ),
               Expanded(
                 child: Container(
                   height: 140,
@@ -517,13 +484,17 @@ class _MinePageState extends State<MinePage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isImageTask ? Icons.image : Icons.text_fields,
+                                  task.originImg != null &&
+                                          task.originImg!.isNotEmpty
+                                      ? Icons.image
+                                      : Icons.text_fields,
                                   color: Colors.white,
                                   size: 12,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  isImageTask
+                                  task.originImg != null &&
+                                          task.originImg!.isNotEmpty
                                       ? 'Image to Video'
                                       : 'Text to Video',
                                   style: const TextStyle(
