@@ -136,7 +136,21 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.card_giftcard,
                 title: 'Get Coins for Free',
-                onTap: () {},
+                onTap: () => context.push('/refer-friends'),
+              ),
+              _buildMenuItem(
+                icon: Icons.share,
+                title: 'Share VideoMaga',
+                onTap: () {
+                  final message =
+                      'Check out VideoMaga - Create amazing AI videos with ease! '
+                      'Download now: https://chat.bigchallenger.com/';
+
+                  Share.share(
+                    message,
+                    subject: 'Share VideoMaga',
+                  );
+                },
               ),
             ]),
 
@@ -148,20 +162,6 @@ class _SettingPageState extends State<SettingPage> {
                 title: 'Coins Details',
                 onTap: () {
                   context.push('/coin-logs');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.share,
-                title: 'Share VideoMaga',
-                onTap: () {
-                  final message =
-                      'Check out VideoMaga - Create amazing AI videos with ease! '
-                      'Download now: https://videomaga.app';
-
-                  Share.share(
-                    message,
-                    subject: 'Share VideoMaga',
-                  );
                 },
               ),
               _buildMenuItem(

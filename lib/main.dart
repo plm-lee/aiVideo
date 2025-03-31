@@ -25,6 +25,7 @@ import 'package:ai_video/page/splash_screen.dart';
 import 'package:ai_video/page/video_processing_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
+import 'package:ai_video/page/refer_friends_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -163,6 +164,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/processing',
       builder: (context, state) => const VideoProcessingPage(),
+    ),
+    GoRoute(
+      path: '/refer-friends',
+      builder: (context, state) => const ReferFriendsPage(),
     ),
   ],
 );
