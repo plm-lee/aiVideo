@@ -9,6 +9,7 @@ import 'package:ai_video/service/locale_service.dart';
 import 'package:ai_video/service/user_service.dart';
 import 'package:ai_video/widgets/coin_display.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -139,21 +140,6 @@ class _SettingPageState extends State<SettingPage> {
               ),
             ]),
 
-            // 权限部分
-            _buildSection('Permissions'),
-            _buildSectionContainer([
-              _buildMenuItem(
-                icon: Icons.photo_library,
-                title: 'Photo Permissions',
-                onTap: _checkPhotoPermission,
-              ),
-              _buildMenuItem(
-                icon: Icons.notifications,
-                title: 'Notification Permissions',
-                onTap: () {},
-              ),
-            ]),
-
             // 帮助部分
             _buildSection('Help'),
             _buildSectionContainer([
@@ -167,7 +153,16 @@ class _SettingPageState extends State<SettingPage> {
               _buildMenuItem(
                 icon: Icons.share,
                 title: 'Share VideoMaga',
-                onTap: () {},
+                onTap: () {
+                  final message =
+                      'Check out VideoMaga - Create amazing AI videos with ease! '
+                      'Download now: https://videomaga.app';
+
+                  Share.share(
+                    message,
+                    subject: 'Share VideoMaga',
+                  );
+                },
               ),
               _buildMenuItem(
                 icon: Icons.logout,
@@ -276,198 +271,5 @@ class _SettingPageState extends State<SettingPage> {
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
-  }
-
-  Future<void> _checkPhotoPermission() async {
-    try {
-      // 检查相册权限
-      final status = await Permission.photos.status;
-      debugPrint('当前相册权限状态: $status');
-
-      // 检查是否真的可以访问相册
-      final canAccess = await Permission.photos.isGranted;
-      debugPrint('是否可以访问相册: $canAccess');
-
-      if (canAccess) {
-        // 已授权，显示提示
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text(
-                'Permission Granted',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: const Text(
-                'Photo library access has been granted. You can now use related features.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                      color: Color(0xFFD7905F),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-      } else {
-        // 未授权，请求权限
-        final result = await Permission.photos.request();
-        debugPrint('请求权限结果: $result');
-
-        if (result.isGranted && mounted) {
-          // 用户授予了权限
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text(
-                'Permission Granted',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: const Text(
-                'Photo library access has been granted. You can now use related features.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                      color: Color(0xFFD7905F),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else if (mounted) {
-          // 用户拒绝了权限
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text(
-                'Permission Denied',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: const Text(
-                'Please enable photo library access in system settings to use related features.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await openAppSettings();
-                  },
-                  child: const Text(
-                    'Settings',
-                    style: TextStyle(
-                      color: Color(0xFFD7905F),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('权限检查出错: $e');
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text(
-              'Permission Check Failed',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: const Text(
-              'An error occurred while checking permissions. Please try again later.',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'OK',
-                  style: TextStyle(
-                    color: Color(0xFFD7905F),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    }
   }
 }
