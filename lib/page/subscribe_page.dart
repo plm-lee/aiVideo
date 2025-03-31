@@ -60,16 +60,9 @@ class _SubscribePageState extends State<SubscribePage> {
         await _applePaymentService.initialize();
       }
 
-      final _products = _applePaymentService.subscribeProducts;
-      if (_products.isNotEmpty) {
-        _subscribeProduct = _products.first;
-      } else {
-        // 更新订阅产品
-        await _applePaymentService.fetchAllProducts();
-        final _products = _applePaymentService.subscribeProducts;
-        if (_products.isNotEmpty) {
-          _subscribeProduct = _products.first;
-        }
+      final _products = _applePaymentService.subscribeProduct;
+      if (_products.id.isNotEmpty) {
+        _subscribeProduct = _products;
       }
     } catch (e) {
       debugPrint('加载商品失败: $e');

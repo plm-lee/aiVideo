@@ -22,7 +22,17 @@ class ApplePaymentService {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
-  List<ProductDetails> _subscribeProducts = [];
+  ProductDetails _subscribeProduct = ProductDetails(
+    id: 'com.videoMaga.subscription.weekly.pro',
+    title: 'weekly',
+    description: 'com.videoMaga.subscription.weekly.pro',
+    price: '7.99',
+    rawPrice: 799,
+    currencyCode: 'USD',
+    currencySymbol: '\$',
+  );
+  // 订阅产品UUID
+  final _subscribeProductUuid = 'efbd9481';
   List<ProductDetails> _coinsProducts = [];
   Map<String, String> _productUuidMap = {}; // 商品id和uuid的映射
   bool _isInitialized = false;
@@ -94,7 +104,9 @@ class ApplePaymentService {
       await fetchAllProducts();
 
       // 合并两种商品到 _products
-      _products = [..._subscribeProducts, ..._coinsProducts];
+      _products = [..._coinsProducts];
+      _products.add(_subscribeProduct);
+      debugPrint('products: ${_products.length}');
 
       // 查询苹果商店的商品详情
       await _queryStoreProducts();
@@ -141,10 +153,8 @@ class ApplePaymentService {
   void _updateProductsWithStoreInfo(List<ProductDetails> storeProducts) {
     for (var storeProduct in storeProducts) {
       // 更新订阅商品
-      final subIndex =
-          _subscribeProducts.indexWhere((p) => p.id == storeProduct.id);
-      if (subIndex != -1) {
-        _subscribeProducts[subIndex] = storeProduct;
+      if (storeProduct.id == _subscribeProduct.id) {
+        _subscribeProduct = storeProduct;
       }
 
       // 更新金币商品
@@ -156,14 +166,15 @@ class ApplePaymentService {
     }
 
     // 更新合并的商品列表
-    _products = [..._subscribeProducts, ..._coinsProducts];
+    _products = [..._coinsProducts];
+    _products.add(_subscribeProduct);
   }
 
   // 返回所有商品
   List<ProductDetails> get products => _products;
 
   // 返回订阅包
-  List<ProductDetails> get subscribeProducts => _subscribeProducts;
+  ProductDetails get subscribeProduct => _subscribeProduct;
 
   // 返回金币包
   List<ProductDetails> get coinsProducts => _coinsProducts;
@@ -328,23 +339,8 @@ class ApplePaymentService {
         allPackages.map((e) => MapEntry(e.description, e.uuid)),
       );
 
-      // 处理订阅产品
-      _subscribeProducts = allPackages
-          .where((e) => e.isSubscription)
-          .map((e) => ProductDetails(
-                id: e.description,
-                title: e.name,
-                description: e.description,
-                price: (e.price / 100).toStringAsFixed(2),
-                rawPrice: e.price / 100,
-                currencyCode: 'USD',
-                currencySymbol: '\$',
-              ))
-          .toList();
-
       // 处理金币产品
       _coinsProducts = allPackages
-          .where((e) => !e.isSubscription)
           .map((e) => ProductDetails(
                 id: e.description,
                 title: e.name,
@@ -522,18 +518,13 @@ class ApplePaymentService {
     try {
       _setLoading(true);
 
-      if (_subscribeProducts.isEmpty) {
-        throw Exception('没有可用的订阅产品');
-      }
-
-      final product = _subscribeProducts.first;
+      final product = _subscribeProduct;
 
       // 清理未完成的交易
       await cleanupPendingTransactions();
 
       // 获取预支付订单号
-      final orderId =
-          await prepayOrder(productUuid: _productUuidMap[product.id] ?? '');
+      final orderId = await prepayOrder(productUuid: _subscribeProductUuid);
       await _savePrepayOrder(product.id, orderId);
       debugPrint('订阅预支付订单号: productId=${product.id}, orderId=$orderId');
 
