@@ -139,8 +139,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
           if (!_videoControllers.containsKey(videoUrl)) {
             try {
-              debugPrint('开始初始化视频: $videoUrl');
-
               final controller = VideoPlayerController.networkUrl(
                 Uri.parse(videoUrl),
                 videoPlayerOptions: VideoPlayerOptions(
@@ -154,7 +152,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
               // 添加错误监听器
               controller.addListener(() {
                 if (controller.value.hasError) {
-                  debugPrint('视频播放错误: ${controller.value.errorDescription}');
                   if (_videoControllers[videoUrl] == controller) {
                     _videoControllers.remove(videoUrl);
                     controller.dispose();
@@ -166,7 +163,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 await controller.initialize().timeout(
                   const Duration(seconds: 5),
                   onTimeout: () {
-                    debugPrint('视频初始化超时: $videoUrl');
                     throw TimeoutException('视频初始化超时');
                   },
                 );
@@ -180,20 +176,17 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 controller.setLooping(true);
                 controller.setVolume(0.0);
                 controller.play();
-                debugPrint('视频初始化成功并开始播放: $videoUrl');
 
                 if (mounted) {
                   setState(() {});
                 }
               } catch (e, stackTrace) {
-                debugPrint('视频初始化失败: $videoUrl, 错误: $e');
                 debugPrint('错误堆栈: $stackTrace');
 
                 _videoControllers.remove(videoUrl);
                 controller.dispose();
               }
             } catch (e, stackTrace) {
-              debugPrint('创建视频控制器失败: $videoUrl, 错误: $e');
               debugPrint('错误堆栈: $stackTrace');
               _videoControllers.remove(videoUrl);
               continue;
@@ -202,14 +195,12 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
             // 如果控制器已存在但没有播放，重新开始播放
             final controller = _videoControllers[videoUrl]!;
             if (controller.value.isInitialized && !controller.value.isPlaying) {
-              debugPrint('重新播放已初始化的视频: $videoUrl');
               controller.play();
             }
           }
         }
       }
     } catch (e, stackTrace) {
-      debugPrint('初始化视频控制器时出错: $e');
       debugPrint('错误堆栈: $stackTrace');
     } finally {
       _isInitializing = false;
@@ -416,7 +407,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       if (controller?.value.isInitialized ?? false) {
         // 确保视频在显示时播放
         if (!controller!.value.isPlaying) {
-          debugPrint('在媒体内容构建中播放视频: $videoUrl');
           controller.play();
         }
 
@@ -427,11 +417,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       } else {
         // 如果视频控制器未初始化，尝试初始化
         if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
-          debugPrint('视频控制器未初始化，尝试初始化: $videoUrl');
           _initializeVideoControllers();
-        } else if (controller != null && !controller.value.isInitialized) {
-          debugPrint('视频控制器存在但未初始化: $videoUrl');
-        }
+        } else if (controller != null && !controller.value.isInitialized) {}
       }
     }
 
