@@ -189,7 +189,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
               const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
               const SizedBox(width: 8),
               Text(
-                '${_selectedLength == 10 ? 300 : 150} Coins',
+                '${_selectedLength == 10 ? 200 : 100} Coins',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -260,7 +260,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
   }
 
   Future<void> _generateVideo() async {
-    final requiredCoins = _selectedLength == 10 ? 300 : 150;
+    final requiredCoins = _selectedLength == 10 ? 200 : 100;
 
     // 检查金币余额
     final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(

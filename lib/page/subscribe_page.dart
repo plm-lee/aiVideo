@@ -206,7 +206,7 @@ class _SubscribePageState extends State<SubscribePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFeatureItem('1200 Coins Refresh Weekly'),
+              _buildFeatureItem('1000 Coins Refresh Weekly'),
               _buildFeatureItem('Up to 5 tasks in queue'),
               _buildFeatureItem('Pro Quality Videos'),
               _buildFeatureItem('Fast-track Generation'),

@@ -206,7 +206,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   }
 
   Future<void> _generateVideo() async {
-    const requiredCoins = 150;
+    const requiredCoins = 100;
 
     // 检查金币余额
     final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(
@@ -473,7 +473,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
               ),
               SizedBox(width: 4),
               Text(
-                '150 Coins',
+                '100 Coins',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
