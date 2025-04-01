@@ -12,6 +12,7 @@ import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/video_cache.dart';
 import 'package:flutter/rendering.dart';
 import 'package:ai_video/widgets/coin_display.dart';
+import 'package:ai_video/page/video_samples_page.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -280,6 +281,54 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildAllButton(String category, List<VideoSampleItem> items) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VideoSamplesPage(
+                title: category,
+                items: items,
+                preloadedControllers: _videoControllers,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          padding: _buttonPadding,
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+            borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'All',
+                style: TextStyle(
+                  fontSize: _subtitleFontSize,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: isDark
+                    ? AppTheme.darkSecondaryTextColor
+                    : AppTheme.lightSecondaryTextColor,
+                size: _smallIconSize,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCategorySection(VideoSample category) {
     final gradient =
         _gradients[_categories.indexOf(category) % _gradients.length];
@@ -328,7 +377,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 ),
               ),
               const Spacer(),
-              _buildAllButton(category.title),
+              _buildAllButton(category.title, category.items),
             ],
           ),
         ),
@@ -345,43 +394,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildAllButton(String category) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
-        onTap: () => debugPrint('查看全部 $category'),
-        child: Container(
-          padding: _buttonPadding,
-          decoration: BoxDecoration(
-            color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-            borderRadius: BorderRadius.circular(AppTheme.smallBorderRadius),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'All',
-                style: TextStyle(
-                  fontSize: _subtitleFontSize,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: isDark
-                    ? AppTheme.darkSecondaryTextColor
-                    : AppTheme.lightSecondaryTextColor,
-                size: _smallIconSize,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
