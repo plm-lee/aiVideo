@@ -136,7 +136,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
             children: [
               const Spacer(),
               const Text(
-                'Coins 33% OFF',
+                'Coins 20% OFF',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -167,7 +167,11 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
                     .map((product) => _buildCoinOption(
                           coins: product.title,
                           price: product.price,
-                          discount: '33%',
+                          discount: _products.indexOf(product) == 0
+                              ? '20%'
+                              : _products.indexOf(product) == 1
+                                  ? '10%'
+                                  : null,
                           isSelected:
                               selectedPlan == _products.indexOf(product),
                           onTap: () => setState(
