@@ -255,7 +255,7 @@ class _SubscribePageState extends State<SubscribePage> {
           Text(
             _subscribeProduct != null
                 ? '${_subscribeProduct!.price} / week'
-                : '\$8.99 / week',
+                : '\$7.99 / week',
             style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 4),
