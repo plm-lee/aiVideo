@@ -103,6 +103,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       setState(() {
         _categories = cachedCategories;
       });
+
+      debugPrint('loadCategories: ${_categories[0].items[0].id}');
     }
 
     // 检查是否需要更新缓存
@@ -517,6 +519,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     context.push(
       '/theme-detail',
       extra: {
+        'sampleId': item.id,
         'title': item.title,
         'prompt': item.prompt,
         'imagePath': item.image,

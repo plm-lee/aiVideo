@@ -17,15 +17,29 @@ class VideoService extends ChangeNotifier {
 
   // 通过theme创建视频
   Future<(bool, String)> themeToVideo({
-    required String prompt,
+    required int sampleId,
     required File imageFile,
   }) async {
-    // 调用imageToVideo，将拼接的图片和prompt传入
-    return await imageToVideo(
-      imageFile: imageFile,
-      prompt: prompt,
-      duration: 5,
-    );
+    try {
+      // 获取当前用户信息
+      final (success, message, user) = await _authService.getCurrentUser();
+      if (!success || user == null) {
+        return (false, message ?? 'User not logged in');
+      }
+
+      final response = await _videoApi.generateVideoByTemplateId(
+        uuid: user.uuid,
+        sampleId: sampleId,
+      );
+
+      if (response['response']['success'] != '1') {
+        return (false, 'Failed to create video task: Empty server response');
+      }
+
+      return (true, 'Video task created successfully');
+    } catch (e) {
+      return (false, 'Video generation failed: $e');
+    }
   }
 
   Future<(bool, String)> imageToVideo({

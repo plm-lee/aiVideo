@@ -21,6 +21,7 @@ class VideoSample {
 }
 
 class VideoSampleItem {
+  final int id;
   final String title;
   final String image;
   final String videoUrl;
@@ -28,6 +29,7 @@ class VideoSampleItem {
   final String prompt;
 
   VideoSampleItem({
+    required this.id,
     required this.title,
     this.imgNum = 1,
     required this.image,
@@ -37,6 +39,7 @@ class VideoSampleItem {
 
   factory VideoSampleItem.fromJson(Map<String, dynamic> json) {
     return VideoSampleItem(
+      id: json['id'] as int,
       title: json['title'] as String? ?? '',
       imgNum: json['img_num'] as int? ?? 1,
       image: json['image'] as String? ?? '',

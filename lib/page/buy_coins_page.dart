@@ -226,7 +226,7 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '$coins Coins',
+              coins,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,

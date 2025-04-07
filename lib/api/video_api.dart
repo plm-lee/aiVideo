@@ -59,4 +59,15 @@ class VideoApi {
       queryParameters: {'uuid': uuid},
     );
   }
+
+  // 通过模版ID生成视频
+  Future<Map<String, dynamic>> generateVideoByTemplateId({
+    required String uuid,
+    required int sampleId,
+  }) async {
+    return await _apiClient.get(
+      '/api/ai_video/generate_video',
+      queryParameters: {'uuid': uuid, 'sample_item_id': sampleId},
+    );
+  }
 }

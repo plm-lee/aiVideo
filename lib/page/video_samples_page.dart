@@ -186,6 +186,7 @@ class _VideoSamplesPageState extends State<VideoSamplesPage> {
     context.push(
       '/theme-detail',
       extra: {
+        'id': item.id,
         'title': item.title,
         'prompt': item.prompt,
         'imagePath': item.image,

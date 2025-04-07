@@ -11,6 +11,7 @@ class ThemeDetailPage extends StatefulWidget {
   final VideoPlayerController? preloadedController;
   final int imgNum;
   final String prompt;
+  final int sampleId;
 
   const ThemeDetailPage({
     super.key,
@@ -20,6 +21,7 @@ class ThemeDetailPage extends StatefulWidget {
     this.preloadedController,
     required this.imgNum,
     required this.prompt,
+    required this.sampleId,
   });
 
   @override
@@ -38,7 +40,8 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
 
   Future<void> _initializeVideo() async {
     if (widget.videoUrl == null) return;
-    debugPrint('初始化视频: ${widget.videoUrl}');
+
+    debugPrint('themeDetail视频:  ${widget.sampleId}');
 
     setState(() => _isLoading = true);
 
@@ -197,7 +200,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
                 '/make-collage',
                 extra: {
                   'imgNum': widget.imgNum,
-                  'prompt': widget.prompt,
+                  'sampleId': widget.sampleId,
                 },
               ),
               style: ElevatedButton.styleFrom(

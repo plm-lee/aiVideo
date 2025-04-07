@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img; // 添加image包用于图片处理
 import 'package:ai_video/service/video_service.dart';
-import 'package:ai_video/service/user_service.dart';
-import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
@@ -12,12 +10,12 @@ import 'package:ai_video/utils/coin_check_utils.dart';
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
-  final String prompt;
+  final int sampleId;
 
   const MakeCollagePage({
     super.key,
     required this.imgNum,
-    required this.prompt,
+    required this.sampleId,
   });
 
   @override
@@ -26,7 +24,6 @@ class MakeCollagePage extends StatefulWidget {
 
 class _MakeCollagePageState extends State<MakeCollagePage> {
   final ImagePicker _picker = ImagePicker();
-  final VideoService _videoService = VideoService();
   XFile? _leftImage; // 左侧图片
   XFile? _rightImage;
   bool _isSplitLayout = false;
@@ -36,6 +33,8 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   void initState() {
     super.initState();
     _isSplitLayout = widget.imgNum == 2; // 根据imgNum设置布局
+
+    debugPrint('makeCollagePage by sampleId: ${widget.sampleId}');
   }
 
   void _toggleLayout() {
@@ -240,7 +239,7 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       final videoService = VideoService();
       final (success, message) = await videoService.themeToVideo(
         imageFile: imageToUse,
-        prompt: widget.prompt,
+        sampleId: widget.sampleId,
       );
 
       if (success) {

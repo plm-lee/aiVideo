@@ -141,13 +141,14 @@ final _router = GoRouter(
         final Map<String, dynamic> extra = state.extra as Map<String, dynamic>;
         return NoTransitionPage(
           child: ThemeDetailPage(
-            title: extra['title'] as String,
-            imagePath: extra['imagePath'] as String,
+            title: extra['title'] as String? ?? '',
+            imagePath: extra['imagePath'] as String? ?? '',
             videoUrl: extra['videoUrl'] as String?,
             preloadedController:
                 extra['preloadedController'] as VideoPlayerController?,
-            imgNum: extra['imgNum'] as int,
-            prompt: extra['prompt'] as String,
+            imgNum: extra['imgNum'] as int? ?? 1,
+            prompt: extra['prompt'] as String? ?? '',
+            sampleId: extra['sampleId'] as int? ?? 0,
           ),
         );
       },
@@ -157,7 +158,7 @@ final _router = GoRouter(
       pageBuilder: (context, state) => NoTransitionPage(
         child: MakeCollagePage(
           imgNum: (state.extra as Map<String, dynamic>)['imgNum'] ?? 1,
-          prompt: (state.extra as Map<String, dynamic>)['prompt'] ?? '',
+          sampleId: (state.extra as Map<String, dynamic>)['sampleId'] ?? '',
         ),
       ),
     ),

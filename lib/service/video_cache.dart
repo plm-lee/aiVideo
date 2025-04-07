@@ -67,6 +67,7 @@ class VideoCache {
                             'video_url': item.videoUrl,
                             'img_num': item.imgNum,
                             'prompt': item.prompt,
+                            'id': item.id,
                           })
                       .toList(),
                 })
