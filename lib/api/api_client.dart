@@ -48,4 +48,27 @@ class ApiClient {
       throw Exception('Failed to post data: ${response.statusCode}');
     }
   }
+
+  // 通用的 DELETE 请求方法
+  Future<Map<String, dynamic>> delete(String endpoint) async {
+    final response = await _client.delete(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    // 打印响应
+    debugPrint('Delete Response: ${response.body}');
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 204) {
+      // 如果响应体为空，返回空对象
+      if (response.body.isEmpty) {
+        return {};
+      }
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to delete data: ${response.statusCode}');
+    }
+  }
 }

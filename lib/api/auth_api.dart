@@ -41,4 +41,11 @@ class AuthApi {
       'password': password,
     });
   }
+
+  // 注销账号
+  Future<Map<String, dynamic>> deleteAccount(String uuid) async {
+    return await _apiClient.post('/api/customer/un_register', {
+      'uuid': uuid,
+    });
+  }
 }

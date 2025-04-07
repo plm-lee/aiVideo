@@ -50,6 +50,21 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteAccount() async {
+    try {
+      if (_currentUser?.id != null) {
+        await _authApi.deleteAccount(_currentUser!.uuid);
+        // 清除本地数据库
+        await _databaseService.clearDatabase();
+      }
+      _currentUser = null;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('注销账号错误: $e');
+      rethrow; // 重新抛出异常，让调用者处理
+    }
+  }
+
   Future<bool> sendVerificationCode(String email) async {
     try {
       final response = await _authApi.sendVerificationCode(email);
