@@ -30,11 +30,15 @@ class VideoService extends ChangeNotifier {
 
       debugPrint('themeToVideo: ${sampleId}');
 
+      final List<int> imageBytes = await imageFile.readAsBytes();
+      final String base64Image = base64Encode(imageBytes);
+
       final response = await _videoApi.generateVideoByTemplateId(
         uuid: user.uuid,
         sampleId: sampleId,
         model: isHighQuality ? 'std' : 'pro',
         duration: duration,
+        image: base64Image,
       );
 
       if (response['response']['success'] != '1') {
