@@ -74,13 +74,14 @@ class VideoService extends ChangeNotifier {
         uuid: user.uuid,
       );
 
-      if (response != null) {
-        return (true, 'Video task created successfully');
+      if (response['response']['success'] != '1') {
+        return (
+          false,
+          'Failed to create video task: ${response['response']['description']}'
+        );
       }
 
-      // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
-
-      return (false, 'Failed to create video task: Empty server response');
+      return (true, 'Video task created successfully');
     } catch (e) {
       return (false, 'Video generation failed: $e');
     }
@@ -106,11 +107,14 @@ class VideoService extends ChangeNotifier {
         uuid: user.uuid,
       );
 
-      if (response != null) {
-        return (true, 'Video task created successfully');
+      if (response['response']['success'] != '1') {
+        return (
+          false,
+          'Failed to create video task: ${response['response']['description']}'
+        );
       }
 
-      return (false, 'Failed to create video task: Empty server response');
+      return (true, 'Video task created successfully');
     } catch (e) {
       return (false, 'Video generation failed: $e');
     }
@@ -200,7 +204,7 @@ class VideoService extends ChangeNotifier {
     }
   }
 
-  // 获取视频样例库
+  // 获取视频素材库
   Future<List<VideoSample>> getVideoSamples() async {
     try {
       final (success, message, user) = await _authService.getCurrentUser();
