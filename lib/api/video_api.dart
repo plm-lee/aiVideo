@@ -65,9 +65,12 @@ class VideoApi {
     required String uuid,
     required int sampleId,
   }) async {
-    return await _apiClient.get(
-      '/api/ai_video/generate_video',
-      queryParameters: {'uuid': uuid, 'sample_item_id': sampleId},
+    return await _apiClient.post(
+      '/api/ai_video/add_sample_task',
+      {
+        'uuid': uuid,
+        'sample_item_id': sampleId,
+      },
     );
   }
 }
