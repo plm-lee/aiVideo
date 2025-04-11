@@ -32,6 +32,8 @@ class VideoService extends ChangeNotifier {
         sampleId: sampleId,
       );
 
+      debugPrint('generateVideoByTemplateId: ${response}');
+
       if (response['response']['success'] != '1') {
         return (false, 'Failed to create video task: Empty server response');
       }

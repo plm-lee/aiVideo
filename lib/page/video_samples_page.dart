@@ -183,10 +183,11 @@ class _VideoSamplesPageState extends State<VideoSamplesPage> {
   }
 
   void _navigateToThemeDetail(VideoSampleItem item) {
+    debugPrint('navigate to theme detail: ${item.title}, id: ${item.id}');
     context.push(
       '/theme-detail',
       extra: {
-        'id': item.id,
+        'sampleId': item.id,
         'title': item.title,
         'prompt': item.prompt,
         'imagePath': item.image,
