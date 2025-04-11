@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:ai_video/utils/dialog_utils.dart'; // 添加导入
 import 'package:ai_video/utils/coin_check_utils.dart';
+import 'package:provider/provider.dart';
+import 'package:ai_video/service/user_service.dart';
 
 class MakeCollagePage extends StatefulWidget {
   final int imgNum;
@@ -28,6 +30,8 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
   XFile? _rightImage;
   bool _isSplitLayout = false;
   bool _isLoading = false; // 添加加载状态
+  bool _isHighQuality = false; // 添加高品质选项状态
+  int _selectedLength = 5; // 默认5秒
 
   @override
   void initState() {
@@ -204,8 +208,200 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
     }
   }
 
+  Widget _buildBottomSection() {
+    // 检查是否可以生成
+    final bool canGenerate = _leftImage != null &&
+        (!_isSplitLayout || (_isSplitLayout && _rightImage != null));
+    final userService = context.watch<UserService>();
+    final int baseCoins = _selectedLength == 10 ? 200 : 100;
+    final int requiredCoins =
+        _isHighQuality && !userService.isSubscribed ? baseCoins * 2 : baseCoins;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFD7905F).withOpacity(canGenerate ? 1 : 0.5),
+                  const Color(0xFFC060C3).withOpacity(canGenerate ? 1 : 0.5),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: ElevatedButton(
+              onPressed: canGenerate && !_isLoading ? _generateVideo : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    )
+                  : const Text(
+                      'Generate Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => _showLengthSelector(),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_selectedLength}s',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              Checkbox(
+                value: _isHighQuality,
+                onChanged: (value) {
+                  setState(() {
+                    _isHighQuality = value ?? false;
+                  });
+                },
+                activeColor: const Color(0xFFD7905F),
+                side: const BorderSide(color: Colors.white),
+              ),
+              const Text(
+                'High Quality (Member Free)',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.monetization_on,
+                color: Color(0xFFFFD700),
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$requiredCoins Coins',
+                style: const TextStyle(
+                  color: Color(0xFFFFD700),
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLengthSelector() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Select Video Length',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildLengthOption(5),
+                  _buildLengthOption(10),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLengthOption(int seconds) {
+    final isSelected = _selectedLength == seconds;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedLength = seconds);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          '${seconds}s',
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _generateVideo() async {
-    const requiredCoins = 100;
+    final userService = context.read<UserService>();
+    final int baseCoins = _selectedLength == 10 ? 200 : 100;
+    final int requiredCoins =
+        _isHighQuality && !userService.isSubscribed ? baseCoins * 2 : baseCoins;
 
     // 检查金币余额
     final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(
@@ -240,6 +436,8 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       final (success, message) = await videoService.themeToVideo(
         imageFile: imageToUse,
         sampleId: widget.sampleId,
+        isHighQuality: _isHighQuality,
+        duration: _selectedLength,
       );
 
       if (success) {
@@ -409,78 +607,6 @@ class _MakeCollagePageState extends State<MakeCollagePage> {
       child: IconButton(
         icon: const Icon(Icons.add, color: Color(0xFFD7905F)),
         onPressed: () => _pickImage(isLeftSide),
-      ),
-    );
-  }
-
-  Widget _buildBottomSection() {
-    // 检查是否可以生成
-    final bool canGenerate = _leftImage != null &&
-        (!_isSplitLayout || (_isSplitLayout && _rightImage != null));
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: double.infinity,
-            height: 50,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFFD7905F).withOpacity(canGenerate ? 1 : 0.5),
-                  const Color(0xFFC060C3).withOpacity(canGenerate ? 1 : 0.5),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: ElevatedButton(
-              onPressed: canGenerate && !_isLoading ? _generateVideo : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    )
-                  : const Text(
-                      'Generate Now',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(
-                Icons.monetization_on,
-                color: Colors.white,
-                size: 16,
-              ),
-              SizedBox(width: 4),
-              Text(
-                '100 Coins',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

@@ -7,7 +7,6 @@ import 'package:ai_video/models/video_task.dart';
 import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/database_service.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
 class VideoService extends ChangeNotifier {
@@ -19,6 +18,8 @@ class VideoService extends ChangeNotifier {
   Future<(bool, String)> themeToVideo({
     required int sampleId,
     required File imageFile,
+    required bool isHighQuality,
+    required int duration,
   }) async {
     try {
       // 获取当前用户信息
@@ -32,12 +33,15 @@ class VideoService extends ChangeNotifier {
       final response = await _videoApi.generateVideoByTemplateId(
         uuid: user.uuid,
         sampleId: sampleId,
+        model: isHighQuality ? 'std' : 'pro',
+        duration: duration,
       );
 
-      debugPrint('generateVideoByTemplateId: ${response}');
-
       if (response['response']['success'] != '1') {
-        return (false, 'Failed to create video task: Empty server response');
+        return (
+          false,
+          'Failed to create video task: ${response['response']['description']}'
+        );
       }
 
       return (true, 'Video task created successfully');
@@ -85,6 +89,7 @@ class VideoService extends ChangeNotifier {
   Future<(bool, String)> textToVideo({
     required String prompt,
     required int duration,
+    bool isHighQuality = false,
   }) async {
     try {
       // 获取当前用户信息
@@ -94,9 +99,9 @@ class VideoService extends ChangeNotifier {
       }
 
       final response = await _videoApi.addVideoTask(
-        image: '', // 文本转视频不需要图片
+        image: '',
         prompt: prompt,
-        model: 'VideoMax-A', // 使用文本转视频模型
+        model: isHighQuality ? 'pro' : 'std',
         duration: duration,
         uuid: user.uuid,
       );
@@ -104,8 +109,6 @@ class VideoService extends ChangeNotifier {
       if (response != null) {
         return (true, 'Video task created successfully');
       }
-
-      // {"response":{"success":"1","description":"success","errorcode":"0000"},"business_id":"62e4b4d2a9a44ac7876fc193c2ef5ee5"}
 
       return (false, 'Failed to create video task: Empty server response');
     } catch (e) {

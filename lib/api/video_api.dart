@@ -64,12 +64,16 @@ class VideoApi {
   Future<Map<String, dynamic>> generateVideoByTemplateId({
     required String uuid,
     required int sampleId,
+    required String model,
+    required int duration,
   }) async {
     return await _apiClient.post(
       '/api/ai_video/add_sample_task',
       {
         'uuid': uuid,
         'sample_item_id': sampleId,
+        'model': model,
+        'duration': duration,
       },
     );
   }
