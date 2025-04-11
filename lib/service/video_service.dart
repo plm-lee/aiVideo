@@ -27,6 +27,8 @@ class VideoService extends ChangeNotifier {
         return (false, message ?? 'User not logged in');
       }
 
+      debugPrint('themeToVideo: ${sampleId}');
+
       final response = await _videoApi.generateVideoByTemplateId(
         uuid: user.uuid,
         sampleId: sampleId,
@@ -48,6 +50,7 @@ class VideoService extends ChangeNotifier {
     required File imageFile,
     required String prompt,
     required int duration,
+    required bool isHighQuality,
   }) async {
     try {
       // 获取当前用户信息
@@ -62,7 +65,7 @@ class VideoService extends ChangeNotifier {
       final response = await _videoApi.addVideoTask(
         image: base64Image,
         prompt: prompt,
-        model: 'VideoMax-A',
+        model: isHighQuality ? 'pro' : 'std',
         duration: duration,
         uuid: user.uuid,
       );
@@ -125,6 +128,10 @@ class VideoService extends ChangeNotifier {
           false,
           'Failed to get tasks: ${response['response']['description']}'
         );
+      }
+
+      if (response['video_tasks'] == null) {
+        return (false, 'Failed to get tasks: Empty server response');
       }
 
       final List<VideoTask> videoTasks =

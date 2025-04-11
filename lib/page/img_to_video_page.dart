@@ -27,6 +27,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   int _selectedLength = 5; // 默认5秒
   bool _isLoading = false; // 添加加载状态
   bool _hasPromptInput = false; // 添加提示词输入状态
+  bool _isHighQuality = false; // 添加高品质选项状态
 
   @override
   void initState() {
@@ -186,6 +187,32 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
                           _buildLengthOption(10),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isHighQuality,
+                            onChanged: (value) {
+                              setState(() {
+                                _isHighQuality = value ?? false;
+                              });
+                            },
+                            activeColor: const Color(0xFFD7905F),
+                            side: const BorderSide(color: Colors.white),
+                          ),
+                          Consumer<UserService>(
+                            builder: (context, userService, child) {
+                              return Text(
+                                'High Quality (Member Free)',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -221,6 +248,10 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
 
   Widget _buildBottomButton() {
     final bool canGenerate = _selectedImage != null && _hasPromptInput;
+    final userService = context.watch<UserService>();
+    final int baseCoins = _selectedLength == 10 ? 200 : 100;
+    final int requiredCoins =
+        _isHighQuality && !userService.isSubscribed ? baseCoins * 2 : baseCoins;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -243,7 +274,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
               const Icon(Icons.monetization_on, color: Color(0xFFFFD700)),
               const SizedBox(width: 8),
               Text(
-                '${_selectedLength == 10 ? 200 : 100} Coins',
+                '$requiredCoins Coins',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -329,7 +360,8 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
   }
 
   Future<void> _generateVideo() async {
-    final requiredCoins = _selectedLength == 10 ? 200 : 100;
+    final int baseCoins = _selectedLength == 10 ? 200 : 100;
+    final int requiredCoins = _isHighQuality ? baseCoins * 2 : baseCoins;
 
     // 检查金币余额
     final hasEnoughCoins = await CoinCheckUtils.checkCoinsBalance(
@@ -347,6 +379,7 @@ class _ImgToVideoPageState extends State<ImgToVideoPage> {
         imageFile: _selectedImage!,
         prompt: _promptController.text.trim(),
         duration: _selectedLength,
+        isHighQuality: _isHighQuality,
       );
 
       if (success) {
