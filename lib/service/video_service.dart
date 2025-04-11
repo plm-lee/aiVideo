@@ -128,8 +128,9 @@ class VideoService extends ChangeNotifier {
         return (false, message ?? 'User not logged in');
       }
 
-      debugPrint('getUserTasks: ${user.uuid}');
       final response = await _videoApi.getUserTasks(uuid: user.uuid);
+
+      debugPrint('getUserTasks: ${user.uuid},response: ${response}');
       if (response['response']['success'] != '1') {
         return (
           false,
@@ -144,7 +145,7 @@ class VideoService extends ChangeNotifier {
       final List<VideoTask> videoTasks =
           (response['video_tasks'] as List).map((task) {
         // 直接使用服务器返回的已解码字符串
-        final prompt = task['prompt'] as String;
+        final prompt = task['prompt'] as String? ?? '';
         task['prompt'] = prompt;
 
         // 如果任务完成且有 object_key，将其作为视频地址
