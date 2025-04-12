@@ -36,6 +36,7 @@ class _MinePageState extends State<MinePage>
   final Map<String, bool> _videoInitializing = {};
   final Map<String, Future<String?>> _imageLoadingFutures = {};
   bool _isRefreshing = false;
+  DateTime? _lastTaskTime;
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class _MinePageState extends State<MinePage>
         _isLoading = false;
         if (tasks.isNotEmpty) {
           business_id = tasks.first.businessId;
+          _lastTaskTime = tasks.first.createdAt;
         }
       });
     } catch (e) {
@@ -87,11 +89,23 @@ class _MinePageState extends State<MinePage>
   Future<void> _queryTaskProgress() async {
     if (_isRefreshing) return;
 
+    // 检查最新任务时间
+    if (_lastTaskTime != null) {
+      final now = DateTime.now();
+      final difference = now.difference(_lastTaskTime!);
+      if (difference.inMinutes >= 10) {
+        debugPrint('最新任务超过10分钟，停止定时查询');
+        _progressTimer?.cancel();
+        return;
+      }
+    }
+
     final videoService = VideoService();
     if (business_id.isEmpty) {
       final task = await videoService.getLatestTask();
       if (task != null) {
         business_id = task.businessId;
+        _lastTaskTime = task.createdAt;
         debugPrint('on progress task: $business_id');
       }
     }
