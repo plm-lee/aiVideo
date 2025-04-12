@@ -83,16 +83,49 @@ class _AIVideoState extends State<AIVideo>
 
     // 定期清理未使用的视频控制器
     _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      _cleanupUnusedControllers();
+      if (mounted) {
+        _cleanupUnusedControllers();
+      }
     });
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _cleanupTimer?.cancel();
-    _disposeAllControllers();
-    super.dispose();
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _updateCredits();
+        _resumeVideoPlayback();
+        break;
+      case AppLifecycleState.paused:
+        _pauseVideoPlayback();
+        break;
+      case AppLifecycleState.inactive:
+        _pauseVideoPlayback();
+        break;
+      case AppLifecycleState.detached:
+        _disposeAllControllers();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _resumeVideoPlayback() {
+    for (var controller in _videoControllers.values) {
+      if (controller.value.isInitialized) {
+        controller.play();
+      }
+    }
+  }
+
+  void _pauseVideoPlayback() {
+    for (var controller in _videoControllers.values) {
+      if (controller.value.isInitialized) {
+        controller.pause();
+      }
+    }
   }
 
   void _disposeAllControllers() {
@@ -206,6 +239,8 @@ class _AIVideoState extends State<AIVideo>
   }
 
   Future<void> _loadVideoController(String videoUrl) async {
+    if (!mounted) return;
+
     if (_videoControllers.containsKey(videoUrl) ||
         _loadingVideos.contains(videoUrl)) {
       return;
@@ -223,6 +258,11 @@ class _AIVideoState extends State<AIVideo>
         ),
       );
 
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
+
       _videoControllers[videoUrl] = controller;
 
       // 添加错误监听器
@@ -234,7 +274,7 @@ class _AIVideoState extends State<AIVideo>
 
       try {
         await controller.initialize().timeout(
-          const Duration(seconds: 10), // 增加超时时间到10秒
+          const Duration(seconds: 10),
           onTimeout: () {
             throw TimeoutException('视频初始化超时');
           },
@@ -275,7 +315,9 @@ class _AIVideoState extends State<AIVideo>
       debugPrint('Error loading video controller: $e\n$stackTrace');
       _disposeController(videoUrl, _videoControllers[videoUrl]);
     } finally {
-      _loadingVideos.remove(videoUrl);
+      if (mounted) {
+        _loadingVideos.remove(videoUrl);
+      }
     }
   }
 

@@ -222,7 +222,7 @@ class VideoService extends ChangeNotifier {
         return [];
       }
 
-      debugPrint('getVideoSamples: ${response['samples']}');
+      // debugPrint('getVideoSamples: ${response['samples']}');
 
       return (response['samples'] as List)
           .map((sample) => VideoSample.fromJson(sample as Map<String, dynamic>))

@@ -66,7 +66,7 @@ class VideoApi {
     required int sampleId,
     required String model,
     required int duration,
-   required String image, 
+    required String image,
   }) async {
     return await _apiClient.post(
       '/api/ai_video/add_sample_task',
