@@ -143,12 +143,6 @@ final _router = GoRouter(
       builder: (context, state) => const CoinLogsPage(),
     ),
     GoRoute(
-      path: '/mine',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: const MinePage(),
-      ),
-    ),
-    GoRoute(
       path: '/theme-detail',
       pageBuilder: (context, state) {
         final Map<String, dynamic> extra = state.extra as Map<String, dynamic>;

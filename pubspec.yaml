@@ -111,13 +111,6 @@ flutter:
 
   # 添加资源配置
   assets:
-    - assets/images/kiss1.jpg
-    - assets/images/kiss2.jpg
-    - assets/images/kiss3.jpg
-    - assets/images/hug1.jpg
-    - assets/images/hug2.jpg
-    - assets/images/hug3.jpg
     - assets/images/diamond.png
     - assets/images/logo.png
     - assets/videos/background.mp4
-    - assets/videos/kiss_manga.mp4

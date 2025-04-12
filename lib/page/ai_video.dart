@@ -57,6 +57,13 @@ class _AIVideoState extends State<AIVideo>
   // 添加视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
   bool _isInitializing = false;
+  final int _maxConcurrentLoads = 3; // 最大并发加载数
+  final int _preloadCount = 4; // 预加载数量
+  Timer? _cleanupTimer;
+  final Set<String> _loadingVideos = {};
+  final Map<String, int> _retryCount = {}; // 记录重试次数
+  final int _maxRetries = 3; // 最大重试次数
+  final Duration _retryDelay = const Duration(seconds: 2); // 重试延迟
 
   // 添加渐变色列表
   final List<List<Color>> _gradients = [
@@ -73,23 +80,39 @@ class _AIVideoState extends State<AIVideo>
     _loadCategories();
     _initializeVideoControllers();
     _updateCredits();
+
+    // 定期清理未使用的视频控制器
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      _cleanupUnusedControllers();
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _cleanupTimer?.cancel();
+    _disposeAllControllers();
+    super.dispose();
+  }
+
+  void _disposeAllControllers() {
     for (var controller in _videoControllers.values) {
       controller.dispose();
     }
     _videoControllers.clear();
-    super.dispose();
+    _loadingVideos.clear();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _updateCredits();
-    }
+  void _cleanupUnusedControllers() {
+    final now = DateTime.now();
+    _videoControllers.removeWhere((url, controller) {
+      // 如果视频超过5分钟未使用，则释放资源
+      if (now.difference(DateTime.now()).inMinutes > 5) {
+        controller.dispose();
+        return true;
+      }
+      return false;
+    });
   }
 
   void _updateCredits() {
@@ -137,79 +160,135 @@ class _AIVideoState extends State<AIVideo>
     _isInitializing = true;
 
     try {
-      for (var category in _categories) {
-        for (var item in category.items) {
-          final String? videoUrl = item.videoUrl;
-          if (videoUrl == null || videoUrl.isEmpty) continue;
+      // 获取当前可见的视频项
+      final visibleItems = _getVisibleVideoItems();
+      if (visibleItems.isEmpty) return;
 
-          if (!_videoControllers.containsKey(videoUrl)) {
-            try {
-              final controller = VideoPlayerController.networkUrl(
-                Uri.parse(videoUrl),
-                videoPlayerOptions: VideoPlayerOptions(
-                  mixWithOthers: true,
-                  allowBackgroundPlayback: false,
-                ),
-              );
+      // 限制并发加载数量
+      final itemsToLoad = visibleItems.take(_maxConcurrentLoads).toList();
 
-              _videoControllers[videoUrl] = controller;
+      // 并发加载视频
+      await Future.wait(
+        itemsToLoad.map((item) => _loadVideoController(item.videoUrl!)),
+      );
 
-              // 添加错误监听器
-              controller.addListener(() {
-                if (controller.value.hasError) {
-                  if (_videoControllers[videoUrl] == controller) {
-                    _videoControllers.remove(videoUrl);
-                    controller.dispose();
-                  }
-                }
-              });
-
-              try {
-                await controller.initialize().timeout(
-                  const Duration(seconds: 5),
-                  onTimeout: () {
-                    throw TimeoutException('视频初始化超时');
-                  },
-                );
-
-                if (!mounted) {
-                  controller.dispose();
-                  _videoControllers.remove(videoUrl);
-                  continue;
-                }
-
-                controller.setLooping(true);
-                controller.setVolume(0.0);
-                controller.play();
-
-                if (mounted) {
-                  setState(() {});
-                }
-              } catch (e, stackTrace) {
-                debugPrint('错误堆栈: $stackTrace');
-
-                _videoControllers.remove(videoUrl);
-                controller.dispose();
-              }
-            } catch (e, stackTrace) {
-              debugPrint('错误堆栈: $stackTrace');
-              _videoControllers.remove(videoUrl);
-              continue;
-            }
-          } else {
-            // 如果控制器已存在但没有播放，重新开始播放
-            final controller = _videoControllers[videoUrl]!;
-            if (controller.value.isInitialized && !controller.value.isPlaying) {
-              controller.play();
-            }
-          }
-        }
-      }
+      // 预加载下一批视频
+      _preloadNextVideos(visibleItems);
     } catch (e, stackTrace) {
-      debugPrint('错误堆栈: $stackTrace');
+      debugPrint('Error initializing video controllers: $e\n$stackTrace');
     } finally {
       _isInitializing = false;
     }
+  }
+
+  List<VideoSampleItem> _getVisibleVideoItems() {
+    final List<VideoSampleItem> items = [];
+    for (var category in _categories) {
+      items.addAll(category.items.where((item) =>
+          item.videoUrl != null &&
+          item.videoUrl!.isNotEmpty &&
+          !_videoControllers.containsKey(item.videoUrl)));
+    }
+    return items;
+  }
+
+  void _preloadNextVideos(List<VideoSampleItem> currentItems) {
+    final nextItems = _getVisibleVideoItems()
+        .where((item) => !currentItems.contains(item))
+        .take(_preloadCount)
+        .toList();
+
+    for (var item in nextItems) {
+      _loadVideoController(item.videoUrl!).catchError((e) {
+        debugPrint('Error preloading video: $e');
+      });
+    }
+  }
+
+  Future<void> _loadVideoController(String videoUrl) async {
+    if (_videoControllers.containsKey(videoUrl) ||
+        _loadingVideos.contains(videoUrl)) {
+      return;
+    }
+
+    _loadingVideos.add(videoUrl);
+    _retryCount[videoUrl] = (_retryCount[videoUrl] ?? 0) + 1;
+
+    try {
+      final controller = VideoPlayerController.networkUrl(
+        Uri.parse(videoUrl),
+        videoPlayerOptions: VideoPlayerOptions(
+          mixWithOthers: true,
+          allowBackgroundPlayback: false,
+        ),
+      );
+
+      _videoControllers[videoUrl] = controller;
+
+      // 添加错误监听器
+      controller.addListener(() {
+        if (controller.value.hasError) {
+          _handleVideoError(videoUrl, controller);
+        }
+      });
+
+      try {
+        await controller.initialize().timeout(
+          const Duration(seconds: 10), // 增加超时时间到10秒
+          onTimeout: () {
+            throw TimeoutException('视频初始化超时');
+          },
+        );
+
+        if (!mounted) {
+          _disposeController(videoUrl, controller);
+          return;
+        }
+
+        controller.setLooping(true);
+        controller.setVolume(0.0);
+        controller.play();
+
+        if (mounted) {
+          setState(() {});
+        }
+
+        // 加载成功后清除重试计数
+        _retryCount.remove(videoUrl);
+      } catch (e) {
+        debugPrint('Error initializing video: $e');
+        _disposeController(videoUrl, controller);
+
+        // 如果未超过最大重试次数，则延迟重试
+        if (_retryCount[videoUrl]! <= _maxRetries) {
+          await Future.delayed(_retryDelay);
+          if (mounted) {
+            _loadVideoController(videoUrl);
+          }
+        } else {
+          debugPrint(
+              'Video loading failed after $_maxRetries retries: $videoUrl');
+          _retryCount.remove(videoUrl);
+        }
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error loading video controller: $e\n$stackTrace');
+      _disposeController(videoUrl, _videoControllers[videoUrl]);
+    } finally {
+      _loadingVideos.remove(videoUrl);
+    }
+  }
+
+  void _handleVideoError(String videoUrl, VideoPlayerController controller) {
+    _disposeController(videoUrl, controller);
+  }
+
+  void _disposeController(String videoUrl, VideoPlayerController? controller) {
+    if (controller != null) {
+      controller.dispose();
+    }
+    _videoControllers.remove(videoUrl);
+    _loadingVideos.remove(videoUrl);
   }
 
   void _handleVideoConversion(String type) {
@@ -438,12 +517,12 @@ class _AIVideoState extends State<AIVideo>
       } else {
         // 如果视频控制器未初始化，尝试初始化
         if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
-          _initializeVideoControllers();
-        } else if (controller != null && !controller.value.isInitialized) {}
+          _loadVideoController(videoUrl);
+        }
       }
     }
 
-    // 如果视频未就绪，显示图片
+    // 如果视频未就绪或加载失败，显示图片
     if (imagePath.isNotEmpty) {
       if (isNetworkPath) {
         return Image.network(
@@ -453,13 +532,19 @@ class _AIVideoState extends State<AIVideo>
             if (loadingProgress == null) return child;
             return placeholder;
           },
-          errorBuilder: (context, error, stackTrace) => placeholder,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading image: $error');
+            return placeholder;
+          },
         );
       } else {
         return Image.asset(
           imagePath,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => placeholder,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading asset image: $error');
+            return placeholder;
+          },
         );
       }
     }
