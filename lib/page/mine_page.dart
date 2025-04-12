@@ -20,11 +20,7 @@ class MinePage extends StatefulWidget {
   State<MinePage> createState() => _MinePageState();
 }
 
-class _MinePageState extends State<MinePage>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
+class _MinePageState extends State<MinePage> {
   final _videoService = VideoService();
   final _databaseService = DatabaseService();
   final _imageCacheService = ImageCacheService();
@@ -610,7 +606,6 @@ class _MinePageState extends State<MinePage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
