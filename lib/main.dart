@@ -99,11 +99,24 @@ final _router = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterPage(),
     ),
-    GoRoute(
-      path: '/home',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: const AIVideo(),
-      ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return child;
+      },
+      routes: [
+        GoRoute(
+          path: '/home',
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: const AIVideo(),
+          ),
+        ),
+        GoRoute(
+          path: '/mine',
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: const MinePage(),
+          ),
+        ),
+      ],
     ),
     GoRoute(
       path: '/settings',
