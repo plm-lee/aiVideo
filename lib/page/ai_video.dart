@@ -64,6 +64,7 @@ class _AIVideoState extends State<AIVideo>
   final Map<String, int> _retryCount = {}; // 记录重试次数
   final int _maxRetries = 3; // 最大重试次数
   final Duration _retryDelay = const Duration(seconds: 2); // 重试延迟
+  bool _isDisposed = false;
 
   // 添加渐变色列表
   final List<List<Color>> _gradients = [
@@ -72,6 +73,14 @@ class _AIVideoState extends State<AIVideo>
     [const Color(0xFFFF5E50), const Color(0xFFFF4E50)], // 红色渐变
     [const Color(0xFF13E2DA), const Color(0xFF00B4D8)], // 青色渐变
   ];
+
+  // 添加缓存
+  final Map<String, ImageProvider> _imageCache = {};
+  final Map<String, bool> _videoErrorCache = {};
+
+  // 添加防抖
+  Timer? _debounceTimer;
+  static const Duration _debounceDuration = Duration(milliseconds: 300);
 
   @override
   void initState() {
@@ -83,65 +92,50 @@ class _AIVideoState extends State<AIVideo>
 
     // 定期清理未使用的视频控制器
     _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         _cleanupUnusedControllers();
       }
     });
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        _updateCredits();
-        _resumeVideoPlayback();
-        break;
-      case AppLifecycleState.paused:
-        _pauseVideoPlayback();
-        break;
-      case AppLifecycleState.inactive:
-        _pauseVideoPlayback();
-        break;
-      case AppLifecycleState.detached:
-        _disposeAllControllers();
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _resumeVideoPlayback() {
-    for (var controller in _videoControllers.values) {
-      if (controller.value.isInitialized) {
-        controller.play();
-      }
-    }
-  }
-
-  void _pauseVideoPlayback() {
-    for (var controller in _videoControllers.values) {
-      if (controller.value.isInitialized) {
-        controller.pause();
-      }
-    }
+  void dispose() {
+    _isDisposed = true;
+    WidgetsBinding.instance.removeObserver(this);
+    _cleanupTimer?.cancel();
+    _debounceTimer?.cancel();
+    _disposeAllControllers();
+    _imageCache.clear();
+    _videoErrorCache.clear();
+    super.dispose();
   }
 
   void _disposeAllControllers() {
     for (var controller in _videoControllers.values) {
-      controller.dispose();
+      try {
+        controller.dispose();
+      } catch (e) {
+        debugPrint('Error disposing controller: $e');
+      }
     }
     _videoControllers.clear();
     _loadingVideos.clear();
+    _retryCount.clear();
   }
 
   void _cleanupUnusedControllers() {
+    if (_isDisposed) return;
+
     final now = DateTime.now();
     _videoControllers.removeWhere((url, controller) {
-      // 如果视频超过5分钟未使用，则释放资源
-      if (now.difference(DateTime.now()).inMinutes > 5) {
-        controller.dispose();
+      try {
+        // 如果视频超过5分钟未使用，则释放资源
+        if (now.difference(DateTime.now()).inMinutes > 5) {
+          controller.dispose();
+          return true;
+        }
+      } catch (e) {
+        debugPrint('Error cleaning up controller: $e');
         return true;
       }
       return false;
@@ -238,8 +232,9 @@ class _AIVideoState extends State<AIVideo>
     }
   }
 
+  // 优化视频加载
   Future<void> _loadVideoController(String videoUrl) async {
-    if (!mounted) return;
+    if (_isDisposed || !mounted || _hasVideoError(videoUrl)) return;
 
     if (_videoControllers.containsKey(videoUrl) ||
         _loadingVideos.contains(videoUrl)) {
@@ -249,8 +244,9 @@ class _AIVideoState extends State<AIVideo>
     _loadingVideos.add(videoUrl);
     _retryCount[videoUrl] = (_retryCount[videoUrl] ?? 0) + 1;
 
+    VideoPlayerController? controller;
     try {
-      final controller = VideoPlayerController.networkUrl(
+      controller = VideoPlayerController.networkUrl(
         Uri.parse(videoUrl),
         videoPlayerOptions: VideoPlayerOptions(
           mixWithOthers: true,
@@ -258,17 +254,16 @@ class _AIVideoState extends State<AIVideo>
         ),
       );
 
-      if (!mounted) {
+      if (_isDisposed || !mounted) {
         controller.dispose();
         return;
       }
 
       _videoControllers[videoUrl] = controller;
 
-      // 添加错误监听器
       controller.addListener(() {
-        if (controller.value.hasError) {
-          _handleVideoError(videoUrl, controller);
+        if (controller?.value.hasError ?? false) {
+          _handleVideoError(videoUrl, controller!);
         }
       });
 
@@ -280,7 +275,7 @@ class _AIVideoState extends State<AIVideo>
           },
         );
 
-        if (!mounted) {
+        if (_isDisposed || !mounted) {
           _disposeController(videoUrl, controller);
           return;
         }
@@ -289,20 +284,17 @@ class _AIVideoState extends State<AIVideo>
         controller.setVolume(0.0);
         controller.play();
 
-        if (mounted) {
-          setState(() {});
-        }
+        _safeSetState(() {});
 
-        // 加载成功后清除重试计数
         _retryCount.remove(videoUrl);
       } catch (e) {
         debugPrint('Error initializing video: $e');
         _disposeController(videoUrl, controller);
+        _markVideoError(videoUrl);
 
-        // 如果未超过最大重试次数，则延迟重试
         if (_retryCount[videoUrl]! <= _maxRetries) {
           await Future.delayed(_retryDelay);
-          if (mounted) {
+          if (mounted && !_isDisposed) {
             _loadVideoController(videoUrl);
           }
         } else {
@@ -313,12 +305,119 @@ class _AIVideoState extends State<AIVideo>
       }
     } catch (e, stackTrace) {
       debugPrint('Error loading video controller: $e\n$stackTrace');
-      _disposeController(videoUrl, _videoControllers[videoUrl]);
+      _disposeController(videoUrl, controller);
+      _markVideoError(videoUrl);
     } finally {
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         _loadingVideos.remove(videoUrl);
       }
     }
+  }
+
+  // 优化媒体内容构建
+  Widget _buildMediaContent(VideoSampleItem item) {
+    final String imagePath = item.image;
+    final String videoUrl = item.videoUrl;
+    final bool isNetworkPath = imagePath.startsWith('http');
+
+    // 默认灰色背景
+    Widget placeholder = Container(
+      color: Colors.grey[900],
+      child: const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
+          strokeWidth: 2,
+        ),
+      ),
+    );
+
+    // 优先展示视频
+    if (videoUrl.isNotEmpty && !_hasVideoError(videoUrl)) {
+      final controller = _videoControllers[videoUrl];
+      if (controller?.value.isInitialized ?? false) {
+        if (!controller!.value.isPlaying) {
+          controller.play();
+        }
+
+        return AspectRatio(
+          aspectRatio: controller.value.aspectRatio,
+          child: VideoPlayer(controller),
+        );
+      } else {
+        if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(_debounceDuration, () {
+            if (mounted && !_isDisposed) {
+              _loadVideoController(videoUrl);
+            }
+          });
+        }
+      }
+    }
+
+    // 如果视频未就绪或加载失败，显示图片
+    if (imagePath.isNotEmpty) {
+      return Image(
+        image: _getImageProvider(imagePath),
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return placeholder;
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('Error loading image: $error');
+          return placeholder;
+        },
+      );
+    }
+
+    return placeholder;
+  }
+
+  // 优化分类卡片构建
+  Widget _buildCategoryCard(VideoSampleItem item) {
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: () => _navigateToThemeDetail(item),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(_borderRadius),
+            color: AppTheme.darkCardColor,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              _buildMediaContent(item),
+              if (item.title.isNotEmpty)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 8,
+                  child: Text(
+                    item.title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: _subtitleFontSize,
+                      fontWeight: FontWeight.bold,
+                      shadows: const [
+                        Shadow(
+                          offset: Offset(1, 1),
+                          blurRadius: 3,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _handleVideoError(String videoUrl, VideoPlayerController controller) {
@@ -326,11 +425,15 @@ class _AIVideoState extends State<AIVideo>
   }
 
   void _disposeController(String videoUrl, VideoPlayerController? controller) {
-    if (controller != null) {
-      controller.dispose();
+    try {
+      if (controller != null) {
+        controller.dispose();
+      }
+      _videoControllers.remove(videoUrl);
+      _loadingVideos.remove(videoUrl);
+    } catch (e) {
+      debugPrint('Error disposing controller: $e');
     }
-    _videoControllers.remove(videoUrl);
-    _loadingVideos.remove(videoUrl);
   }
 
   void _handleVideoConversion(String type) {
@@ -527,124 +630,31 @@ class _AIVideoState extends State<AIVideo>
     );
   }
 
-  Widget _buildMediaContent(VideoSampleItem item) {
-    final String imagePath = item.image;
-    final String videoUrl = item.videoUrl;
-    final bool isNetworkPath = imagePath.startsWith('http');
-
-    // 默认灰色背景
-    Widget placeholder = Container(
-      color: Colors.grey[900],
-      child: const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD7905F)),
-          strokeWidth: 2,
-        ),
-      ),
-    );
-
-    // 优先展示视频
-    if (videoUrl.isNotEmpty) {
-      final controller = _videoControllers[videoUrl];
-      if (controller?.value.isInitialized ?? false) {
-        // 确保视频在显示时播放
-        if (!controller!.value.isPlaying) {
-          controller.play();
-        }
-
-        return AspectRatio(
-          aspectRatio: controller.value.aspectRatio,
-          child: VideoPlayer(controller),
-        );
+  // 优化图片加载
+  ImageProvider _getImageProvider(String imagePath) {
+    return _imageCache.putIfAbsent(imagePath, () {
+      if (imagePath.startsWith('http')) {
+        return NetworkImage(imagePath);
       } else {
-        // 如果视频控制器未初始化，尝试初始化
-        if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
-          _loadVideoController(videoUrl);
-        }
+        return AssetImage(imagePath);
       }
-    }
-
-    // 如果视频未就绪或加载失败，显示图片
-    if (imagePath.isNotEmpty) {
-      if (isNetworkPath) {
-        return Image.network(
-          imagePath,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return placeholder;
-          },
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading image: $error');
-            return placeholder;
-          },
-        );
-      } else {
-        return Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading asset image: $error');
-            return placeholder;
-          },
-        );
-      }
-    }
-
-    return placeholder;
+    });
   }
 
-  Widget _buildErrorWidget() {
-    return Container(
-      color: Colors.black,
-      child: const Icon(Icons.error, color: Colors.white),
-    );
+  // 优化视频错误处理
+  bool _hasVideoError(String videoUrl) {
+    return _videoErrorCache[videoUrl] ?? false;
   }
 
-  Widget _buildCategoryCard(VideoSampleItem item) {
-    // final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isDark = true;
+  void _markVideoError(String videoUrl) {
+    _videoErrorCache[videoUrl] = true;
+  }
 
-    return GestureDetector(
-      onTap: () => _navigateToThemeDetail(item),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(_borderRadius),
-          color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            _buildMediaContent(item),
-            if (item.title.isNotEmpty)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 8,
-                child: Text(
-                  item.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: _subtitleFontSize,
-                    fontWeight: FontWeight.bold,
-                    shadows: const [
-                      Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 3,
-                        color: Colors.black,
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  // 优化状态更新
+  void _safeSetState(VoidCallback fn) {
+    if (mounted && !_isDisposed) {
+      setState(fn);
+    }
   }
 
   void _navigateToThemeDetail(VideoSampleItem item) {
