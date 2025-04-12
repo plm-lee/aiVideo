@@ -383,18 +383,23 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
             ],
           ),
         ),
-        SizedBox(
-          height: _categoryHeight,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: _spacing),
-            itemCount: category.items.length,
-            itemBuilder: (context, index) {
-              final item = category.items[index];
-              return _buildCategoryCard(item);
-            },
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: _spacing),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: _spacing,
+            mainAxisSpacing: _spacing,
           ),
+          itemCount: category.items.length,
+          itemBuilder: (context, index) {
+            final item = category.items[index];
+            return _buildCategoryCard(item);
+          },
         ),
+        const SizedBox(height: _spacing),
       ],
     );
   }
@@ -474,8 +479,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     return GestureDetector(
       onTap: () => _navigateToThemeDetail(item),
       child: Container(
-        width: _cardWidth,
-        margin: EdgeInsets.only(right: _spacing),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_borderRadius),
           color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
@@ -574,7 +577,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                 ],
               ),
             ),
-            ..._categories.map(_buildCategorySection),
+            ..._categories
+                .where((category) => category.items.isNotEmpty)
+                .map(_buildCategorySection),
           ],
         ),
       ),
