@@ -3,10 +3,14 @@ import 'package:go_router/go_router.dart';
 
 class BottomNavBar extends StatelessWidget {
   final String currentPath;
+  final int currentIndex;
+  final Function(int)? onTap;
 
   const BottomNavBar({
     super.key,
     required this.currentPath,
+    this.currentIndex = 0,
+    this.onTap,
   });
 
   @override
@@ -25,15 +29,15 @@ class BottomNavBar extends StatelessWidget {
             context,
             icon: Icons.home_rounded,
             label: 'Home',
-            isSelected: currentPath == '/home',
-            onTap: () => context.go('/home'),
+            isSelected: currentIndex == 0,
+            onTap: () => onTap?.call(0) ?? context.go('/home'),
           ),
           _buildNavItem(
             context,
             icon: Icons.face_rounded,
             label: 'Mine',
-            isSelected: currentPath == '/mine',
-            onTap: () => context.go('/mine'),
+            isSelected: currentIndex == 1,
+            onTap: () => onTap?.call(1) ?? context.go('/mine'),
           ),
         ],
       ),
@@ -53,12 +57,6 @@ class BottomNavBar extends StatelessWidget {
       child: Container(
         width: 120,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        // decoration: isSelected
-        //     ? BoxDecoration(
-        //         color: const Color(0xFF2E2E2E),
-        //         borderRadius: BorderRadius.circular(20),
-        //       )
-        //     : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,

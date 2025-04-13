@@ -705,7 +705,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNavBar(currentPath: '/home'),
     );
   }
 }

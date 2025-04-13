@@ -26,6 +26,7 @@ import 'package:ai_video/page/video_processing_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_video/page/refer_friends_page.dart';
+import 'package:ai_video/widgets/bottom_nav_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -101,19 +102,19 @@ final _router = GoRouter(
     ),
     ShellRoute(
       builder: (context, state, child) {
-        return child;
+        return const MainScreen();
       },
       routes: [
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) => NoTransitionPage(
-            child: const AIVideo(),
+            child: const MainScreen(),
           ),
         ),
         GoRoute(
           path: '/mine',
           pageBuilder: (context, state) => NoTransitionPage(
-            child: const MinePage(),
+            child: const MainScreen(),
           ),
         ),
       ],
@@ -196,6 +197,44 @@ class MyApp extends StatelessWidget {
           routerConfig: _router,
         );
       },
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const AIVideo(),
+    const MinePage(),
+  ];
+
+  void _onPageChanged(int index) {
+    if (index == _currentIndex) return;
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentPath: _currentIndex == 0 ? '/home' : '/mine',
+        currentIndex: _currentIndex,
+        onTap: _onPageChanged,
+      ),
     );
   }
 }

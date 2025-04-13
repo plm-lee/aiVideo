@@ -629,7 +629,6 @@ class _MinePageState extends State<MinePage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _buildContent(),
-      bottomNavigationBar: const BottomNavBar(currentPath: '/mine'),
     );
   }
 
