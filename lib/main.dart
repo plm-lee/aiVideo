@@ -40,14 +40,16 @@ void main() async {
   // 检查认证状态
   await AuthService().checkAuth();
 
-  // 加载用户金币
-  await UserService().initUser();
+  // 如果是登录的，加载下面
+  if (AuthService().currentUser != null) {
+    // 加载用户金币
+    await UserService().initUser();
+    // 初始化苹果支付
+    ApplePaymentService().initialize();
+  }
 
   // 加载语言设置
   await LocaleService().loadLocale();
-
-  // 初始化苹果支付
-  ApplePaymentService().initialize();
 
   runApp(
     ProviderScope(

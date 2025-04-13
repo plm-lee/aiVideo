@@ -596,8 +596,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-              const Spacer(),
-              _buildAllButton(category.title, category.items),
             ],
           ),
         ),

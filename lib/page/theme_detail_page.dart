@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 import 'package:ai_video/service/video_service.dart';
 import 'dart:io';
 import 'package:go_router/go_router.dart';
+import 'package:ai_video/service/video_service.dart';
 
 class ThemeDetailPage extends StatefulWidget {
   final String title;
@@ -57,15 +58,41 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
         return;
       }
 
-      _videoController = widget.videoUrl!.startsWith('http')
-          ? VideoPlayerController.networkUrl(
-              Uri.parse(widget.videoUrl!),
-              videoPlayerOptions: VideoPlayerOptions(
-                mixWithOthers: true,
-                allowBackgroundPlayback: false,
-              ),
-            )
-          : VideoPlayerController.asset(widget.videoUrl!);
+      // 先检查本地缓存
+      String? localPath =
+          await VideoService().getLocalVideoPath(widget.sampleId.toString());
+
+      // 如果没有本地缓存，尝试下载
+      if (localPath == null) {
+        debugPrint('未找到本地视频缓存: ${widget.sampleId}');
+        localPath = await VideoService()
+            .downloadVideo(widget.videoUrl!, widget.sampleId.toString());
+
+        if (localPath == null) {
+          debugPrint('下载视频失败: ${widget.videoUrl}');
+          return;
+        }
+
+        debugPrint('下载视频成功: $localPath');
+      }
+
+      // 创建视频控制器
+      _videoController = VideoPlayerController.file(File(localPath));
+
+      if (!mounted) {
+        _videoController?.dispose();
+        return;
+      }
+
+      // _videoController = widget.videoUrl!.startsWith('http')
+      //     ? VideoPlayerController.networkUrl(
+      //         Uri.parse(widget.videoUrl!),
+      //         videoPlayerOptions: VideoPlayerOptions(
+      //           mixWithOthers: true,
+      //           allowBackgroundPlayback: false,
+      //         ),
+      //       )
+      //     : VideoPlayerController.asset(widget.videoUrl!);
 
       // 预加载视频
       await _videoController!.initialize();
@@ -85,6 +112,7 @@ class _ThemeDetailPageState extends State<ThemeDetailPage> {
   void dispose() {
     if (widget.preloadedController == null) {
       _videoController?.dispose();
+      debugPrint('dispose videoController, ${widget.sampleId}');
     } else {
       // 返回列表页面时恢复静音
       _videoController?.setVolume(0.0);
