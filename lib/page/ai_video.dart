@@ -57,8 +57,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   final Map<String, VideoPlayerController> _videoControllers = {};
 
   bool _isInitializing = false;
-  final int _maxConcurrentLoads = 3; // 最大并发加载数
-  final int _preloadCount = 4; // 预加载数量
   final Set<String> _loadingVideos = {};
   bool _isPageVisible = true; // 页面可见性状态
 
@@ -81,9 +79,13 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // 添加观察者
-    _loadCategories(); // 加载素材库
-    _initializeVideoControllers(); // 初始化视频控制器
+    _initializeSample(); // 初始化
     _updateCredits(); // 更新积分
+  }
+
+  Future<void> _initializeSample() async {
+    await _loadCategories(); // 加载素材库
+    _initializeVideoControllers(); // 初始化视频控制器
   }
 
   @override
@@ -181,21 +183,16 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     _isInitializing = true;
 
     try {
-      // 获取当前可见的视频项
-      final visibleItems = _getVisibleVideoItems();
-      if (visibleItems.isEmpty) return;
+      // 获取所有视频项
+      final allItems = _getAllVideoItems();
+      debugPrint('allItems: ${allItems.length}');
+      if (allItems.isEmpty) return;
 
-      // 限制并发加载数量
-      final itemsToLoad = visibleItems.take(_maxConcurrentLoads).toList();
-
-      // 并发加载视频
+      // 同时加载所有视频
       await Future.wait(
-        itemsToLoad.map(
-            (item) => _loadVideoController(item.id.toString(), item.videoUrl!)),
+        allItems.map(
+            (item) => _loadVideoController(item.id.toString(), item.videoUrl)),
       );
-
-      // 预加载下一批视频
-      _preloadNextVideos(visibleItems);
     } catch (e) {
       debugPrint('Error initializing video controllers: $e');
     } finally {
@@ -203,31 +200,29 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     }
   }
 
-  List<VideoSampleItem> _getVisibleVideoItems() {
+  List<VideoSampleItem> _getAllVideoItems() {
     final List<VideoSampleItem> items = [];
     for (var category in _categories) {
-      items.addAll(category.items.where((item) =>
-          item.videoUrl != null &&
-          item.videoUrl!.isNotEmpty &&
-          !_videoControllers.containsKey(item.videoUrl)));
+      items.addAll(category.items.where((item) => item.videoUrl.isNotEmpty));
     }
     return items;
   }
 
-  void _preloadNextVideos(List<VideoSampleItem> currentItems) {
-    final nextItems = _getVisibleVideoItems()
-        .where((item) => !currentItems.contains(item))
-        .take(_preloadCount)
-        .toList();
+  // void _preloadNextVideos(List<VideoSampleItem> currentItems) {
+  //   final nextItems = _getAllVideoItems()
+  //       .where((item) => !currentItems.contains(item))
+  //       .take(_preloadCount)
+  //       .toList();
 
-    for (var item in nextItems) {
-      _loadVideoController(item.id.toString(), item.videoUrl!).catchError((e) {
-        debugPrint('Error preloading video: $e');
-      });
-    }
-  }
+  //   for (var item in nextItems) {
+  //     _loadVideoController(item.id.toString(), item.videoUrl!).catchError((e) {
+  //       debugPrint('Error preloading video: $e');
+  //     });
+  //   }
+  // }
 
   Future<void> _loadVideoController(String sampleId, String videoUrl) async {
+    debugPrint('loadVideoController: $sampleId');
     if (!mounted) return;
 
     if (_videoControllers.containsKey(videoUrl) ||
@@ -244,7 +239,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         sampleId,
       );
 
-      // 如果没有本地缓存，直接返回，不初始化视频控制器
+      // 如果没有本地缓存，尝试下载
       if (localPath == null) {
         debugPrint('未找到本地视频缓存: ${sampleId}');
         localPath = await _videoService.downloadVideo(
@@ -253,11 +248,11 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         );
 
         if (localPath == null) {
-          debugPrint('下载视频失败: ${sampleId}');
+          debugPrint('下载视频失败: ${videoUrl}');
           return;
         }
 
-        debugPrint('下载视频成功: ${sampleId}');
+        debugPrint('下载视频成功: ${localPath}');
 
         // 如果需要使用网络加载视频，使用下面代码
         // controller = VideoPlayerController.networkUrl(
@@ -272,10 +267,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         //   controller.dispose();
         //   return;
         // }
-
-        return;
       }
 
+      // 创建视频控制器
       controller = VideoPlayerController.file(File(localPath));
 
       if (!mounted) {
@@ -322,10 +316,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   }
 
   Widget _buildMediaContent(VideoSampleItem item) {
-    final String imagePath = item.image;
     final String videoUrl = item.videoUrl;
     final String sampleId = item.id.toString();
-    final bool isNetworkPath = imagePath.startsWith('http');
 
     // 默认灰色背景
     Widget placeholder = Container(
