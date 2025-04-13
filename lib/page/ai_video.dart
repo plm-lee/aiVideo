@@ -55,9 +55,9 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
   // 简化视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
+  final Set<String> _loadingVideos = {};
 
   bool _isInitializing = false;
-  final Set<String> _loadingVideos = {};
   bool _isPageVisible = true; // 页面可见性状态
 
   // 添加渐变色列表
@@ -92,7 +92,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _disposeAllControllers();
-    // _imageCache.clear();
     super.dispose();
   }
 
@@ -127,9 +126,12 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   }
 
   void _disposeAllControllers() {
-    for (var controller in _videoControllers.values) {
+    for (var entry in _videoControllers.entries) {
       try {
+        final controller = entry.value;
         controller.dispose();
+        debugPrint(
+            'dispose controller: ${entry.key} - ${controller.value.isInitialized}');
       } catch (e) {
         debugPrint('Error disposing controller: $e');
       }
@@ -203,7 +205,10 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   List<VideoSampleItem> _getAllVideoItems() {
     final List<VideoSampleItem> items = [];
     for (var category in _categories) {
-      items.addAll(category.items.where((item) => item.videoUrl.isNotEmpty));
+      items.addAll(category.items.where((item) =>
+          item.videoUrl.isNotEmpty &&
+          !_videoControllers.containsKey(item.id.toString()) &&
+          !_loadingVideos.contains(item.id.toString())));
     }
     return items;
   }
@@ -225,48 +230,37 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     debugPrint('loadVideoController: $sampleId');
     if (!mounted) return;
 
-    if (_videoControllers.containsKey(videoUrl) ||
-        _loadingVideos.contains(videoUrl)) {
+    // 检查是否已经在加载或已存在
+    if (_videoControllers.containsKey(sampleId) ||
+        _loadingVideos.contains(sampleId)) {
+      debugPrint('视频已在加载或已存在: $sampleId');
       return;
     }
 
-    _loadingVideos.add(videoUrl);
+    _loadingVideos.add(sampleId);
 
     VideoPlayerController? controller;
     try {
       // 先检查本地缓存
-      String? localPath = await _videoService.getLocalVideoPath(
-        sampleId,
-      );
+      String? localPath = await _videoService.getLocalVideoPath(sampleId);
 
       // 如果没有本地缓存，尝试下载
       if (localPath == null) {
-        debugPrint('未找到本地视频缓存: ${sampleId}');
-        localPath = await _videoService.downloadVideo(
-          videoUrl,
-          sampleId,
-        );
+        debugPrint('未找到本地视频缓存: $sampleId');
+        localPath = await _videoService.downloadVideo(videoUrl, sampleId);
 
         if (localPath == null) {
-          debugPrint('下载视频失败: ${videoUrl}');
+          debugPrint('下载视频失败: $videoUrl');
           return;
         }
 
-        debugPrint('下载视频成功: ${localPath}');
+        debugPrint('下载视频成功: $localPath');
+      }
 
-        // 如果需要使用网络加载视频，使用下面代码
-        // controller = VideoPlayerController.networkUrl(
-        //   Uri.parse(videoUrl),
-        //   videoPlayerOptions: VideoPlayerOptions(
-        //     mixWithOthers: true,
-        //     allowBackgroundPlayback: false,
-        //   ),
-        // );
-
-        // if (!mounted) {
-        //   controller.dispose();
-        //   return;
-        // }
+      // 再次检查是否已存在控制器（防止并发加载）
+      if (_videoControllers.containsKey(sampleId)) {
+        debugPrint('视频控制器已存在: $sampleId');
+        return;
       }
 
       // 创建视频控制器
@@ -277,11 +271,11 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         return;
       }
 
-      _videoControllers[videoUrl] = controller;
+      _videoControllers[sampleId] = controller;
 
       controller.addListener(() {
         if (controller?.value.hasError ?? false) {
-          _handleVideoError(videoUrl, controller!);
+          _handleVideoError(sampleId, controller!);
         }
       });
 
@@ -293,7 +287,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       );
 
       if (!mounted) {
-        _disposeController(videoUrl, controller);
+        _disposeController(sampleId, controller);
         return;
       }
 
@@ -307,10 +301,10 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
       _safeSetState(() {});
     } catch (e) {
       debugPrint('Error loading video: $e');
-      _disposeController(videoUrl, controller);
+      _disposeController(sampleId, controller);
     } finally {
       if (mounted) {
-        _loadingVideos.remove(videoUrl);
+        _loadingVideos.remove(sampleId);
       }
     }
   }
@@ -332,7 +326,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
     // 优先展示视频
     if (videoUrl.isNotEmpty) {
-      final controller = _videoControllers[videoUrl];
+      final controller = _videoControllers[sampleId];
       if (controller?.value.isInitialized ?? false) {
         if (!controller!.value.isPlaying && _isPageVisible) {
           controller.play();
@@ -343,7 +337,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           child: VideoPlayer(controller),
         );
       } else {
-        if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
+        if (!_isInitializing && !_videoControllers.containsKey(sampleId)) {
           _debounceTimer?.cancel();
           _debounceTimer = Timer(_debounceDuration, () {
             if (mounted) {
@@ -418,17 +412,17 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     );
   }
 
-  void _handleVideoError(String videoUrl, VideoPlayerController controller) {
-    _disposeController(videoUrl, controller);
+  void _handleVideoError(String sampleId, VideoPlayerController controller) {
+    _disposeController(sampleId, controller);
   }
 
-  void _disposeController(String videoUrl, VideoPlayerController? controller) {
+  void _disposeController(String sampleId, VideoPlayerController? controller) {
     try {
       if (controller != null) {
         controller.dispose();
       }
-      _videoControllers.remove(videoUrl);
-      _loadingVideos.remove(videoUrl);
+      _videoControllers.remove(sampleId);
+      _loadingVideos.remove(sampleId);
     } catch (e) {
       debugPrint('Error disposing controller: $e');
     }
