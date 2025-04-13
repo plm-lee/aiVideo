@@ -13,7 +13,6 @@ import 'package:ai_video/service/video_cache.dart';
 import 'package:flutter/rendering.dart';
 import 'package:ai_video/widgets/coin_display.dart';
 import 'package:ai_video/page/video_samples_page.dart';
-import 'package:flutter/rendering.dart';
 
 class AIVideo extends StatefulWidget {
   const AIVideo({super.key});
@@ -22,8 +21,7 @@ class AIVideo extends StatefulWidget {
   State<AIVideo> createState() => _AIVideoState();
 }
 
-class _AIVideoState extends State<AIVideo>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   // 布局常量
   static const double _cardHeight = 100.0; // 顶部两个按钮的高度
 
@@ -674,11 +672,7 @@ class _AIVideoState extends State<AIVideo>
   }
 
   @override
-  bool get wantKeepAlive => true;
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
