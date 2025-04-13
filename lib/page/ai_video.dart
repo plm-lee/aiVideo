@@ -52,29 +52,24 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
   List<VideoSample> _categories = [];
 
-  // 添加视频控制器管理
+  // 简化视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
   bool _isInitializing = false;
   final int _maxConcurrentLoads = 3; // 最大并发加载数
   final int _preloadCount = 4; // 预加载数量
-  Timer? _cleanupTimer;
   final Set<String> _loadingVideos = {};
-  final Map<String, int> _retryCount = {}; // 记录重试次数
-  final int _maxRetries = 3; // 最大重试次数
-  final Duration _retryDelay = const Duration(seconds: 2); // 重试延迟
-  bool _isDisposed = false;
+  bool _isPageVisible = true; // 页面可见性状态
 
   // 添加渐变色列表
   final List<List<Color>> _gradients = [
-    [const Color(0xFFD7905F), const Color(0xFFC060C3)], // 橙色到紫色
+    [const Color(0xFFD7905F), const Color.fromARGB(255, 13, 12, 14)], // 橙色到紫色
     [const Color(0xFF4FACFE), const Color(0xFF00F2FE)], // 蓝色渐变
     [const Color(0xFFFF5E50), const Color(0xFFFF4E50)], // 红色渐变
     [const Color(0xFF13E2DA), const Color(0xFF00B4D8)], // 青色渐变
   ];
 
   // 添加缓存
-  final Map<String, ImageProvider> _imageCache = {};
-  final Map<String, bool> _videoErrorCache = {};
+  // final Map<String, ImageProvider> _imageCache = {};
 
   // 添加防抖
   Timer? _debounceTimer;
@@ -87,25 +82,44 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     _loadCategories();
     _initializeVideoControllers();
     _updateCredits();
-
-    // 定期清理未使用的视频控制器
-    _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      if (mounted && !_isDisposed) {
-        _cleanupUnusedControllers();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
-    _cleanupTimer?.cancel();
-    _debounceTimer?.cancel();
     _disposeAllControllers();
-    _imageCache.clear();
-    _videoErrorCache.clear();
+    // _imageCache.clear();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _isPageVisible = true;
+      _resumeVisibleVideos();
+    } else if (state == AppLifecycleState.paused) {
+      _isPageVisible = false;
+      _pauseAllVideos();
+    }
+  }
+
+  void _resumeVisibleVideos() {
+    if (!_isPageVisible) return;
+
+    for (var controller in _videoControllers.values) {
+      if (controller.value.isInitialized && !controller.value.isPlaying) {
+        controller.play();
+      }
+    }
+  }
+
+  void _pauseAllVideos() {
+    for (var controller in _videoControllers.values) {
+      if (controller.value.isPlaying) {
+        controller.pause();
+      }
+    }
   }
 
   void _disposeAllControllers() {
@@ -118,26 +132,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     }
     _videoControllers.clear();
     _loadingVideos.clear();
-    _retryCount.clear();
-  }
-
-  void _cleanupUnusedControllers() {
-    if (_isDisposed) return;
-
-    final now = DateTime.now();
-    _videoControllers.removeWhere((url, controller) {
-      try {
-        // 如果视频超过5分钟未使用，则释放资源
-        if (now.difference(DateTime.now()).inMinutes > 5) {
-          controller.dispose();
-          return true;
-        }
-      } catch (e) {
-        debugPrint('Error cleaning up controller: $e');
-        return true;
-      }
-      return false;
-    });
   }
 
   void _updateCredits() {
@@ -199,8 +193,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
       // 预加载下一批视频
       _preloadNextVideos(visibleItems);
-    } catch (e, stackTrace) {
-      debugPrint('Error initializing video controllers: $e\n$stackTrace');
+    } catch (e) {
+      debugPrint('Error initializing video controllers: $e');
     } finally {
       _isInitializing = false;
     }
@@ -230,9 +224,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     }
   }
 
-  // 优化视频加载
   Future<void> _loadVideoController(String videoUrl) async {
-    if (_isDisposed || !mounted || _hasVideoError(videoUrl)) return;
+    if (!mounted) return;
 
     if (_videoControllers.containsKey(videoUrl) ||
         _loadingVideos.contains(videoUrl)) {
@@ -240,7 +233,6 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     }
 
     _loadingVideos.add(videoUrl);
-    _retryCount[videoUrl] = (_retryCount[videoUrl] ?? 0) + 1;
 
     VideoPlayerController? controller;
     try {
@@ -252,7 +244,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         ),
       );
 
-      if (_isDisposed || !mounted) {
+      if (!mounted) {
         controller.dispose();
         return;
       }
@@ -265,54 +257,36 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         }
       });
 
-      try {
-        await controller.initialize().timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw TimeoutException('视频初始化超时');
-          },
-        );
+      await controller.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('视频初始化超时');
+        },
+      );
 
-        if (_isDisposed || !mounted) {
-          _disposeController(videoUrl, controller);
-          return;
-        }
-
-        controller.setLooping(true);
-        controller.setVolume(0.0);
-        controller.play();
-
-        _safeSetState(() {});
-
-        _retryCount.remove(videoUrl);
-      } catch (e) {
-        debugPrint('Error initializing video: $e');
+      if (!mounted) {
         _disposeController(videoUrl, controller);
-        _markVideoError(videoUrl);
-
-        if (_retryCount[videoUrl]! <= _maxRetries) {
-          await Future.delayed(_retryDelay);
-          if (mounted && !_isDisposed) {
-            _loadVideoController(videoUrl);
-          }
-        } else {
-          debugPrint(
-              'Video loading failed after $_maxRetries retries: $videoUrl');
-          _retryCount.remove(videoUrl);
-        }
+        return;
       }
-    } catch (e, stackTrace) {
-      debugPrint('Error loading video controller: $e\n$stackTrace');
+
+      controller.setLooping(true);
+      controller.setVolume(0.0);
+
+      if (_isPageVisible) {
+        controller.play();
+      }
+
+      _safeSetState(() {});
+    } catch (e) {
+      debugPrint('Error loading video: $e');
       _disposeController(videoUrl, controller);
-      _markVideoError(videoUrl);
     } finally {
-      if (mounted && !_isDisposed) {
+      if (mounted) {
         _loadingVideos.remove(videoUrl);
       }
     }
   }
 
-  // 优化媒体内容构建
   Widget _buildMediaContent(VideoSampleItem item) {
     final String imagePath = item.image;
     final String videoUrl = item.videoUrl;
@@ -330,10 +304,10 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     );
 
     // 优先展示视频
-    if (videoUrl.isNotEmpty && !_hasVideoError(videoUrl)) {
+    if (videoUrl.isNotEmpty) {
       final controller = _videoControllers[videoUrl];
       if (controller?.value.isInitialized ?? false) {
-        if (!controller!.value.isPlaying) {
+        if (!controller!.value.isPlaying && _isPageVisible) {
           controller.play();
         }
 
@@ -345,7 +319,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         if (!_isInitializing && !_videoControllers.containsKey(videoUrl)) {
           _debounceTimer?.cancel();
           _debounceTimer = Timer(_debounceDuration, () {
-            if (mounted && !_isDisposed) {
+            if (mounted) {
               _loadVideoController(videoUrl);
             }
           });
@@ -354,25 +328,24 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     }
 
     // 如果视频未就绪或加载失败，显示图片
-    if (imagePath.isNotEmpty) {
-      return Image(
-        image: _getImageProvider(imagePath),
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return placeholder;
-        },
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('Error loading image: $error');
-          return placeholder;
-        },
-      );
-    }
+    // if (imagePath.isNotEmpty) {
+    //   return Image(
+    //     image: _getImageProvider(imagePath),
+    //     fit: BoxFit.cover,
+    //     loadingBuilder: (context, child, loadingProgress) {
+    //       if (loadingProgress == null) return child;
+    //       return placeholder;
+    //     },
+    //     errorBuilder: (context, error, stackTrace) {
+    //       debugPrint('Error loading image: $error');
+    //       return placeholder;
+    //     },
+    //   );
+    // }
 
     return placeholder;
   }
 
-  // 优化分类卡片构建
   Widget _buildCategoryCard(VideoSampleItem item) {
     return RepaintBoundary(
       child: GestureDetector(
@@ -628,29 +601,20 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
     );
   }
 
-  // 优化图片加载
-  ImageProvider _getImageProvider(String imagePath) {
-    return _imageCache.putIfAbsent(imagePath, () {
-      if (imagePath.startsWith('http')) {
-        return NetworkImage(imagePath);
-      } else {
-        return AssetImage(imagePath);
-      }
-    });
-  }
-
-  // 优化视频错误处理
-  bool _hasVideoError(String videoUrl) {
-    return _videoErrorCache[videoUrl] ?? false;
-  }
-
-  void _markVideoError(String videoUrl) {
-    _videoErrorCache[videoUrl] = true;
-  }
+  // // 优化图片加载
+  // ImageProvider _getImageProvider(String imagePath) {
+  //   return _imageCache.putIfAbsent(imagePath, () {
+  //     if (imagePath.startsWith('http')) {
+  //       return NetworkImage(imagePath);
+  //     } else {
+  //       return AssetImage(imagePath);
+  //     }
+  //   });
+  // }
 
   // 优化状态更新
   void _safeSetState(VoidCallback fn) {
-    if (mounted && !_isDisposed) {
+    if (mounted) {
       setState(fn);
     }
   }
