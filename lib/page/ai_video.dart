@@ -7,6 +7,7 @@ import 'package:ai_video/widgets/bottom_nav_bar.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 import 'dart:ui';
+import 'dart:io';
 import 'package:ai_video/service/video_service.dart';
 import 'package:ai_video/models/video_sample.dart';
 import 'package:ai_video/service/video_cache.dart';
@@ -54,6 +55,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
   // 简化视频控制器管理
   final Map<String, VideoPlayerController> _videoControllers = {};
+
   bool _isInitializing = false;
   final int _maxConcurrentLoads = 3; // 最大并发加载数
   final int _preloadCount = 4; // 预加载数量
@@ -78,10 +80,10 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _loadCategories();
-    _initializeVideoControllers();
-    _updateCredits();
+    WidgetsBinding.instance.addObserver(this); // 添加观察者
+    _loadCategories(); // 加载素材库
+    _initializeVideoControllers(); // 初始化视频控制器
+    _updateCredits(); // 更新积分
   }
 
   @override
@@ -188,7 +190,8 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
       // 并发加载视频
       await Future.wait(
-        itemsToLoad.map((item) => _loadVideoController(item.videoUrl!)),
+        itemsToLoad.map(
+            (item) => _loadVideoController(item.id.toString(), item.videoUrl!)),
       );
 
       // 预加载下一批视频
@@ -218,13 +221,13 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
         .toList();
 
     for (var item in nextItems) {
-      _loadVideoController(item.videoUrl!).catchError((e) {
+      _loadVideoController(item.id.toString(), item.videoUrl!).catchError((e) {
         debugPrint('Error preloading video: $e');
       });
     }
   }
 
-  Future<void> _loadVideoController(String videoUrl) async {
+  Future<void> _loadVideoController(String sampleId, String videoUrl) async {
     if (!mounted) return;
 
     if (_videoControllers.containsKey(videoUrl) ||
@@ -236,13 +239,44 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
 
     VideoPlayerController? controller;
     try {
-      controller = VideoPlayerController.networkUrl(
-        Uri.parse(videoUrl),
-        videoPlayerOptions: VideoPlayerOptions(
-          mixWithOthers: true,
-          allowBackgroundPlayback: false,
-        ),
+      // 先检查本地缓存
+      String? localPath = await _videoService.getLocalVideoPath(
+        sampleId,
       );
+
+      // 如果没有本地缓存，直接返回，不初始化视频控制器
+      if (localPath == null) {
+        debugPrint('未找到本地视频缓存: ${sampleId}');
+        localPath = await _videoService.downloadVideo(
+          videoUrl,
+          sampleId,
+        );
+
+        if (localPath == null) {
+          debugPrint('下载视频失败: ${sampleId}');
+          return;
+        }
+
+        debugPrint('下载视频成功: ${sampleId}');
+
+        // 如果需要使用网络加载视频，使用下面代码
+        // controller = VideoPlayerController.networkUrl(
+        //   Uri.parse(videoUrl),
+        //   videoPlayerOptions: VideoPlayerOptions(
+        //     mixWithOthers: true,
+        //     allowBackgroundPlayback: false,
+        //   ),
+        // );
+
+        // if (!mounted) {
+        //   controller.dispose();
+        //   return;
+        // }
+
+        return;
+      }
+
+      controller = VideoPlayerController.file(File(localPath));
 
       if (!mounted) {
         controller.dispose();
@@ -290,6 +324,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
   Widget _buildMediaContent(VideoSampleItem item) {
     final String imagePath = item.image;
     final String videoUrl = item.videoUrl;
+    final String sampleId = item.id.toString();
     final bool isNetworkPath = imagePath.startsWith('http');
 
     // 默认灰色背景
@@ -320,7 +355,7 @@ class _AIVideoState extends State<AIVideo> with WidgetsBindingObserver {
           _debounceTimer?.cancel();
           _debounceTimer = Timer(_debounceDuration, () {
             if (mounted) {
-              _loadVideoController(videoUrl);
+              _loadVideoController(sampleId, videoUrl);
             }
           });
         }
