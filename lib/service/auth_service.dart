@@ -4,7 +4,7 @@ import 'package:ai_video/service/database_service.dart';
 import 'package:ai_video/api/auth_api.dart';
 import 'package:ai_video/service/user_service.dart';
 
-// 添加一个注册结果类
+// Add a registration result class
 class RegisterResult {
   final bool success;
   final String? message;
@@ -28,13 +28,13 @@ class AuthService extends ChangeNotifier {
     try {
       _currentUser = await _databaseService.getLastLoggedInUser();
       if (_currentUser != null) {
-        debugPrint('加载用户: ${_currentUser!.email}');
-        // 设置用户 UUID 到 CreditsService
+        debugPrint('Loading user: ${_currentUser!.email}');
+        // Set user UUID to CreditsService
         _userService.setUuid(_currentUser!.uuid);
       }
       notifyListeners();
     } catch (e) {
-      debugPrint('检查认证状态错误: $e');
+      debugPrint('Error checking authentication status: $e');
     }
   }
 
@@ -46,7 +46,7 @@ class AuthService extends ChangeNotifier {
       _currentUser = null;
       notifyListeners();
     } catch (e) {
-      debugPrint('登出错误: $e');
+      debugPrint('Logout error: $e');
     }
   }
 
@@ -54,14 +54,14 @@ class AuthService extends ChangeNotifier {
     try {
       if (_currentUser?.id != null) {
         await _authApi.deleteAccount(_currentUser!.uuid);
-        // 清除本地数据库
+        // Clear local database
         await _databaseService.clearDatabase();
       }
       _currentUser = null;
       notifyListeners();
     } catch (e) {
-      debugPrint('注销账号错误: $e');
-      rethrow; // 重新抛出异常，让调用者处理
+      debugPrint('Account deletion error: $e');
+      rethrow; // Rethrow the exception for the caller to handle
     }
   }
 
@@ -71,14 +71,16 @@ class AuthService extends ChangeNotifier {
       final responseData = response['response'];
 
       if (responseData['success'] == '1') {
-        debugPrint('验证码发送成功: ${responseData['description']}');
+        debugPrint(
+            'Verification code sent successfully: ${responseData['description']}');
         return true;
       } else {
-        debugPrint('验证码发送失败: ${responseData['description']}');
+        debugPrint(
+            'Failed to send verification code: ${responseData['description']}');
         return false;
       }
     } catch (e) {
-      debugPrint('发送验证码错误: $e');
+      debugPrint('Error sending verification code: $e');
       return false;
     }
   }
@@ -102,8 +104,9 @@ class AuthService extends ChangeNotifier {
         return RegisterResult(false, responseData['description']);
       }
     } catch (e) {
-      debugPrint('注册错误: $e');
-      return const RegisterResult(false, '注册失败，请稍后重试');
+      debugPrint('Registration error: $e');
+      return const RegisterResult(
+          false, 'Registration failed, please try again later');
     }
   }
 
@@ -114,6 +117,8 @@ class AuthService extends ChangeNotifier {
         email: email,
         password: password,
       );
+
+      debugPrint('Login request: $email, $password, response: $response');
       final responseData = response['response'];
       final uuid = response['uuid'];
 
@@ -128,36 +133,40 @@ class AuthService extends ChangeNotifier {
         await _databaseService.saveUser(user);
         _currentUser = user;
 
-        // 设置用户 UUID 到 CreditsService
+        // Set user UUID to CreditsService
         _userService.setUuid(user.uuid);
 
         notifyListeners();
-        debugPrint('登录用户uuid: ${user.uuid}');
+        debugPrint('Logged in user UUID: ${user.uuid}');
         return (true, null);
       } else {
-        debugPrint('登录失败: ${responseData['description']}');
+        debugPrint('Login failed: ${responseData['description']}');
         return (false, responseData['description']?.toString());
       }
     } catch (e) {
-      debugPrint('登录错误: $e');
-      return (false, '登录失败，请稍后重试');
+      debugPrint('Login error: $e');
+      return (false, 'Login failed, please try again later');
     }
   }
 
-  // 获取当前用户信息
+  // Get current user information
   Future<(bool success, String? message, User? user)> getCurrentUser() async {
     try {
       _currentUser ??= await _databaseService.getLastLoggedInUser();
 
       if (_currentUser == null) {
-        return (false, '用户未登录', null);
+        return (false, 'User not logged in', null);
       }
 
-      debugPrint('当前用户: ${_currentUser!.email}');
+      debugPrint('Current user: ${_currentUser!.email}');
       return (true, null, _currentUser);
     } catch (e) {
-      debugPrint('获取用户信息错误: $e');
-      return (false, '获取用户信息失败，请重新登录', null);
+      debugPrint('Error getting user information: $e');
+      return (
+        false,
+        'Failed to get user information, please log in again',
+        null
+      );
     }
   }
 }

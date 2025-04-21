@@ -52,7 +52,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
       setState(() {
         _errorMessage = 'Email and password are required';
       });
@@ -61,8 +64,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final (isSuccess, errorMessage) = await AuthService().login(
-        _emailController.text,
-        _passwordController.text,
+        email,
+        password,
       );
 
       if (isSuccess && mounted) {

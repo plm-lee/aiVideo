@@ -37,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   // 添加邮箱有效性状态
-  bool get _isEmailValid => _emailRegex.hasMatch(_emailController.text);
+  bool get _isEmailValid => _emailRegex.hasMatch(_emailController.text.trim());
 
   @override
   void initState() {
@@ -63,9 +63,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       final result = await AuthService().register(
-        email: _emailController.text,
-        verificationCode: _verificationCodeController.text,
-        password: _passwordController.text,
+        email: _emailController.text.trim(),
+        verificationCode: _verificationCodeController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
       if (result.success) {
@@ -164,10 +164,11 @@ class _RegisterPageState extends State<RegisterPage> {
     bool isValid = true;
     setState(() {
       // 验证邮箱
-      if (_emailController.text.isEmpty) {
+      final email = _emailController.text.trim();
+      if (email.isEmpty) {
         _emailError = 'Email is required';
         isValid = false;
-      } else if (!_emailRegex.hasMatch(_emailController.text)) {
+      } else if (!_emailRegex.hasMatch(email)) {
         _emailError = 'Please enter a valid email';
         isValid = false;
       } else {
@@ -175,7 +176,8 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       // 验证验证码
-      if (_verificationCodeController.text.isEmpty) {
+      final verificationCode = _verificationCodeController.text.trim();
+      if (verificationCode.isEmpty) {
         _verificationCodeError = 'Verification code is required';
         isValid = false;
       } else {
@@ -183,7 +185,8 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       // 验证密码
-      if (_passwordController.text.isEmpty) {
+      final password = _passwordController.text.trim();
+      if (password.isEmpty) {
         _passwordError = 'Password is required';
         isValid = false;
       } else {
@@ -224,14 +227,16 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _sendVerificationCode() async {
-    if (_emailController.text.isEmpty) {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
       setState(() {
         _emailError = 'Email is required';
       });
       return;
     }
 
-    if (!_emailRegex.hasMatch(_emailController.text)) {
+    if (!_emailRegex.hasMatch(email)) {
       setState(() {
         _emailError = 'Please enter a valid email';
       });
@@ -244,8 +249,7 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      final result =
-          await AuthService().sendVerificationCode(_emailController.text);
+      final result = await AuthService().sendVerificationCode(email);
 
       if (mounted) {
         if (result) {
