@@ -237,7 +237,8 @@ class _LoginPageState extends State<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              // TODO: 实现忘记密码功能
+                              _launchURL(
+                                  'https://chat.bigchallenger.com/customer_services/new');
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
