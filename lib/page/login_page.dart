@@ -423,7 +423,12 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: _isAgreeToTerms ? _handleLogin : null,
+        onPressed: _isAgreeToTerms
+            ? _handleLogin
+            : () {
+                // 收起键盘
+                FocusScope.of(context).unfocus();
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
