@@ -133,11 +133,11 @@ class _SettingPageState extends State<SettingPage> {
             // 推荐好友部分
             _buildSection('Refer friends'),
             _buildSectionContainer([
-              _buildMenuItem(
-                icon: Icons.card_giftcard,
-                title: 'Get Coins for Free',
-                onTap: () => context.push('/refer-friends'),
-              ),
+              // _buildMenuItem(
+              //   icon: Icons.card_giftcard,
+              //   title: 'Get Coins for Free',
+              //   onTap: () => context.push('/refer-friends'),
+              // ),
               _buildMenuItem(
                 icon: Icons.share,
                 title: 'Share VideoMaga',
